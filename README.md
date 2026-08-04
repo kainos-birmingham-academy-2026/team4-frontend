@@ -19,7 +19,7 @@ npm install
 	- Builds the app and stores output in `./dist`
 - `npm run dev`
 	- Runs the app in hot reload mode
-- `npm start`
+- `npm run start`
 	- Starts the app from the `./dist` folder
 
 ## Endpoints

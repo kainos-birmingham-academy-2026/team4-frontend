@@ -1,6 +1,6 @@
-const express = require("express");
-const nunjucks = require("nunjucks");
-const path = require("path");
+import express, { Request, Response } from "express";
+import nunjucks from "nunjucks";
+import path from "path";
 
 const app = express();
 
@@ -11,15 +11,15 @@ nunjucks.configure(path.join(__dirname, "views"), {
 
 app.set("view engine", "njk");
 
-app.get("/", (_req, res) => {
+app.get("/", (_req: Request, res: Response) => {
   res.render("index", { message: "hello world" });
 });
 
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "UP",
     time: new Date().toISOString(),
   });
 });
 
-module.exports = app;
+export default app;
