@@ -1,0 +1,26 @@
+{
+  "name": "team4-frontend",
+  "version": "1.0.0",
+  "description": "Team4 Frontend",
+  "main": "src/server.js",
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp -R src/* dist/",
+    "dev": "node --watch src/server.js",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kainos-birmingham-academy-2026/team4-frontend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kainos-birmingham-academy-2026/team4-frontend/issues"
+  },
+  "homepage": "https://github.com/kainos-birmingham-academy-2026/team4-frontend#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "nunjucks": "^3.2.4"
+  }
+}
