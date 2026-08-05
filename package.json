@@ -13,12 +13,12 @@
 		"typecheck": "tsc --noEmit",
 		"prepare": "lefthook install",
 		"test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
-  },
-  "vitest": {
-    "environment": "node"
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"test:ui": "vitest --ui"
+	},
+	"vitest": {
+		"environment": "node"
 	},
 	"repository": {
 		"type": "git",
@@ -41,13 +41,13 @@
 		"@types/node": "^24.2.0",
 		"@types/nunjucks": "^3.2.6",
 		"lefthook": "^2.1.10",
-    "@types/supertest": "^7.2.1",
-    "@vitest/coverage-v8": "^4.1.10",
-    "@vitest/ui": "^4.1.10",
+		"@types/supertest": "^7.2.1",
+		"@vitest/coverage-v8": "^4.1.10",
+		"@vitest/ui": "^4.1.10",
 		"shx": "^0.4.0",
-    "supertest": "^7.2.2",
+		"supertest": "^7.2.2",
 		"tsx": "^4.20.5",
 		"typescript": "^5.9.2",
-    "vitest": "^4.1.10"
+		"vitest": "^4.1.10"
 	}
 }
