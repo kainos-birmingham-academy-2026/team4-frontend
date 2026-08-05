@@ -1,42 +1,42 @@
 {
-  "name": "team4-frontend",
-  "version": "1.0.0",
-  "description": "Team4 Frontend",
-  "main": "dist/server.js",
-  "scripts": {
-    "build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views",
-    "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "typecheck": "tsc --noEmit",
-    "prepare": "lefthook install",
-    "test": "echo \"No tests configured\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kainos-birmingham-academy-2026/team4-frontend.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/kainos-birmingham-academy-2026/team4-frontend/issues"
-  },
-  "homepage": "https://github.com/kainos-birmingham-academy-2026/team4-frontend#readme",
-  "dependencies": {
-    "express": "^5.2.1",
-    "nunjucks": "^3.2.4"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.5.7",
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.2.0",
-    "@types/nunjucks": "^3.2.6",
-    "lefthook": "^2.1.10",
-    "shx": "^0.4.0",
-    "tsx": "^4.20.5",
-    "typescript": "^5.9.2"
-  }
+	"name": "team4-frontend",
+	"version": "1.0.0",
+	"description": "Team4 Frontend",
+	"main": "dist/server.js",
+	"scripts": {
+		"build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views",
+		"dev": "tsx watch src/server.ts",
+		"start": "node dist/server.js",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"typecheck": "tsc --noEmit",
+		"prepare": "lefthook install",
+		"test": "echo \"No tests configured\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/kainos-birmingham-academy-2026/team4-frontend.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/kainos-birmingham-academy-2026/team4-frontend/issues"
+	},
+	"homepage": "https://github.com/kainos-birmingham-academy-2026/team4-frontend#readme",
+	"dependencies": {
+		"express": "^5.2.1",
+		"nunjucks": "^3.2.4"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.7",
+		"@types/express": "^5.0.3",
+		"@types/node": "^24.2.0",
+		"@types/nunjucks": "^3.2.6",
+		"lefthook": "^2.1.10",
+		"shx": "^0.4.0",
+		"tsx": "^4.20.5",
+		"typescript": "^5.9.2"
+	}
 }
