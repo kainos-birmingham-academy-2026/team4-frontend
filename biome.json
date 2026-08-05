@@ -1,16 +1,16 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
-  "files": {
-    "includes": ["**", "!dist", "!node_modules", "!.github"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space"
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "preset": "recommended"
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
+	"files": {
+		"includes": ["**", "!dist", "!node_modules", "github/workflows/ci.yml"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended"
+		}
+	}
 }
