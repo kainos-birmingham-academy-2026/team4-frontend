@@ -22,6 +22,19 @@ npm install
 - `npm run start`
 	- Starts the app from the `./dist` folder
 
+## Testing
+
+Unit tests are written with [Vitest](https://vitest.dev/).
+
+- `npm run test`
+	- Runs all unit tests once
+- `npm run test:ui`
+	- Opens the Vitest browser UI for interactive test inspection
+- `npm run test:coverage`
+	- Runs tests and generates a coverage report in `./coverage`
+
+Test files follow the `*.test.ts` naming convention and live alongside the source files they cover.
+
 ## Linting And Type Checking
 
 - `npm run lint`
