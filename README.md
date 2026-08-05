@@ -22,6 +22,29 @@ npm install
 - `npm run start`
 	- Starts the app from the `./dist` folder
 
+## Linting And Type Checking
+
+- `npm run lint`
+	- Runs Biome checks across the project without changing files
+- `npm run lint:fix`
+	- Runs Biome checks and writes safe automatic fixes
+- `npm run format`
+	- Applies Biome formatter changes
+- `npm run typecheck`
+	- Runs TypeScript checks with `tsc --noEmit`
+
+Use these commands when you want to lint manually outside of git hooks.
+
+## Git Hook Setup (Lefthook)
+
+Pre-commit hooks are installed automatically by `npm install` through the `prepare` script.
+
+You only need to run this manually if install scripts were skipped (for example, `npm install --ignore-scripts`):
+
+```bash
+npm run prepare
+```
+
 ## Endpoints
 
 - `GET /`

@@ -7,7 +7,11 @@
     "build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views",
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "lint": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "lefthook install",
     "test": "echo \"No tests configured\""
   },
   "repository": {
@@ -26,9 +30,11 @@
     "nunjucks": "^3.2.4"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
     "@types/express": "^5.0.3",
     "@types/node": "^24.2.0",
     "@types/nunjucks": "^3.2.6",
+    "lefthook": "^2.1.10",
     "shx": "^0.4.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"

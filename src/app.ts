@@ -1,6 +1,6 @@
-import express, { Request, Response } from "express";
+import path from "node:path";
+import express, { type Request, type Response } from "express";
 import nunjucks from "nunjucks";
-import path from "path";
 
 const app = express();
 
