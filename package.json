@@ -12,7 +12,9 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit",
 		"prepare": "lefthook install",
-		"test": "echo \"No tests configured\""
+		"test": "vitest run",
+		"test:ui": "vitest --ui --run",
+		"test:coverage": "vitest run --coverage"
 	},
 	"repository": {
 		"type": "git",
