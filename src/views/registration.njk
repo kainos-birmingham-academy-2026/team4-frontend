@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+</head>
+<body>
+  <h1>Register</h1>
+
+  {% if errors.general %}
+    <div style="border: 1px solid #d4351c; padding: 12px; margin-bottom: 16px;" role="alert">
+      <p style="color: #d4351c; margin: 0;">{{ errors.general }}</p>
+    </div>
+  {% endif %}
+  
+  <form action="/register" method="POST" novalidate>
+    <div>
+      <label for="email">Email</label><br />
+      {% if errors.email %}<p style="color: #d4351c;">{{ errors.email }}</p>{% endif %}
+      <input id="email" name="email" type="email" value="{{ form.email }}" />
+    </div>
+
+    <div style="margin-top: 12px;">
+      <label for="password">Password</label><br />
+      {% if errors.password %}<p style="color: #d4351c;">{{ errors.password }}</p>{% endif %}
+      <input id="password" name="password" type="password" />
+    </div>
+
+    <div style="margin-top: 12px;">
+      <label for="confirmPassword">Confirm password</label><br />
+      {% if errors.confirmPassword %}<p style="color: #d4351c;">{{ errors.confirmPassword }}</p>{% endif %}
+      <input id="confirmPassword" name="confirmPassword" type="password" />
+    </div>
+
+    <button type="submit" style="margin-top: 16px;">Create account</button>
+  </form>
+</body>
+</html>
