@@ -1,0 +1,34 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="eyebrow">Your Kainos story starts here</p>
+      <h1>Find your next role at Kainos</h1>
+      <p class="hero-copy">
+        Search opportunities across engineering, consulting, design and more.
+        This starter page gives you the branded base for your upcoming job role
+        search features.
+      </p>
+
+      <form class="search-card" action="#" method="get" aria-label="Search jobs">
+        <label for="q">Search by title, keyword, or skill</label>
+        <div class="search-row">
+          <input id="q" name="q" type="text" placeholder="e.g. Software Engineer" />
+          <button type="submit">Search</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="intro">
+    <div class="container">
+      <h2>Ready for role search features</h2>
+      <p>
+        This layout includes reusable header, footer, typography, color tokens,
+        container spacing, and base components so future pages will keep a
+        consistent Kainos-inspired visual style.
+      </p>
+    </div>
+  </section>
+{% endblock %}
