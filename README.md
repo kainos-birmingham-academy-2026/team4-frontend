@@ -35,6 +35,15 @@ npm install
 
 Use these commands when you want to lint manually outside of git hooks.
 
+## Testing
+
+- `npm run test`
+	- Runs unit tests once using Vitest
+- `npm run test:ui`
+	- Runs tests with Vitest UI mode enabled
+- `npm run test:coverage`
+	- Runs tests and generates a coverage report in `./coverage`
+
 ## Git Hook Setup (Lefthook)
 
 Pre-commit hooks are installed automatically by `npm install` through the `prepare` script.
