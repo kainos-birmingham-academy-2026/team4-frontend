@@ -7,7 +7,11 @@ import jobRoleRouter from "./routes/jobRoleRouter";
 
 
 const app = express();
-const env = nunjucks.configure(path.join(__dirname, "views"), {
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+nunjucks.configure(path.join(__dirname, "views"), {
 	autoescape: true,
 	express: app,
 });
