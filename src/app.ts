@@ -2,6 +2,7 @@ import path from "node:path";
 import express, { type Request, type Response } from "express";
 import nunjucks from "nunjucks";
 import registrationRoutes from "./routes/registrationRoutes";
+import jobRouter from "./routes/jobRouter";
 
 const app = express();
 
@@ -15,16 +16,9 @@ nunjucks.configure(path.join(__dirname, "views"), {
 
 app.set("view engine", "njk");
 
-app.get("/", (req: Request, res: Response) => {
-	const registered = req.query.registered === "1";
+app.use(express.static(path.join(__dirname, "../public")));
 
-	res.render("index", {
-		message: "hello world",
-		registrationSuccessMessage: registered
-			? "Registration successful. You can now sign in."
-			: undefined,
-	});
-});
+app.use(jobRouter);
 
 app.use("/register", registrationRoutes);
 

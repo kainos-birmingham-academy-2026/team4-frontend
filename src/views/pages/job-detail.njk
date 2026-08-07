@@ -1,0 +1,93 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="container">
+      <a href="/job-roles" class="breadcrumb-link">← Back to Job Roles</a>
+
+      <div class="job-detail-header">
+        <div>
+          <h1 class="job-detail-title">{{ job.title }}</h1>
+          <p class="job-detail-department">{{ job.department }}</p>
+        </div>
+        <span class="job-status-badge open">{{ job.status }}</span>
+      </div>
+
+      <div class="job-detail-meta">
+        <div class="meta-item">
+          <span class="meta-label">📍 Location</span>
+          <span class="meta-value">{{ job.location }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">💰 Salary</span>
+          <span class="meta-value">{{ job.salary }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">⏱️ Type</span>
+          <span class="meta-value">{{ job.type }}</span>
+        </div>
+      </div>
+
+      <div class="job-detail-grid">
+        <div class="job-detail-main">
+          <section class="detail-section">
+            <h2>About This Role</h2>
+            <p>{{ job.fullDescription }}</p>
+          </section>
+
+          <section class="detail-section">
+            <h2>Key Responsibilities</h2>
+            <ul class="responsibilities-list">
+              {% for responsibility in job.responsibilities %}
+                <li>{{ responsibility }}</li>
+              {% endfor %}
+            </ul>
+          </section>
+
+          <section class="detail-section">
+            <h2>Required Skills & Experience</h2>
+            <ul class="requirements-list">
+              {% for requirement in job.requirements %}
+                <li>{{ requirement }}</li>
+              {% endfor %}
+            </ul>
+          </section>
+
+          <section class="detail-section">
+            <h2>Skills You'll Need</h2>
+            <div class="detail-skills">
+              {% for skill in job.skills %}
+                <span class="skill-badge">{{ skill }}</span>
+              {% endfor %}
+            </div>
+          </section>
+        </div>
+
+        <aside class="job-detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Ready to Apply?</h3>
+            <p>Take the next step in your career at Kainos</p>
+            <button class="btn" style="width: 100%;">Apply Now</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 0.75rem;">Save Job</button>
+          </div>
+
+          <div class="sidebar-card">
+            <h3>Share This Role</h3>
+            <p>Know someone perfect for this position?</p>
+            <div class="share-buttons">
+              <a href="#" class="share-btn" title="Share on LinkedIn">in</a>
+              <a href="#" class="share-btn" title="Share on Twitter">𝕏</a>
+              <a href="#" class="share-btn" title="Share via Email">✉</a>
+            </div>
+          </div>
+
+          <div class="sidebar-card">
+            <h3>Questions?</h3>
+            <p>Contact our recruitment team</p>
+            <a href="mailto:careers@kainos.com" class="contact-link">careers@kainos.com</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+{% endblock %}
