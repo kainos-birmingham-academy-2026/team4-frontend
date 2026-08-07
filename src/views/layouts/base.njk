@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ pageTitle or "Kainos Careers" }}</title>
+    <link rel="icon" type="image/png" href="/assets/icons/favicon.png" />
+    <link rel="preconnect" href="https://cdn.phenompeople.com" crossorigin />
+    <link rel="stylesheet" href="https://cdn.phenompeople.com/CareerConnectResources/common/fonts/fontfaces/fontface-1737463335511.css" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+  </head>
+  <body>
+    {% include "partials/header.njk" %}
+
+    <main class="site-main" id="main-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/footer.njk" %}
+  </body>
+</html>
