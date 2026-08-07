@@ -10,9 +10,9 @@ export async function getAllJobRoles(): Promise<JobRole[] | undefined> {
 		if (axios.isAxiosError(error)) {
 			const status = error.response?.status;
 			if (status === 404) {
-				console.error("Job roles not found.");
-			} else {
-				console.error(`Error fetching job roles: ${error.message}`);
+				throw new Error("Job roles not found.");
+			} else if (status === 500) {
+				throw new Error(`Error fetching job roles: ${error.message}`);
 			}
 			throw error;
 		}
