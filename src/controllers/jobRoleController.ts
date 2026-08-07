@@ -22,7 +22,7 @@ export class JobRoleController {
 
 	async getJobRoles(_req: Request, res: Response): Promise<void> {
 		const jobRoles = await getAllJobRoles();
-		res.render("pages/jobRoles", {
+		res.render("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: jobRoles,
 		});

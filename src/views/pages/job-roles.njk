@@ -44,11 +44,11 @@
 
             <div class="job-card-meta">
               <span class="job-badge location">📍 {{ job.location }}</span>
-              <span class="job-badge salary">💰 {{ job.salary }}</span>
+              <!-- <span class="job-badge salary">💰 {{ "Insert Salary" }}</span> -->
               <span class="job-badge">{{ job.capability }}</span>
             </div>
 
-            <p class="job-card-description">{{ Insert job description }}</p>
+            <p class="job-card-description">Closing date: {{ job.closingDate | formatDate }}</p>
 
 
             <!--

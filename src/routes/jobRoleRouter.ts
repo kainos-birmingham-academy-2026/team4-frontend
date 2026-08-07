@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { JobRoleController } from "../controllers/jobRoleController";
-import { getAllJobRoles } from "../services/jobRoleApiService";
 
 const router = Router();
 const controller = new JobRoleController();
