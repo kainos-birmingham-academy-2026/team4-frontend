@@ -1,22 +1,12 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
 import app from "../../src/app";
+import { getAllJobRoles } from "../../src/services/jobRoleApiService";
+import { mockJobRoles } from "../mockJobRoles";
 
-describe("JobRoleRouter", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("GET /job-roles should return the job roles page with the correct title", async () => {
-		const response = await request(app).get("/job-roles");
-
-		expect(response.status).toBe(200);
-		expect(response.text).toContain(
-			"<title>Kainos Careers - Job Roles</title>",
-		);
-	});
-});
+vi.mock("../../src/services/jobRoleApiService", () => ({
+	getAllJobRoles: vi.fn(),
+}));
 
 describe("GET /", () => {
 	it("should return the home page with the correct title", async () => {
@@ -47,6 +37,8 @@ describe("GET /login", () => {
 
 describe("GET /job-roles", () => {
 	it("GET /job-roles should return the job roles page with the correct title", async () => {
+		vi.mocked(getAllJobRoles).mockResolvedValue(mockJobRoles);
+
 		const response = await request(app).get("/job-roles");
 
 		expect(response.status).toBe(200);
