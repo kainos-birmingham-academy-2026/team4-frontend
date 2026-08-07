@@ -1,3 +1,4 @@
+import "dotenv/config";
 import path from "node:path";
 import express, { type Request, type Response } from "express";
 import nunjucks from "nunjucks";
