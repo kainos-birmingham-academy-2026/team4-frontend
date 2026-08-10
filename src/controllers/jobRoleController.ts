@@ -2,19 +2,19 @@ import type { Request, Response } from "express";
 import { getAllJobRoles } from "../services/jobRoleApiService";
 
 export class JobRoleController {
-	async getHome(_req: Request, res: Response): Promise<void> {
+	getHome(_req: Request, res: Response) {
 		res.render("pages/index", {
 			pageTitle: "Kainos Careers - Home",
 		});
 	}
 
-	async getRegister(_req: Request, res: Response): Promise<void> {
+	getRegister(_req: Request, res: Response) {
 		res.render("pages/register", {
 			pageTitle: "Kainos Careers - Register",
 		});
 	}
 
-	async getLogin(_req: Request, res: Response): Promise<void> {
+	getLogin(_req: Request, res: Response) {
 		res.render("pages/login", {
 			pageTitle: "Kainos Careers - Sign In",
 		});
