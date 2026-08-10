@@ -29,36 +29,26 @@
         </h2>
       </div>
 
+
       <div class="jobs-listing">
         {% for job in jobs %}
           <div class="job-card">
             <div class="job-card-header">
               <div>
                 <a href="/job-roles/{{ job.id }}" class="job-card-title-link">
-                  <h3 class="job-card-title">{{ job.title }}</h3>
+                  <h3 class="job-card-title">{{ job.roleName }}</h3>
                 </a>
               </div>
-              <span class="job-status-badge open">{{ job.status }}</span>
+              <span class="job-status-badge open">Open</span>
             </div>
 
             <div class="job-card-meta">
               <span class="job-badge location">📍 {{ job.location }}</span>
-              <span class="job-badge salary">💰 {{ job.salary }}</span>
-              <span class="job-badge">{{ job.type }}</span>
+              <span class="job-badge">{{ job.capability }}</span>
             </div>
 
-            <p class="job-card-description">{{ job.description }}</p>
+            <p class="job-card-description">Closing date: {{ job.closingDate | formatDate }}</p>
 
-            <div>
-              <p style="color: var(--kainos-muted); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                Required Skills
-              </p>
-              <div class="job-card-tags">
-                {% for skill in job.skills %}
-                  <span class="tag">{{ skill }}</span>
-                {% endfor %}
-              </div>
-            </div>
 
             <div style="margin-top: 1rem;">
               <a href="/job-roles/{{ job.id }}" class="btn">View Details</a>
