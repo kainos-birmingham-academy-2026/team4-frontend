@@ -4,9 +4,9 @@ import { JobRoleController } from "../controllers/jobRoleController";
 const router = Router();
 const controller = new JobRoleController();
 
-router.get("/", (req, res) => controller.getHome(req, res));
-router.get("/register", (req, res) => controller.getRegister(req, res));
-router.get("/login", (req, res) => controller.getLogin(req, res));
-router.get("/job-roles", async (req, res) => controller.getJobRoles(req, res));
+router.get("/", controller.getHome);
+router.get("/register", controller.getRegister);
+router.get("/login", controller.getLogin);
+router.get("/job-roles", controller.getJobRoles);
 
 export default router;
