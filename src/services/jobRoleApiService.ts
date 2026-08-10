@@ -4,17 +4,20 @@ import type { JobRole } from "../models/jobRole";
 
 export async function getAllJobRoles(): Promise<JobRole[] | undefined> {
 	try {
-		const response = await apiClient.get<JobRole[]>("/api/job-roles");
-		return response.data;
+		const { data } = await apiClient.get<JobRole[]>("/api/job-roles");
+		return data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
-			const status = error.response?.status;
+			const { status } = error.response || {};
+			if (!status) throw error;
+
 			if (status === 404) {
 				throw new Error("Job roles not found.");
-			} else if (status === 500) {
+			} else if (status >= 500) {
 				throw new Error(`Error fetching job roles: ${error.message}`);
+			} else {
+				throw new Error(`Unexpected error: ${error.message}`);
 			}
-			throw error;
 		}
 	}
 }
