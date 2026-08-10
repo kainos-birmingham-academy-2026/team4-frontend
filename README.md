@@ -57,10 +57,15 @@ npm run prepare
 ## Endpoints
 
 - `GET /`
-	- Returns a basic HTML page with hello world
+	- Displays a home page
+- `GET /register`
+	- Displays a registration page (not fully implemented)
+- `GET /login`
+	- Displays a login page (not fully implemented)
+- `GET /job-roles`
+	- Displays a page listing all open job roles
 - `GET /health`
-	- Returns health JSON:
-
+	- Displays this JSON object:
 ```json
 {
 	"status": "UP",
