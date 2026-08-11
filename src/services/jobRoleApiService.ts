@@ -21,3 +21,23 @@ export async function getAllJobRoles(): Promise<JobRole[] | undefined> {
 		}
 	}
 }
+
+export async function getJobRoleById(id: number): Promise<JobRole | undefined> {
+	try {
+		const { data } = await apiClient.get<JobRole>(`/api/job-roles/${id}`);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const { status } = error.response || {};
+			if (!status) throw error;
+
+			if (status === 404) {
+				throw new Error("Job role not found.");
+			} else if (status >= 500) {
+				throw new Error(`Error fetching job role: ${error.message}`);
+			} else {
+				throw new Error(`Unexpected error: ${error.message}`);
+			}
+		}
+	}
+}
