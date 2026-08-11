@@ -6,6 +6,19 @@ Basic Node.js frontend scaffold using Express and Nunjucks.
 
 - Node.js 18+
 - npm
+- Docker Desktop (for full-stack setup)
+
+**Required Folder Structure:**
+
+Both `team4-backend` and `team4-frontend` must be cloned in the same parent folder:
+
+```
+parent-folder/
+  team4-backend/     ← Related repository
+  team4-frontend/    ← This repository
+```
+
+This structure is required for the Docker Compose setup to work correctly.
 
 ## Install
 
