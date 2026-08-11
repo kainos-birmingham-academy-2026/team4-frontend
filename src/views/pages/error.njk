@@ -1,0 +1,14 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+    <div class="container hero-inner">
+        <section class="hero">
+
+        <h1>Error {{ status }}</h1>
+
+        <p class="hero-copy"> {{ message }} </p>
+        <a href="/" class="hero-copy"> Back to homepage </a>
+
+        </section>
+    </div>
+{% endblock %}

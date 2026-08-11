@@ -7,10 +7,13 @@
 
       <div class="job-detail-header">
         <div>
-          <h1 class="job-detail-title">{{ job.title }}</h1>
-          <p class="job-detail-department">{{ job.department }}</p>
+          <h1 class="job-detail-title">{{ job.roleName }}</h1>
         </div>
+        {% if job.status == "Open" %}
         <span class="job-status-badge open">{{ job.status }}</span>
+        {% else %}
+        <span class="job-status-badge closed">{{ job.status }}</span>
+        {% endif %}
       </div>
 
       <div class="job-detail-meta">
@@ -19,20 +22,28 @@
           <span class="meta-value">{{ job.location }}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">💰 Salary</span>
-          <span class="meta-value">{{ job.salary }}</span>
+          <span class="meta-label">⏱️ Band</span>
+          <span class="meta-value">{{ job.band }}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">⏱️ Type</span>
-          <span class="meta-value">{{ job.type }}</span>
+          <span class="meta-label">💪 Capability</span>
+          <span class="meta-value">{{ job.capability }}</span>
         </div>
+        {% if job.status == "Open" %}
+        <div class="meta-item">
+          <span class="meta-label">⌛ Closing Date</span>
+          <span class="meta-value">{{ job.closingDate | formatDate}}</span>
+        </div>
+        {% endif %}
       </div>
 
       <div class="job-detail-grid">
         <div class="job-detail-main">
+
           <section class="detail-section">
             <h2>About This Role</h2>
-            <p>{{ job.fullDescription }}</p>
+            <p>{{ job.description }}</p>
+            <p><a href={{ job.sharepointUrl }}>View this role in SharePoint.</a></p>
           </section>
 
           <section class="detail-section">
@@ -44,32 +55,15 @@
             </ul>
           </section>
 
-          <section class="detail-section">
-            <h2>Required Skills & Experience</h2>
-            <ul class="requirements-list">
-              {% for requirement in job.requirements %}
-                <li>{{ requirement }}</li>
-              {% endfor %}
-            </ul>
-          </section>
-
-          <section class="detail-section">
-            <h2>Skills You'll Need</h2>
-            <div class="detail-skills">
-              {% for skill in job.skills %}
-                <span class="skill-badge">{{ skill }}</span>
-              {% endfor %}
-            </div>
-          </section>
-        </div>
-
         <aside class="job-detail-sidebar">
+          {% if job.status == "Open" %}
           <div class="sidebar-card">
             <h3>Ready to Apply?</h3>
-            <p>Take the next step in your career at Kainos</p>
+            <p>We have {{ job.numberOfOpenPositions }} open positions for this role. Take the next step in your career at Kainos:</p>
             <button class="btn" style="width: 100%;">Apply Now</button>
             <button class="btn btn-secondary" style="width: 100%; margin-top: 0.75rem;">Save Job</button>
           </div>
+          {% endif %}
 
           <div class="sidebar-card">
             <h3>Share This Role</h3>
