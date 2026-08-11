@@ -439,6 +439,12 @@ tbody tr:hover {
 	border: 1px solid rgba(92, 192, 137, 0.5);
 }
 
+.job-status-badge.closed {
+	background: rgba(255, 77, 77, 0.2);
+	color: var(--kainos-navy);
+	border: 1px solid rgba(255, 77, 77, 0.5);
+}
+
 .job-card-meta {
 	display: flex;
 	gap: 1rem;
