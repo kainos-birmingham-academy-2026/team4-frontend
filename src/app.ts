@@ -5,11 +5,22 @@ import nunjucks from "nunjucks";
 import jobRoleRouter from "./routes/jobRoleRouter";
 import registrationRoutes from "./routes/registrationRoutes";
 
-
+const isDev = process.env.NODE_ENV !== "production";
 const app = express();
 const env = nunjucks.configure(path.join(__dirname, "views"), {
 	autoescape: true,
 	express: app,
+	noCache: isDev,
+	watch: isDev,
+});
+
+env.addFilter("formatDate", (value: string | Date) => {
+	const date = value instanceof Date ? value : new Date(value);
+	return new Intl.DateTimeFormat("en-GB", {
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+	}).format(date);
 });
 
 env.addFilter("formatDate", (value: string | Date) => {
