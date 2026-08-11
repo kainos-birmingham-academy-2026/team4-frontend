@@ -63,6 +63,19 @@ describe("JobRoleController - getLogin", () => {
 
 		expect(mockRender).toHaveBeenCalledWith("pages/login", {
 			pageTitle: "Kainos Careers - Sign In",
+			registrationSuccessMessage: undefined,
+		});
+	});
+
+	it("should include registration success message when query has registered=1", async () => {
+		mockRequest.query.registered = "1";
+
+		await jobRoleController.getLogin(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/login", {
+			pageTitle: "Kainos Careers - Sign In",
+			registrationSuccessMessage:
+				"Registration successful. You can now sign in.",
 		});
 	});
 });
@@ -115,6 +128,20 @@ describe("JobRoleController - getJobRoleDetails", () => {
 			pageTitle: "Kainos Careers - Error",
 			message: "Invalid job role ID",
 			status: 400,
+		});
+	});
+
+	it("should return 404 and render error page when job role is missing", async () => {
+		mockRequest.params.id = "999";
+		vi.mocked(getJobRoleById).mockResolvedValue(undefined);
+
+		await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(404);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			message: "Job role not found",
+			status: 404,
 		});
 	});
 });
