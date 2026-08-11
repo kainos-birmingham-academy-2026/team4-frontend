@@ -4,6 +4,7 @@ export class JobRole {
 	private _capability: string;
 	private _band: string;
 	private _closingDate: Date;
+	private _status: string;
 
 	constructor(
 		roleName: string,
@@ -11,12 +12,14 @@ export class JobRole {
 		capability: string,
 		band: string,
 		closingDate: Date,
+		status: string,
 	) {
 		this._roleName = roleName;
 		this._location = location;
 		this._capability = capability;
 		this._band = band;
 		this._closingDate = closingDate;
+		this._status = status;
 	}
 
 	public get roleName(): string {
@@ -37,5 +40,51 @@ export class JobRole {
 
 	public get closingDate(): Date {
 		return this._closingDate;
+	}
+
+	public get status(): string {
+		return this._status;
+	}
+}
+
+export class JobRoleDetail extends JobRole {
+	private _description: string;
+	private _responsibilities: string[];
+	private _sharepointUrl: string;
+	private _numberOfOpenPositions: number;
+
+	constructor(
+		roleName: string,
+		location: string,
+		capability: string,
+		band: string,
+		closingDate: Date,
+		status: string,
+		description: string,
+		responsibilities: string[],
+		sharepointUrl: string,
+		numberOfOpenPositions: number,
+	) {
+		super(roleName, location, capability, band, closingDate, status);
+		this._description = description;
+		this._responsibilities = responsibilities;
+		this._sharepointUrl = sharepointUrl;
+		this._numberOfOpenPositions = numberOfOpenPositions;
+	}
+
+	public get description(): string {
+		return this._description;
+	}
+
+	public get responsibilities(): string[] {
+		return this._responsibilities;
+	}
+
+	public get sharepointUrl(): string {
+		return this._sharepointUrl;
+	}
+
+	public get numberOfOpenPositions(): number {
+		return this._numberOfOpenPositions;
 	}
 }
