@@ -345,6 +345,32 @@ button:disabled,
 	color: var(--kainos-blue);
 }
 
+.form-error-summary {
+	background: #fff1f0;
+	border: 1px solid #cf3f37;
+	border-radius: 10px;
+	padding: 0.85rem 1rem;
+	margin-bottom: 1rem;
+}
+
+.form-error-summary p {
+	margin: 0;
+	color: #9d1f19;
+	font-weight: 600;
+}
+
+.form-error-text {
+	margin: 0 0 0.5rem;
+	color: #9d1f19;
+	font-size: 0.88rem;
+	font-weight: 600;
+}
+
+.form-group-error input {
+	border-color: #cf3f37;
+	box-shadow: 0 0 0 2px rgba(207, 63, 55, 0.12);
+}
+
 /* Table Styles */
 table {
 	width: 100%;

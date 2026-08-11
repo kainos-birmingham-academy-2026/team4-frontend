@@ -13,7 +13,7 @@ export class RegistrationController {
 	constructor(private readonly authService: AuthService = new AuthService()) {}
 
 	showForm(_req: Request, res: Response): void {
-		res.render("registration", this.getEmptyViewModel());
+		res.render("pages/register", this.toPageModel(this.getEmptyViewModel()));
 	}
 
 	async submitRegistration(req: Request, res: Response): Promise<void> {
@@ -23,7 +23,10 @@ export class RegistrationController {
 		if (Object.keys(errors).length > 0) {
 			res
 				.status(400)
-				.render("registration", this.buildViewModel(formData, errors));
+				.render(
+					"pages/register",
+					this.toPageModel(this.buildViewModel(formData, errors)),
+				);
 			return;
 		}
 
@@ -43,10 +46,21 @@ export class RegistrationController {
 			res
 				.status(400)
 				.render(
-					"registration",
-					this.buildViewModel(formData, { general: message }),
+					"pages/register",
+					this.toPageModel(this.buildViewModel(formData, { general: message })),
 				);
 		}
+	}
+
+	private toPageModel(
+		viewModel: RegistrationViewModel,
+	): RegistrationViewModel & {
+		pageTitle: string;
+	} {
+		return {
+			...viewModel,
+			pageTitle: "Kainos Careers - Register",
+		};
 	}
 
 	private toFormData(body: unknown): RegistrationFormData {
