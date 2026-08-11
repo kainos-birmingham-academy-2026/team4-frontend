@@ -1,4 +1,4 @@
-import type { RegistrationPayload } from "../types/registration";
+import type { RegistrationPayload } from "../types/registrationDTO";
 
 interface BackendErrorResponse {
 	error?: string;

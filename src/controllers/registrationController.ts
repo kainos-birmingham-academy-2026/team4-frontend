@@ -4,7 +4,7 @@ import type {
 	RegistrationFormData,
 	RegistrationValidationErrors,
 	RegistrationViewModel,
-} from "../types/registration";
+} from "../types/registrationDTO";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{9,}$/;
