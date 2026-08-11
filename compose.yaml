@@ -1,0 +1,61 @@
+services:
+  job-db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: jobRoles
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d jobRoles"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - team4-network
+
+  team4-backend:
+    build:
+      context: ../team4-backend
+      dockerfile: .dockerfile
+    image: backend:latest
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+    depends_on:
+      job-db:
+        condition: service_healthy
+    networks:
+      - team4-network
+
+  team4-frontend:
+    build:
+      context: .
+      dockerfile: .dockerfile
+    image: frontend:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - API_BASE_URL=http://team4-backend:4000
+    depends_on:
+      team4-backend:
+        condition: service_started
+    networks:
+      - team4-network
+
+networks:
+  team4-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

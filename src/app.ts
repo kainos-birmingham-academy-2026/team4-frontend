@@ -5,9 +5,12 @@ import nunjucks from "nunjucks";
 import jobRoleRouter from "./routes/jobRoleRouter";
 
 const app = express();
+const isDev = process.env.NODE_ENV !== "production";
 const env = nunjucks.configure(path.join(__dirname, "views"), {
 	autoescape: true,
 	express: app,
+	noCache: isDev,
+	watch: isDev,
 });
 
 env.addFilter("formatDate", (value: string | Date) => {
