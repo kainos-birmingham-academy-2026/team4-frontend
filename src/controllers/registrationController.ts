@@ -36,7 +36,7 @@ export class RegistrationController {
 				password: formData.password,
 			});
 
-			res.redirect("/?registered=1");
+			res.redirect("/login?registered=1");
 		} catch (error) {
 			const message =
 				error instanceof AuthServiceError

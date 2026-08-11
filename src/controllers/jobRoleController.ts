@@ -14,9 +14,14 @@ export class JobRoleController {
 		});
 	}
 
-	getLogin(_req: Request, res: Response) {
+	getLogin(req: Request, res: Response) {
+		const registered = req.query.registered === "1";
+
 		res.render("pages/login", {
 			pageTitle: "Kainos Careers - Sign In",
+			registrationSuccessMessage: registered
+				? "Registration successful. You can now sign in."
+				: undefined,
 		});
 	}
 
