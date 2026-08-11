@@ -64,6 +64,8 @@ npm run prepare
 	- Displays a login page (not fully implemented)
 - `GET /job-roles`
 	- Displays a page listing all open job roles
+- `GET /job-roles/:id`
+	- Displays a page listing the details of a job role
 - `GET /health`
 	- Displays this JSON object:
 ```json
