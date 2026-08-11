@@ -35,23 +35,24 @@
           <div class="job-card">
             <div class="job-card-header">
               <div>
-                <a href="/job-roles/{{ job.id }}" class="job-card-title-link">
+                <a href="/job-roles/{{ job.jobRoleId }}" class="job-card-title-link">
                   <h3 class="job-card-title">{{ job.roleName }}</h3>
                 </a>
               </div>
-              <span class="job-status-badge open">Open</span>
+              {% if job.status == "Open" %} <span class="job-status-badge open">{{ job.status }}</span> 
+              {% else %} <span class="job-status-badge closed">{{ job.status }}</span> 
+              {% endif %}
+
             </div>
 
             <div class="job-card-meta">
               <span class="job-badge location">📍 {{ job.location }}</span>
-              <span class="job-badge">{{ job.capability }}</span>
+              <span class="job-badge">💪{{ job.capability }}</span>
+              {% if job.status == "Open" %} <span class="job-badge">Closes on {{ job.closingDate | formatDate }}</span> {% endif %}
             </div>
 
-            <p class="job-card-description">Closing date: {{ job.closingDate | formatDate }}</p>
-
-
             <div style="margin-top: 1rem;">
-              <a href="/job-roles/{{ job.id }}" class="btn">View Details</a>
+              <a href="/job-roles/{{ job.jobRoleId }}" class="btn">View Details</a>
               <a href="#" class="btn btn-secondary" style="margin-left: 0.5rem;">Save Job</a>
             </div>
           </div>
