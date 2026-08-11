@@ -61,9 +61,6 @@ Use these commands when you want to lint manually outside of git hooks.
 
 For a complete development environment with frontend + backend + database, the compose file is included in this repository:
 
-### Starting the Stack
-& Deployment
-
 ### ⚠️ Docker Requirement
 
 **Important:** Docker Desktop must be running before starting any containers or running the compose file.
@@ -117,6 +114,12 @@ The `-v` flag removes volumes (including the database), allowing you to run `doc
 
 To debug or monitor services, view logs from specific containers:
 
+```bash
+docker compose logs -f frontend
+docker compose logs -f backend
+docker compose logs -f db
+```
+
 
 ## Git Hook Setup (Lefthook)
 
@@ -133,9 +136,14 @@ npm run prepare
 - `GET /`
 	- Displays a home page
 - `GET /register`
-	- Displays a registration page (not fully implemented)
+	- Displays the registration page
+- `POST /register`
+	- Validates registration form data and submits to backend auth API
+	- On success, redirects to `/login?registered=1`
+	- On validation/backend failure, re-renders registration page with errors
 - `GET /login`
-	- Displays a login page (not fully implemented)
+	- Displays login page
+	- Shows success message when redirected from registration (`registered=1`)
 - `GET /job-roles`
 	- Displays a page listing all open job roles
 - `GET /health`
@@ -146,6 +154,32 @@ npm run prepare
 	"time": "<current timestamp>"
 }
 ```
+
+## Environment Variables
+
+The frontend reads configuration from environment variables:
+
+- `PORT`
+	- Local server port (default: `3000`)
+- `BACKEND_API_BASE_URL`
+	- Backend API base URL used by registration service (default: `http://localhost:4000`)
+
+Example:
+
+```bash
+PORT=3000
+BACKEND_API_BASE_URL=http://localhost:4000
+```
+
+## Registration Validation
+
+Registration currently validates:
+
+- Required email
+- Valid email format
+- Required password
+- Password strength: at least 9 characters with uppercase, lowercase, and a special character
+- Confirm password is required and must match password
 
 ## Default Port
 

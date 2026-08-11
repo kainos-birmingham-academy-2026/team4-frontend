@@ -1,5 +1,5 @@
 import request from "supertest";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
 import { getAllJobRoles } from "../../src/services/jobRoleApiService";
 import { mockJobRoles } from "../mockJobRoles";

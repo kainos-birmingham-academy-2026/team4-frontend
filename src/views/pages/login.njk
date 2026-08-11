@@ -10,6 +10,12 @@
         </div>
 
         <div class="form-card">
+          {% if registrationSuccessMessage %}
+            <div class="form-success-summary" role="status" aria-live="polite">
+              <p>{{ registrationSuccessMessage }}</p>
+            </div>
+          {% endif %}
+
           <form action="#" method="post">
             <div class="form-group">
               <label for="email">Email Address</label>
