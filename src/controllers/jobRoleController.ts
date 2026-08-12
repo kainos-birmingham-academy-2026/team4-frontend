@@ -2,6 +2,23 @@ import type { Request, Response } from "express";
 import { getAllJobRoles, getJobRoleById } from "../services/jobRoleApiService";
 
 export class JobRoleController {
+	private getJwtToken(req: Request): string {
+		return req.session.jwtToken ?? "";
+	}
+
+	private handleUnauthorized(
+		req: Request,
+		res: Response,
+		error: unknown,
+	): boolean {
+		if (error instanceof Error && error.message === "Unauthorized") {
+			req.session.jwtToken = undefined;
+			res.redirect("/login");
+			return true;
+		}
+		return false;
+	}
+
 	getHome(_req: Request, res: Response) {
 		res.render("pages/index", {
 			pageTitle: "Kainos Careers - Home",
@@ -25,8 +42,8 @@ export class JobRoleController {
 		});
 	}
 
-	async getJobRoles(_req: Request, res: Response): Promise<void> {
-		const jobRoles = await getAllJobRoles();
+	async getJobRoles(req: Request, res: Response): Promise<void> {
+		const jobRoles = await getAllJobRoles(this.getJwtToken(req));
 		res.render("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: jobRoles,
@@ -44,7 +61,7 @@ export class JobRoleController {
 			return;
 		}
 
-		const jobRole = await getJobRoleById(id);
+		const jobRole = await getJobRoleById(id, this.getJwtToken(req));
 		if (!jobRole) {
 			res.status(404).render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
