@@ -12,7 +12,13 @@
       <a href="/job-roles">Browse Roles</a>
       <a href="#">Life at Kainos</a>
       <a href="#">Our Culture</a>
+      {% if isAuthenticated %}
+      <a href="/logout">Log Out</a>
+      {% else %}
       <a href="/register">Sign Up</a>
+      <a href="/login">Log In</a>
+      {% endif %}
+      
     </nav>
   </div>
 </header>
