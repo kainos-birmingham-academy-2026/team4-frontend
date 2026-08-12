@@ -4,6 +4,7 @@ import apiClient from "../../src/config/apiClient";
 import {
 	getAllJobRoles,
 	getJobRoleById,
+	getPaginatedJobRoles,
 } from "../../src/services/jobRoleApiService";
 import { mockJobRoles } from "../mockJobRoles";
 
@@ -135,5 +136,127 @@ describe("jobRoleApiService - getJobRoleById", () => {
 		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
 
 		await expect(getJobRoleById(jobRoleId)).rejects.toThrow("Network error");
+	});
+});
+
+describe("jobRoleApiService - getPaginatedJobRoles", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should return paginated job roles when the API call is successful", async () => {
+		const mockPaginatedResponse = {
+			jobs: mockJobRoles.slice(0, 2),
+			pagination: {
+				currentPage: 1,
+				totalPages: 5,
+				totalCount: 47,
+				pageSize: 10,
+				hasNext: true,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(apiClient).get = vi
+			.fn()
+			.mockResolvedValue({ data: mockPaginatedResponse });
+
+		const result = await getPaginatedJobRoles(1);
+
+		expect(result).toEqual(mockPaginatedResponse);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			params: { page: 1 },
+		});
+	});
+
+	it("should use default page 1 when no page parameter is provided", async () => {
+		const mockPaginatedResponse = {
+			jobs: mockJobRoles.slice(0, 2),
+			pagination: {
+				currentPage: 1,
+				totalPages: 5,
+				totalCount: 47,
+				pageSize: 10,
+				hasNext: true,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(apiClient).get = vi
+			.fn()
+			.mockResolvedValue({ data: mockPaginatedResponse });
+
+		const result = await getPaginatedJobRoles();
+
+		expect(result).toEqual(mockPaginatedResponse);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			params: { page: 1 },
+		});
+	});
+
+	it("should return paginated results for page 2", async () => {
+		const mockPaginatedResponse = {
+			jobs: [mockJobRoles[2]],
+			pagination: {
+				currentPage: 2,
+				totalPages: 5,
+				totalCount: 47,
+				pageSize: 10,
+				hasNext: true,
+				hasPrev: true,
+			},
+		};
+		vi.mocked(apiClient).get = vi
+			.fn()
+			.mockResolvedValue({ data: mockPaginatedResponse });
+
+		const result = await getPaginatedJobRoles(2);
+
+		expect(result).toEqual(mockPaginatedResponse);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			params: { page: 2 },
+		});
+	});
+
+	it("should throw an error when the API returns a 404 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Not found",
+			response: { status: 404 },
+		});
+
+		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
+			"Job roles not found.",
+		);
+	});
+
+	it("should throw an error when the API returns a 500 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Internal Server Error",
+			response: { status: 500 },
+		});
+
+		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
+			"Error fetching job roles: Internal Server Error",
+		);
+	});
+
+	it("should throw unexpected error for non-404/500 axios statuses", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Bad request",
+			response: { status: 400 },
+		});
+
+		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
+			"Unexpected error: Bad request",
+		);
+	});
+
+	it("should rethrow axios errors without response status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		const originalError = new Error("Network error");
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
+
+		await expect(getPaginatedJobRoles(1)).rejects.toThrow("Network error");
 	});
 });
