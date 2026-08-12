@@ -5,7 +5,6 @@ import session from "express-session";
 import nunjucks from "nunjucks";
 import authRouter from "./routes/authRouter";
 import jobRoleRouter from "./routes/jobRoleRouter";
-import registrationRoutes from "./routes/registrationRoutes";
 
 const isDev = process.env.NODE_ENV !== "production";
 const app = express();
@@ -14,15 +13,6 @@ const env = nunjucks.configure(path.join(__dirname, "views"), {
 	express: app,
 	noCache: isDev,
 	watch: isDev,
-});
-
-env.addFilter("formatDate", (value: string | Date) => {
-	const date = value instanceof Date ? value : new Date(value);
-	return new Intl.DateTimeFormat("en-GB", {
-		day: "2-digit",
-		month: "short",
-		year: "numeric",
-	}).format(date);
 });
 
 env.addFilter("formatDate", (value: string | Date) => {
@@ -58,8 +48,6 @@ app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
 	next();
 });
-
-app.use("/register", registrationRoutes);
 
 app.use(authRouter);
 app.use(jobRoleRouter);
