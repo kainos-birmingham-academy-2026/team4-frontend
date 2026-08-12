@@ -15,7 +15,7 @@ export class ChatProxyServiceError extends Error {
 
 export class ChatProxyService {
 	constructor(
-		private readonly baseUrl: string = process.env.BACKEND_API_BASE_URL ||
+		private readonly baseUrl: string = process.env.API_BASE_URL ||
 			"http://localhost:4000",
 	) {}
 
