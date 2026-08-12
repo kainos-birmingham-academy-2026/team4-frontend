@@ -9,6 +9,24 @@ describe("ChatProxyService", () => {
 		vi.unstubAllGlobals();
 	});
 
+	it("uses the default localhost base URL when not provided", async () => {
+		const payload = { message: "ok", recommendations: [] };
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: true,
+			json: vi.fn().mockResolvedValue(payload),
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		const service = new ChatProxyService();
+		await service.ask("engineering");
+
+		expect(fetchMock).toHaveBeenCalledWith("http://localhost:4000/api/chat", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ message: "engineering" }),
+		});
+	});
+
 	it("returns parsed JSON when backend responds successfully", async () => {
 		const payload = {
 			message: "ok",
