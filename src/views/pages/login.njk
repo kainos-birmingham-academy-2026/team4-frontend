@@ -16,6 +16,12 @@
             </div>
           {% endif %}
 
+          {% if errorMessage %}
+            <div class="form-error-summary" role="status" aria-live="polite">
+              <p>{{ errorMessage }}</p>
+            </div>
+          {% endif %}
+
           <form action="/login" method="post">
             <div class="form-group">
               <label for="email">Email Address</label>
