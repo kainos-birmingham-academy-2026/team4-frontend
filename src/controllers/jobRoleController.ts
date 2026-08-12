@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
-import { getAllJobRoles, getJobRoleById } from "../services/jobRoleApiService";
+import {
+	getJobRoleById,
+	getPaginatedJobRoles,
+} from "../services/jobRoleApiService";
 
 export class JobRoleController {
 	getHome(_req: Request, res: Response) {
@@ -25,12 +28,37 @@ export class JobRoleController {
 		});
 	}
 
-	async getJobRoles(_req: Request, res: Response): Promise<void> {
-		const jobRoles = await getAllJobRoles();
-		res.render("pages/job-roles", {
-			pageTitle: "Kainos Careers - Job Roles",
-			jobs: jobRoles,
-		});
+	async getJobRoles(req: Request, res: Response): Promise<void> {
+		const page = parseInt(req.query.page as string) || 1;
+		try {
+			const data = await getPaginatedJobRoles(page);
+			res.render("pages/job-roles", {
+				pageTitle: "Kainos Careers - Job Roles",
+				jobs: data?.jobs || [],
+				pagination: data?.pagination || {
+					currentPage: 1,
+					totalPages: 1,
+					totalCount: 0,
+					pageSize: 10,
+					hasNext: false,
+					hasPrev: false,
+				},
+			});
+		} catch (error) {
+			console.error("Error fetching paginated job roles:", error);
+			res.render("pages/job-roles", {
+				pageTitle: "Kainos Careers - Job Roles",
+				jobs: [],
+				pagination: {
+					currentPage: 1,
+					totalPages: 1,
+					totalCount: 0,
+					pageSize: 10,
+					hasNext: false,
+					hasPrev: false,
+				},
+			});
+		}
 	}
 
 	async getJobRoleDetails(req: Request, res: Response): Promise<void> {
