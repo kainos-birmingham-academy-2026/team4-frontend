@@ -49,8 +49,11 @@ app.use((req, res, next) => {
 	next();
 });
 
-app.use(authRouter);
-app.use(jobRoleRouter);
+app.get("/", (_req: Request, res: Response) => {
+	res.render("pages/index.njk", {
+		title: "Kainos Careers - Home",
+	});
+});
 
 app.get("/health", (_req: Request, res: Response) => {
 	res.json({
@@ -58,5 +61,8 @@ app.get("/health", (_req: Request, res: Response) => {
 		time: new Date().toISOString(),
 	});
 });
+
+app.use(authRouter);
+app.use(jobRoleRouter);
 
 export default app;

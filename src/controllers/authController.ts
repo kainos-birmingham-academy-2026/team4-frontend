@@ -19,6 +19,7 @@ export class AuthController {
 
 		res.render("pages/login.njk", {
 			formValues: { email: "" },
+			pageTitle: "Kainos Careers - Login",
 		});
 	}
 
@@ -56,7 +57,10 @@ export class AuthController {
 	}
 
 	showRegistrationForm(_req: Request, res: Response): void {
-		res.render("pages/register", this.toPageModel(this.getEmptyViewModel()));
+		res.render(
+			"pages/register.njk",
+			this.toPageModel(this.getEmptyViewModel()),
+		);
 	}
 
 	async submitRegistration(req: Request, res: Response): Promise<void> {
@@ -67,7 +71,7 @@ export class AuthController {
 			res
 				.status(400)
 				.render(
-					"pages/register",
+					"pages/register.njk",
 					this.toPageModel(this.buildViewModel(formData, errors)),
 				);
 			return;
@@ -90,7 +94,7 @@ export class AuthController {
 			res
 				.status(400)
 				.render(
-					"pages/register",
+					"pages/register.njk",
 					this.toPageModel(this.buildViewModel(formData, { general: message })),
 				);
 		}
