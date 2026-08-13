@@ -31,7 +31,8 @@ const mockResponse = {
 } as unknown as Response;
 
 vi.mock("../../src/services/authApiService", async (importOriginal) => {
-	const actual = (await importOriginal()) as any;
+	const actual =
+		(await importOriginal()) as typeof import("../../src/services/authApiService");
 	return {
 		AuthServiceError: actual.AuthServiceError,
 		login: vi.fn(),

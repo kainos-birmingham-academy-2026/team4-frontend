@@ -13,7 +13,7 @@ vi.mock("../../src/services/jobRoleApiService", () => ({
 }));
 
 vi.mock("../../src/middlewares/authMiddleware", () => ({
-	requireAuth: vi.fn((req, res, next) => next()),
+	requireAuth: vi.fn((_req, _res, next) => next()),
 }));
 describe("GET /", () => {
 	it("should return the home page with the correct title", async () => {

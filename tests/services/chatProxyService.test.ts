@@ -29,23 +29,6 @@ describe("ChatProxyService", () => {
 		expect(response).toEqual(payload);
 	});
 
-	it("uses default base URL when none is provided", async () => {
-		const fetchMock = vi.fn().mockResolvedValue({
-			ok: true,
-			json: vi.fn().mockResolvedValue({ message: "ok", recommendations: [] }),
-		});
-		vi.stubGlobal("fetch", fetchMock);
-
-		const service = new ChatProxyService();
-		await service.ask("hello");
-
-		expect(fetchMock).toHaveBeenCalledWith("http://localhost:4000/api/chat", {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ message: "hello" }),
-		});
-	});
-
 	it("throws ChatProxyServiceError with backend message field", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: false,

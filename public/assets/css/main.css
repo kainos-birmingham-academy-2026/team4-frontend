@@ -970,6 +970,13 @@ tbody tr:hover {
 	letter-spacing: 0.03em;
 }
 
+.chat-recommendations small {
+	display: block;
+	font-size: 0.76rem;
+	line-height: 1.35;
+	color: #44506f;
+}
+
 .chat-recommendations li.chat-recommendation-action p,
 .chat-recommendations li.chat-recommendation-action small {
 	color: #4f5f86;
@@ -993,13 +1000,6 @@ tbody tr:hover {
 	margin: 0.25rem 0;
 	font-size: 0.79rem;
 	color: var(--kainos-muted);
-}
-
-.chat-recommendations small {
-	display: block;
-	font-size: 0.76rem;
-	line-height: 1.35;
-	color: #44506f;
 }
 
 .career-chat-form {

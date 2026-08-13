@@ -9,7 +9,7 @@ declare module "express-session" {
 declare global {
 	namespace Express {
 		interface Request {
-			session: Record<string, any> & { jwtToken?: string };
+			session: Record<string, string> & { jwtToken?: string };
 		}
 	}
 }

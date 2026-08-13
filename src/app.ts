@@ -57,7 +57,7 @@ app.use((req, res, next) => {
 
 app.get("/", (_req: Request, res: Response) => {
 	res.render("pages/index.njk", {
-		title: "Kainos Careers - Home",
+		pageTitle: "Kainos Careers - Home",
 	});
 });
 

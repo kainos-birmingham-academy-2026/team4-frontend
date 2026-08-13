@@ -7,7 +7,7 @@ describe("app routes", () => {
 		const response = await request(app).get("/");
 
 		expect(response.status).toBe(200);
-		expect(response.text).toContain("<title>Kainos Careers</title>");
+		expect(response.text).toContain("<title>Kainos Careers - Home</title>");
 	});
 
 	it("GET /health returns service status", async () => {
