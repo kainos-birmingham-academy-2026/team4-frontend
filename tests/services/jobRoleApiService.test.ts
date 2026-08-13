@@ -171,11 +171,14 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			.fn()
 			.mockResolvedValue({ data: mockPaginatedResponse });
 
-		const result = await getPaginatedJobRoles(1);
+		const result = await getPaginatedJobRoles(1, mockToken);
 
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			headers: {
+				Authorization: `Bearer ${mockToken}`,
+			},
 		});
 	});
 
@@ -195,11 +198,14 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			.fn()
 			.mockResolvedValue({ data: mockPaginatedResponse });
 
-		const result = await getPaginatedJobRoles();
+		const result = await getPaginatedJobRoles(1, mockToken);
 
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			headers: {
+				Authorization: `Bearer ${mockToken}`,
+			},
 		});
 	});
 
@@ -219,11 +225,14 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			.fn()
 			.mockResolvedValue({ data: mockPaginatedResponse });
 
-		const result = await getPaginatedJobRoles(2);
+		const result = await getPaginatedJobRoles(2, mockToken);
 
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 2 },
+			headers: {
+				Authorization: `Bearer ${mockToken}`,
+			},
 		});
 	});
 
@@ -234,7 +243,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			response: { status: 404 },
 		});
 
-		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
+		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
 			"Job roles not found.",
 		);
 	});
@@ -246,8 +255,8 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			response: { status: 500 },
 		});
 
-		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
-			"Error fetching job roles: Internal Server Error",
+		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
+			"Error fetching paginated job roles: Internal Server Error",
 		);
 	});
 
@@ -258,7 +267,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 			response: { status: 400 },
 		});
 
-		await expect(getPaginatedJobRoles(1)).rejects.toThrow(
+		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
 			"Unexpected error: Bad request",
 		);
 	});
@@ -268,6 +277,8 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		const originalError = new Error("Network error");
 		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
 
-		await expect(getPaginatedJobRoles(1)).rejects.toThrow("Network error");
+		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
+			"Network error",
+		);
 	});
 });
