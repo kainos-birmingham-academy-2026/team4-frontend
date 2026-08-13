@@ -12,32 +12,9 @@ vi.mock("../../src/services/jobRoleApiService", () => ({
 	getJobRoleById: vi.fn(),
 }));
 
-describe("GET /", () => {
-	it("should return the home page with the correct title", async () => {
-		const response = await request(app).get("/");
-
-		expect(response.status).toBe(200);
-		expect(response.text).toContain("<title>Kainos Careers - Home</title>");
-	});
-});
-
-describe("GET /register", () => {
-	it("should return the register page with the correct title", async () => {
-		const response = await request(app).get("/register");
-
-		expect(response.status).toBe(200);
-		expect(response.text).toContain("<title>Kainos Careers - Register</title>");
-	});
-});
-
-describe("GET /login", () => {
-	it("should return the login page with the correct title", async () => {
-		const response = await request(app).get("/login");
-
-		expect(response.status).toBe(200);
-		expect(response.text).toContain("<title>Kainos Careers - Sign In</title>");
-	});
-});
+vi.mock("../../src/middlewares/authMiddleware", () => ({
+	requireAuth: vi.fn((req, res, next) => next()),
+}));
 
 describe("GET /job-roles", () => {
 	it("should return the job roles page with the correct title", async () => {

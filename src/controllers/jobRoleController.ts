@@ -2,31 +2,12 @@ import type { Request, Response } from "express";
 import { getAllJobRoles, getJobRoleById } from "../services/jobRoleApiService";
 
 export class JobRoleController {
-	getHome(_req: Request, res: Response) {
-		res.render("pages/index", {
-			pageTitle: "Kainos Careers - Home",
-		});
+	private getJwtToken(req: Request): string {
+		return req.session.jwtToken ?? "";
 	}
 
-	getRegister(_req: Request, res: Response) {
-		res.render("pages/register", {
-			pageTitle: "Kainos Careers - Register",
-		});
-	}
-
-	getLogin(req: Request, res: Response) {
-		const registered = req.query.registered === "1";
-
-		res.render("pages/login", {
-			pageTitle: "Kainos Careers - Sign In",
-			registrationSuccessMessage: registered
-				? "Registration successful. You can now sign in."
-				: undefined,
-		});
-	}
-
-	async getJobRoles(_req: Request, res: Response): Promise<void> {
-		const jobRoles = await getAllJobRoles();
+	async getJobRoles(req: Request, res: Response): Promise<void> {
+		const jobRoles = await getAllJobRoles(this.getJwtToken(req));
 		res.render("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: jobRoles,
@@ -44,7 +25,7 @@ export class JobRoleController {
 			return;
 		}
 
-		const jobRole = await getJobRoleById(id);
+		const jobRole = await getJobRoleById(id, this.getJwtToken(req));
 		if (!jobRole) {
 			res.status(404).render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
