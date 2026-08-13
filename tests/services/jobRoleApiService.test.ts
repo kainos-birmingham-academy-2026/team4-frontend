@@ -2,11 +2,14 @@ import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import apiClient from "../../src/config/apiClient";
 import {
+	createJobRole,
+	deleteJobRole,
 	getAllJobRoles,
 	getJobRoleById,
 	getPaginatedJobRoles,
+	updateJobRole,
 } from "../../src/services/jobRoleApiService";
-import { mockJobRoles } from "../mockJobRoles";
+import { mockJobRole1, mockJobRoles } from "../mockJobRoles";
 
 vi.mock("../../src/config/apiClient", () => ({
 	default: {
@@ -279,6 +282,234 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 
 		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
 			"Network error",
+		);
+	});
+});
+
+describe("jobRoleApiService - createJobRole", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should create a job role when the API call is successful", async () => {
+		vi.mocked(apiClient).post = vi
+			.fn()
+			.mockResolvedValue({ data: mockJobRole1 });
+
+		const result = await createJobRole(mockJobRole1, mockToken);
+
+		expect(result).toEqual(mockJobRole1);
+		expect(apiClient.post).toHaveBeenCalledWith(
+			"/api/job-roles",
+			mockJobRole1,
+			{ headers: { Authorization: `Bearer ${mockToken}` } },
+		);
+	});
+
+	it("should throw an error when the API returns a 400 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			message: "Bad request",
+			response: { status: 400 },
+		});
+
+		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+			"Invalid job role data.",
+		);
+	});
+
+	it("should throw an authorisation error when the API returns a 401 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			message: "Unauthorized",
+			response: { status: 401 },
+		});
+
+		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+			"Unauthorized",
+		);
+	});
+
+	it("should throw a forbidden error when the API returns a 403 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			message: "Forbidden",
+			response: { status: 403 },
+		});
+
+		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+			"Forbidden",
+		);
+	});
+
+	it("should throw an error when the API returns a 500 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			message: "Internal Server Error",
+			response: { status: 500 },
+		});
+
+		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+			"Error creating job role: Internal Server Error",
+		);
+	});
+
+	it("should throw unexpected error for non-400/401/403/500 axios statuses", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			message: "Conflict",
+			response: { status: 409 },
+		});
+
+		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+			"Unexpected error: Conflict",
+		);
+	});
+});
+
+describe("jobRoleApiService - updateJobRole", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should update a job role when the API call is successful", async () => {
+		const updatedJobRole = { ...mockJobRole1, roleName: "Updated Role" };
+		vi.mocked(apiClient).put = vi
+			.fn()
+			.mockResolvedValue({ data: updatedJobRole });
+
+		const result = await updateJobRole(
+			mockJobRole1.id,
+			updatedJobRole,
+			mockToken,
+		);
+
+		expect(result).toEqual(updatedJobRole);
+		expect(apiClient.put).toHaveBeenCalledWith(
+			`/api/job-roles/${mockJobRole1.id}`,
+			updatedJobRole,
+			{ headers: { Authorization: `Bearer ${mockToken}` } },
+		);
+	});
+
+	it("should throw an error when the API returns a 400 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Bad request",
+			response: { status: 400 },
+		});
+
+		await expect(
+			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+		).rejects.toThrow("Invalid job role data.");
+	});
+
+	it("should throw an authorisation error when the API returns a 401 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Unauthorized",
+			response: { status: 401 },
+		});
+
+		await expect(
+			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+		).rejects.toThrow("Unauthorized");
+	});
+
+	it("should throw a forbidden error when the API returns a 403 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Forbidden",
+			response: { status: 403 },
+		});
+	});
+
+	it("should throw an error when the API returns a 500 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Internal Server Error",
+			response: { status: 500 },
+		});
+
+		await expect(
+			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+		).rejects.toThrow("Error updating job role: Internal Server Error");
+	});
+
+	it("should throw unexpected error for non-400/401/403/404/500 axios statuses", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Conflict",
+			response: { status: 409 },
+		});
+
+		await expect(
+			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+		).rejects.toThrow("Unexpected error: Conflict");
+	});
+});
+
+describe("jobRoleApiService - deleteJobRole", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should delete a job role when the API call is successful", async () => {
+		vi.mocked(apiClient).delete = vi.fn().mockResolvedValue({});
+
+		await deleteJobRole(mockJobRole1.id, mockToken);
+
+		expect(apiClient.delete).toHaveBeenCalledWith(
+			`/api/job-roles/${mockJobRole1.id}`,
+			{ headers: { Authorization: `Bearer ${mockToken}` } },
+		);
+	});
+
+	it("should throw an authorisation error when the API returns a 401 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).delete = vi.fn().mockRejectedValue({
+			message: "Unauthorized",
+			response: { status: 401 },
+		});
+
+		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
+			"Unauthorized",
+		);
+	});
+
+	it("should throw a forbidden error when the API returns a 403 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).delete = vi.fn().mockRejectedValue({
+			message: "Forbidden",
+			response: { status: 403 },
+		});
+
+		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
+			"Forbidden",
+		);
+	});
+
+	it("should throw an error when the API returns a 500 status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).delete = vi.fn().mockRejectedValue({
+			message: "Internal Server Error",
+			response: { status: 500 },
+		});
+
+		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
+			"Error deleting job role: Internal Server Error",
+		);
+	});
+
+	it("should throw unexpected error for non-401/403/500 axios statuses", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).delete = vi.fn().mockRejectedValue({
+			message: "Conflict",
+			response: { status: 409 },
+		});
+
+		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
+			"Unexpected error: Conflict",
 		);
 	});
 });
