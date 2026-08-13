@@ -7,6 +7,11 @@ const controller = new JobRoleController();
 
 router.use(requireAuth);
 router.get("/job-roles", controller.getJobRoles.bind(controller));
+
+router.post("/job-roles", controller.create);
+router.post("/job-roles/:id", controller.update);
+router.post("/job-roles/:id/delete", controller.delete);
+
 router.get("/job-roles/:id", controller.getJobRoleDetails.bind(controller));
 
 export default router;
