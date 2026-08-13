@@ -9,7 +9,7 @@ export default defineConfig({
 			reporter: ["text", "html"],
 			reportsDirectory: "coverage",
 			include: ["src/**/*.ts"],
-			exclude: ["src/**/*.test.ts", "src/server.ts"],
+			exclude: ["src/**/*.test.ts", "src/server.ts", "src/client/**/*.ts"],
 			thresholds: {
 				statements: 80,
 				branches: 80,

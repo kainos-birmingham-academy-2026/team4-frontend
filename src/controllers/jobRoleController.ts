@@ -29,13 +29,72 @@ export class JobRoleController {
 		});
 	}
 
+	private filterJobs(
+		queryValue: string,
+		capabilityValue: string,
+		jobs: Array<{
+			roleName: string;
+			capability: string;
+			location: string;
+		}>,
+	) {
+		const normalizedQuery = queryValue.toLowerCase();
+		const normalizedCapability = capabilityValue.toLowerCase();
+
+		return jobs.filter((jobRole) => {
+			const roleNameMatches = jobRole.roleName
+				.toLowerCase()
+				.includes(normalizedQuery);
+			const capabilityMatchesText = jobRole.capability
+				.toLowerCase()
+				.includes(normalizedQuery);
+			const locationMatchesText = jobRole.location
+				.toLowerCase()
+				.includes(normalizedQuery);
+
+			const queryMatches =
+				normalizedQuery.length === 0 ||
+				roleNameMatches ||
+				capabilityMatchesText ||
+				locationMatchesText;
+
+			const capabilityMatches =
+				normalizedCapability.length === 0 ||
+				jobRole.capability.toLowerCase() === normalizedCapability;
+
+			return queryMatches && capabilityMatches;
+		});
+	}
+
+	private getCapabilityOptions(
+		jobs: Array<{
+			capability: string;
+		}>,
+	): string[] {
+		return Array.from(
+			new Set(jobs.map((jobRole) => jobRole.capability).filter(Boolean)),
+		).sort((left, right) => left.localeCompare(right));
+	}
+
 	async getJobRoles(req: Request, res: Response): Promise<void> {
-		const page = parseInt(req.query.page as string) || 1;
+		const page = parseInt(req.query.page as string, 10) || 1;
+		const queryValue = String(req.query.q ?? "").trim();
+		const capabilityValue = String(req.query.capability ?? "").trim();
+
 		try {
 			const data = await getPaginatedJobRoles(page, this.getJwtToken(req));
+			const jobs = data?.jobs || [];
+			const filteredJobs = this.filterJobs(queryValue, capabilityValue, jobs);
+			const capabilityOptions = this.getCapabilityOptions(jobs);
+
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: data?.jobs || [],
+				jobs: filteredJobs,
+				filters: {
+					q: queryValue,
+					capability: capabilityValue,
+				},
+				capabilityOptions,
 				pagination: data?.pagination || {
 					currentPage: 1,
 					totalPages: 1,
@@ -45,28 +104,44 @@ export class JobRoleController {
 					hasPrev: false,
 				},
 			});
-		} catch (error) {
+		} catch (_error) {
 			// If fetching paginated job roles fails, fallback to fetching all job roles
 			await this.getNonPaginatedJobRoles(req, res);
 		}
 	}
 
 	async getNonPaginatedJobRoles(req: Request, res: Response): Promise<void> {
+		const queryValue = String(req.query.q ?? "").trim();
+		const capabilityValue = String(req.query.capability ?? "").trim();
+
 		try {
 			const jobs = await getAllJobRoles(this.getJwtToken(req));
+			const safeJobs = jobs || [];
+			const filteredJobs = this.filterJobs(
+				queryValue,
+				capabilityValue,
+				safeJobs,
+			);
+			const capabilityOptions = this.getCapabilityOptions(safeJobs);
+
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: jobs || [],
+				jobs: filteredJobs,
+				filters: {
+					q: queryValue,
+					capability: capabilityValue,
+				},
+				capabilityOptions,
 				pagination: {
 					currentPage: 1,
 					totalPages: 1,
-					totalCount: jobs?.length || 0,
-					pageSize: jobs?.length || 0,
+					totalCount: safeJobs.length,
+					pageSize: safeJobs.length,
 					hasNext: false,
 					hasPrev: false,
 				},
 			});
-		} catch (error) {
+		} catch (_error) {
 			res.render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
 				status: 500,

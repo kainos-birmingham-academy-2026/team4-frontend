@@ -59,6 +59,11 @@ describe("JobRoleController - getJobRoles", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
+			filters: {
+				q: "",
+				capability: "",
+			},
+			capabilityOptions: ["Data", "Engineering"],
 			pagination: mockPaginatedResponse.pagination,
 		});
 	});
@@ -88,6 +93,43 @@ describe("JobRoleController - getJobRoles", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: [mockJobRoles[0]],
+			filters: {
+				q: "",
+				capability: "",
+			},
+			capabilityOptions: ["Engineering"],
+			pagination: mockPaginatedResponse.pagination,
+		});
+	});
+
+	it("should apply text and capability filters to paginated jobs", async () => {
+		const mockRequest2 = {
+			...mockRequest,
+			query: { q: "data", capability: "Data" },
+		} as unknown as Request;
+		const mockPaginatedResponse = {
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 2,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
+
+		await jobRoleController.getJobRoles(mockRequest2, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
+			pageTitle: "Kainos Careers - Job Roles",
+			jobs: [mockJobRoles[1]],
+			filters: {
+				q: "data",
+				capability: "Data",
+			},
+			capabilityOptions: ["Data", "Engineering"],
 			pagination: mockPaginatedResponse.pagination,
 		});
 	});
@@ -101,6 +143,11 @@ describe("JobRoleController - getJobRoles", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
+			filters: {
+				q: "",
+				capability: "",
+			},
+			capabilityOptions: ["Data", "Engineering"],
 			pagination: {
 				currentPage: 1,
 				totalPages: 1,

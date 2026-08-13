@@ -771,6 +771,273 @@ tbody tr:hover {
 	text-decoration: underline;
 }
 
+.career-chat {
+	position: fixed;
+	right: 1.25rem;
+	bottom: 1.25rem;
+	z-index: 220;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.75rem;
+}
+
+.career-chat-launcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.55rem;
+	min-height: 3.1rem;
+	padding: 0.75rem 1rem;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	background: linear-gradient(130deg, #1b2f68, #0073e6);
+	box-shadow: 0 18px 36px rgba(16, 33, 78, 0.35);
+	font-size: 0.92rem;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+}
+
+.career-chat-launcher:hover {
+	filter: brightness(1.04);
+	transform: translateY(-2px);
+}
+
+.career-chat-launcher-icon {
+	font-size: 1.1rem;
+}
+
+.career-chat-panel {
+	width: min(400px, calc(100vw - 2rem));
+	max-height: min(70vh, 620px);
+	display: flex;
+	flex-direction: column;
+	border-radius: 20px;
+	border: 1px solid rgba(37, 45, 79, 0.2);
+	background: linear-gradient(180deg, #f9fbff 0%, #ffffff 18%, #ffffff 100%);
+	box-shadow: 0 28px 52px rgba(14, 24, 61, 0.28);
+	overflow: hidden;
+}
+
+.career-chat-panel[hidden] {
+	display: none;
+}
+
+.career-chat-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.95rem 1rem 0.85rem;
+	background: linear-gradient(
+		130deg,
+		rgba(0, 115, 230, 0.12),
+		rgba(92, 192, 137, 0.15)
+	);
+	border-bottom: 1px solid var(--kainos-border);
+}
+
+.career-chat-header h2 {
+	margin: 0;
+	font-size: 1.08rem;
+	line-height: 1.2;
+}
+
+.career-chat-eyebrow {
+	margin: 0 0 0.2rem;
+	font-size: 0.73rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--kainos-blue);
+}
+
+.career-chat-close {
+	min-height: auto;
+	background: transparent;
+	color: var(--kainos-navy);
+	padding: 0.1rem 0.35rem;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	font-size: 1rem;
+	line-height: 1;
+	font-weight: 700;
+}
+
+.career-chat-close:hover {
+	background: rgba(37, 45, 79, 0.08);
+	transform: none;
+	filter: none;
+	border-color: rgba(37, 45, 79, 0.15);
+}
+
+.career-chat-prompts {
+	display: flex;
+	gap: 0.5rem;
+	padding: 0.75rem 1rem;
+	flex-wrap: wrap;
+	border-bottom: 1px solid var(--kainos-border);
+	background: var(--kainos-white);
+}
+
+.career-chat-prompt {
+	min-height: auto;
+	padding: 0.4rem 0.7rem;
+	border: 1px solid var(--kainos-border);
+	border-radius: 999px;
+	background: #f2f6ff;
+	color: var(--kainos-navy);
+	font-size: 0.78rem;
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.career-chat-prompt:hover {
+	background: #e8f1ff;
+	transform: none;
+	filter: none;
+	border-color: #b4cbec;
+}
+
+.career-chat-messages {
+	flex: 1;
+	padding: 0.95rem 1rem;
+	overflow-y: auto;
+	background:
+		radial-gradient(
+			circle at 10% -10%,
+			rgba(92, 192, 137, 0.08),
+			transparent 45%
+		),
+		radial-gradient(circle at 100% 0%, rgba(0, 115, 230, 0.09), transparent 46%),
+		#ffffff;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+.chat-bubble {
+	max-width: 92%;
+	padding: 0.65rem 0.8rem;
+	border-radius: 12px;
+	font-size: 0.9rem;
+	line-height: 1.4;
+	box-shadow: 0 6px 16px rgba(31, 46, 97, 0.08);
+}
+
+.chat-bubble-bot {
+	align-self: flex-start;
+	background: #f4f8ff;
+	border: 1px solid #d9e6fb;
+	color: #273357;
+}
+
+.chat-bubble-user {
+	align-self: flex-end;
+	background: linear-gradient(135deg, #1360c6, #0a7de4);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	color: #ffffff;
+}
+
+.chat-recommendations {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 0.55rem;
+}
+
+.chat-recommendations li {
+	border: 1px solid var(--kainos-border);
+	border-radius: 12px;
+	padding: 0.65rem 0.75rem;
+	background: #ffffff;
+	box-shadow: 0 4px 12px rgba(37, 45, 79, 0.06);
+}
+
+.chat-recommendations li.chat-recommendation-action {
+	margin-top: 0.25rem;
+	border-style: dashed;
+	border-color: #a8bfdf;
+	background: #f7faff;
+	box-shadow: none;
+}
+
+.chat-recommendations li.chat-recommendation-action a {
+	color: var(--kainos-blue);
+	font-size: 0.88rem;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.chat-recommendations small {
+	display: block;
+	font-size: 0.76rem;
+	line-height: 1.35;
+	color: #44506f;
+}
+
+.chat-recommendations li.chat-recommendation-action p,
+.chat-recommendations li.chat-recommendation-action small {
+	color: #4f5f86;
+	font-size: 0.74rem;
+}
+
+.chat-recommendations a,
+.chat-recommendations strong {
+	color: var(--kainos-navy);
+	font-weight: 700;
+	font-size: 0.92rem;
+	text-decoration: none;
+}
+
+.chat-recommendations a:hover {
+	text-decoration: underline;
+	color: var(--kainos-blue);
+}
+
+.chat-recommendations p {
+	margin: 0.25rem 0;
+	font-size: 0.79rem;
+	color: var(--kainos-muted);
+}
+
+.career-chat-form {
+	margin: 0;
+	padding: 0.8rem 1rem 1rem;
+	border-top: 1px solid var(--kainos-border);
+	background: var(--kainos-white);
+}
+
+.career-chat-input-label {
+	font-size: 0.78rem;
+	font-weight: 700;
+	margin-bottom: 0.45rem;
+	color: #425178;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.career-chat-input-row {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.career-chat-input-row input {
+	min-height: 2.7rem;
+	padding: 0.62rem 0.75rem;
+	font-size: 0.89rem;
+	border-radius: 10px;
+}
+
+.career-chat-input-row button {
+	min-height: 2.7rem;
+	padding-inline: 1rem;
+	font-size: 0.86rem;
+	border-radius: 10px;
+	white-space: nowrap;
+}
+
 @media (max-width: 900px) {
 	.primary-nav {
 		display: none;
@@ -804,5 +1071,26 @@ tbody tr:hover {
 
 	.job-detail-title {
 		font-size: 1.5rem;
+	}
+
+	.career-chat {
+		right: 0.7rem;
+		bottom: 0.7rem;
+	}
+
+	.career-chat-launcher {
+		padding-inline: 0.82rem;
+	}
+
+	.career-chat-launcher-text {
+		display: none;
+	}
+
+	.career-chat-panel {
+		max-height: min(72vh, 560px);
+	}
+
+	.career-chat-input-row {
+		flex-direction: column;
 	}
 }

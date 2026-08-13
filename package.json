@@ -4,8 +4,8 @@
 	"description": "Team4 Frontend",
 	"main": "dist/server.js",
 	"scripts": {
-		"build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views",
-		"dev": "tsx watch src/server.ts",
+		"build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views && tsc -p tsconfig.client.json",
+		"dev": "tsc -p tsconfig.client.json && tsx watch src/server.ts",
 		"start": "node dist/server.js",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
