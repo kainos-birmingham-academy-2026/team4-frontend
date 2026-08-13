@@ -112,6 +112,8 @@ export class JobRoleController {
 
 			if (message === "Forbidden") {
 				this.handleForbiddenError(res);
+			} else if (message === "Unauthorized") {
+				this.handleUnauthorizedError(res);
 			} else {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",

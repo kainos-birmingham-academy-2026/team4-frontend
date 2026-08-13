@@ -1,12 +1,16 @@
 import type { Request, Response } from "express";
+import type { SessionData } from "express-session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobRoleController } from "../../src/controllers/jobRoleController";
 import {
+	createJobRole,
+	deleteJobRole,
 	getAllJobRoles,
 	getJobRoleById,
 	getPaginatedJobRoles,
+	updateJobRole,
 } from "../../src/services/jobRoleApiService";
-import { mockJobRoles } from "../mockJobRoles";
+import { mockJobRole1, mockJobRoles } from "../mockJobRoles";
 
 const mockRender = vi.fn();
 
@@ -16,7 +20,7 @@ const mockRequest = {
 	body: {},
 	session: {
 		jwtToken: "mock-jwt-token",
-	},
+	} as unknown as SessionData,
 } as unknown as Request;
 
 const mockResponse = {
@@ -32,6 +36,7 @@ const jobRoleController = new JobRoleController();
 describe("JobRoleController - getJobRoles", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockRequest.session.jwtToken = "mock-jwt-token"; // Reset JWT token for each test
 	});
 
 	it("should render the job roles page with paginated jobs and default page 1", async () => {
@@ -167,6 +172,228 @@ describe("JobRoleController - getJobRoleDetails", () => {
 			pageTitle: "Kainos Careers - Error",
 			message: "Job role not found",
 			status: 404,
+		});
+	});
+});
+
+describe("JobRoleController - create", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should call createJobRole and handle success", async () => {
+		const mockJobRoleData = {
+			roleName: "New Role",
+			description: "Description",
+		};
+		mockRequest.body = mockJobRoleData;
+		vi.mocked(createJobRole).mockResolvedValue(mockJobRole1);
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(createJobRole).toHaveBeenCalledWith(
+			mockJobRoleData,
+			"mock-jwt-token",
+		);
+	});
+
+	it("should redirect to the login page if the user is not authorized", async () => {
+		vi.mocked(createJobRole).mockRejectedValue(new Error("Forbidden"));
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(403);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Forbidden access",
+			status: 403,
+		});
+	});
+
+	it("should redirect to the login page if the user is not authenticated", async () => {
+		vi.mocked(createJobRole).mockRejectedValue(new Error("Unauthorized"));
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Unauthorized access",
+			status: 401,
+		});
+	});
+
+	it("should render the error page if an unexpected error occurs", async () => {
+		vi.mocked(createJobRole).mockRejectedValue(new Error("Unexpected error"));
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unexpected error",
+		});
+	});
+
+	it("should create its own error message if none are provided", async () => {
+		vi.mocked(createJobRole).mockRejectedValue({});
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unable to create job role",
+		});
+	});
+});
+
+describe("JobRoleController - update", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should call updateJobRole and handle success", async () => {
+		const mockJobRoleData = { roleName: "Updated Role" };
+		mockRequest.params.id = "1";
+		mockRequest.body = mockJobRoleData;
+		vi.mocked(updateJobRole).mockResolvedValue(mockJobRole1);
+
+		await jobRoleController.update(mockRequest, mockResponse);
+
+		expect(updateJobRole).toHaveBeenCalledWith(
+			1,
+			mockJobRoleData,
+			"mock-jwt-token",
+		);
+	});
+
+	it("should redirect to the login page if the user is not authorized", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(updateJobRole).mockRejectedValue(new Error("Forbidden"));
+
+		await jobRoleController.update(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(403);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Forbidden access",
+			status: 403,
+		});
+	});
+
+	it("should redirect to the login page if the user is not authenticated", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(updateJobRole).mockRejectedValue(new Error("Unauthorized"));
+
+		await jobRoleController.update(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Unauthorized access",
+			status: 401,
+		});
+	});
+
+	it("should render the error page if an unexpected error occurs", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(updateJobRole).mockRejectedValue(new Error("Unexpected error"));
+
+		await jobRoleController.update(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unexpected error",
+		});
+	});
+
+	it("should create its own error message if none are provided", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(updateJobRole).mockRejectedValue({});
+
+		await jobRoleController.update(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unable to update job role",
+		});
+	});
+});
+
+describe("JobRoleController - delete", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should call deleteJobRole and handle success", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockResolvedValue();
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(deleteJobRole).toHaveBeenCalledWith(1, "mock-jwt-token");
+	});
+
+	it("should redirect to the login page if the user is not authorized", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockRejectedValue(new Error("Forbidden"));
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(403);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Forbidden access",
+			status: 403,
+		});
+	});
+
+	it("should redirect to the login page if the user is not authenticated", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockRejectedValue(new Error("Unauthorized"));
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			message: "Unauthorized access",
+			status: 401,
+		});
+	});
+
+	it("should render the error page if an unexpected error occurs", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockRejectedValue(new Error("Unexpected error"));
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unexpected error",
+		});
+	});
+
+	it("should create its own error message if none are provided", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockRejectedValue({});
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unable to delete job role",
 		});
 	});
 });
