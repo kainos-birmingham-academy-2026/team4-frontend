@@ -2,8 +2,8 @@ import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobRoleController } from "../../src/controllers/jobRoleController";
 import {
-	getAllJobRoles,
 	getJobRoleById,
+	getPaginatedJobRoles,
 } from "../../src/services/jobRoleApiService";
 import { mockJobRoles } from "../mockJobRoles";
 
@@ -33,15 +33,71 @@ describe("JobRoleController - getJobRoles", () => {
 		vi.clearAllMocks();
 	});
 
-	it("should render the job roles page with the correct title and jobs", async () => {
-		vi.mocked(getAllJobRoles).mockResolvedValue(mockJobRoles);
+	it("should render the job roles page with paginated jobs and default page 1", async () => {
+		const mockPaginatedResponse = {
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 3,
+				totalCount: 25,
+				pageSize: 10,
+				hasNext: true,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
 
 		await jobRoleController.getJobRoles(mockRequest, mockResponse);
 
-		expect(getAllJobRoles).toHaveBeenCalled();
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(1);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
+			pagination: mockPaginatedResponse.pagination,
+		});
+	});
+
+	it("should render the job roles page for a specific page", async () => {
+		const mockRequest2 = { ...mockRequest, query: { page: "2" } };
+		const mockPaginatedResponse = {
+			jobs: [mockJobRoles[0]],
+			pagination: {
+				currentPage: 2,
+				totalPages: 3,
+				totalCount: 25,
+				pageSize: 10,
+				hasNext: true,
+				hasPrev: true,
+			},
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
+
+		await jobRoleController.getJobRoles(mockRequest2, mockResponse);
+
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(2);
+		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
+			pageTitle: "Kainos Careers - Job Roles",
+			jobs: [mockJobRoles[0]],
+			pagination: mockPaginatedResponse.pagination,
+		});
+	});
+
+	it("should handle errors and render with empty pagination", async () => {
+		vi.mocked(getPaginatedJobRoles).mockRejectedValue(new Error("API error"));
+
+		await jobRoleController.getJobRoles(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
+			pageTitle: "Kainos Careers - Job Roles",
+			jobs: [],
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 0,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
 		});
 	});
 });
