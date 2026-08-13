@@ -58,10 +58,12 @@ export async function getJobRoleById(
 
 export async function getPaginatedJobRoles(
 	page: number = 1,
+	token: string,
 ): Promise<PaginatedResponse | undefined> {
 	try {
 		const { data } = await apiClient.get<PaginatedResponse>("/api/job-roles", {
 			params: { page },
+			headers: authHeaders(token),
 		});
 		return data;
 	} catch (error) {
@@ -72,7 +74,7 @@ export async function getPaginatedJobRoles(
 			if (status === 404) {
 				throw new Error("Job roles not found.");
 			} else if (status >= 500) {
-				throw new Error(`Error fetching job roles: ${error.message}`);
+				throw new Error(`Error fetching paginated job roles: ${error.message}`);
 			} else {
 				throw new Error(`Unexpected error: ${error.message}`);
 			}

@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import {
+	getAllJobRoles,
 	getJobRoleById,
 	getPaginatedJobRoles,
 } from "../services/jobRoleApiService";
@@ -9,27 +10,10 @@ export class JobRoleController {
 		return req.session.jwtToken ?? "";
 	}
 
-	getRegister(_req: Request, res: Response) {
-		res.render("pages/register", {
-			pageTitle: "Kainos Careers - Register",
-		});
-	}
-
-	getLogin(req: Request, res: Response) {
-		const registered = req.query.registered === "1";
-
-		res.render("pages/login", {
-			pageTitle: "Kainos Careers - Sign In",
-			registrationSuccessMessage: registered
-				? "Registration successful. You can now sign in."
-				: undefined,
-		});
-	}
-
 	async getJobRoles(req: Request, res: Response): Promise<void> {
 		const page = parseInt(req.query.page as string) || 1;
 		try {
-			const data = await getPaginatedJobRoles(page);
+			const data = await getPaginatedJobRoles(page, this.getJwtToken(req));
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
 				jobs: data?.jobs || [],
@@ -43,18 +27,31 @@ export class JobRoleController {
 				},
 			});
 		} catch (error) {
-			console.error("Error fetching paginated job roles:", error);
+			// If fetching paginated job roles fails, fallback to fetching all job roles
+			await this.getNonPaginatedJobRoles(req, res);
+		}
+	}
+
+	async getNonPaginatedJobRoles(req: Request, res: Response): Promise<void> {
+		try {
+			const jobs = await getAllJobRoles(this.getJwtToken(req));
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: [],
+				jobs: jobs || [],
 				pagination: {
 					currentPage: 1,
 					totalPages: 1,
-					totalCount: 0,
-					pageSize: 10,
+					totalCount: jobs?.length || 0,
+					pageSize: jobs?.length || 0,
 					hasNext: false,
 					hasPrev: false,
 				},
+			});
+		} catch (error) {
+			res.render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 500,
+				message: "Error fetching job roles",
 			});
 		}
 	}
