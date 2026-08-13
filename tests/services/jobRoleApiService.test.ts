@@ -14,6 +14,8 @@ vi.mock("../../src/config/apiClient", () => ({
 	},
 }));
 
+const mockToken = "mocked-jwt-token";
+
 describe("jobRoleApiService - getAllJobRoles", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -24,10 +26,12 @@ describe("jobRoleApiService - getAllJobRoles", () => {
 			.fn()
 			.mockResolvedValue({ data: mockJobRoles });
 
-		const result = await getAllJobRoles();
+		const result = await getAllJobRoles(mockToken);
 
 		expect(result).toEqual(mockJobRoles);
-		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles");
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			headers: { Authorization: `Bearer ${mockToken}` },
+		});
 	});
 
 	it("should throw an error when the API returns a 404 status", async () => {
@@ -37,7 +41,9 @@ describe("jobRoleApiService - getAllJobRoles", () => {
 			response: { status: 404 },
 		});
 
-		await expect(getAllJobRoles()).rejects.toThrow("Job roles not found.");
+		await expect(getAllJobRoles(mockToken)).rejects.toThrow(
+			"Job roles not found.",
+		);
 	});
 
 	it("should throw an error when the API returns a 500 status", async () => {
@@ -47,7 +53,7 @@ describe("jobRoleApiService - getAllJobRoles", () => {
 			response: { status: 500 },
 		});
 
-		await expect(getAllJobRoles()).rejects.toThrow(
+		await expect(getAllJobRoles(mockToken)).rejects.toThrow(
 			"Error fetching job roles: Internal Server Error",
 		);
 	});
@@ -59,7 +65,7 @@ describe("jobRoleApiService - getAllJobRoles", () => {
 			response: { status: 400 },
 		});
 
-		await expect(getAllJobRoles()).rejects.toThrow(
+		await expect(getAllJobRoles(mockToken)).rejects.toThrow(
 			"Unexpected error: Bad request",
 		);
 	});
@@ -69,7 +75,7 @@ describe("jobRoleApiService - getAllJobRoles", () => {
 		const originalError = new Error("Network error");
 		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
 
-		await expect(getAllJobRoles()).rejects.toThrow("Network error");
+		await expect(getAllJobRoles(mockToken)).rejects.toThrow("Network error");
 	});
 });
 
@@ -82,11 +88,14 @@ describe("jobRoleApiService - getJobRoleById", () => {
 		const mockJobRole = mockJobRoles[0];
 		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({ data: mockJobRole });
 
-		const result = await getJobRoleById(mockJobRole.id);
+		const result = await getJobRoleById(mockJobRole.id, mockToken);
 
 		expect(result).toEqual(mockJobRole);
 		expect(apiClient.get).toHaveBeenCalledWith(
 			`/api/job-roles/${mockJobRole.id}`,
+			{
+				headers: { Authorization: `Bearer ${mockToken}` },
+			},
 		);
 	});
 
@@ -98,7 +107,7 @@ describe("jobRoleApiService - getJobRoleById", () => {
 			response: { status: 404 },
 		});
 
-		await expect(getJobRoleById(jobRoleId)).rejects.toThrow(
+		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
 			"Job role not found.",
 		);
 	});
@@ -111,7 +120,7 @@ describe("jobRoleApiService - getJobRoleById", () => {
 			response: { status: 500 },
 		});
 
-		await expect(getJobRoleById(jobRoleId)).rejects.toThrow(
+		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
 			"Error fetching job role: Internal Server Error",
 		);
 	});
@@ -124,7 +133,7 @@ describe("jobRoleApiService - getJobRoleById", () => {
 			response: { status: 400 },
 		});
 
-		await expect(getJobRoleById(jobRoleId)).rejects.toThrow(
+		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
 			"Unexpected error: Bad request",
 		);
 	});
@@ -135,7 +144,9 @@ describe("jobRoleApiService - getJobRoleById", () => {
 		const originalError = new Error("Network error");
 		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
 
-		await expect(getJobRoleById(jobRoleId)).rejects.toThrow("Network error");
+		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
+			"Network error",
+		);
 	});
 });
 

@@ -3,9 +3,17 @@ import apiClient from "../config/apiClient";
 import type { JobRole } from "../models/jobRole";
 import type { PaginatedResponse } from "../types/jobRoleDTO";
 
-export async function getAllJobRoles(): Promise<JobRole[] | undefined> {
+function authHeaders(token: string): { Authorization: string } {
+	return { Authorization: `Bearer ${token}` };
+}
+
+export async function getAllJobRoles(
+	token: string,
+): Promise<JobRole[] | undefined> {
 	try {
-		const { data } = await apiClient.get<JobRole[]>("/api/job-roles");
+		const { data } = await apiClient.get<JobRole[]>("/api/job-roles", {
+			headers: authHeaders(token),
+		});
 		return data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
@@ -23,9 +31,14 @@ export async function getAllJobRoles(): Promise<JobRole[] | undefined> {
 	}
 }
 
-export async function getJobRoleById(id: number): Promise<JobRole | undefined> {
+export async function getJobRoleById(
+	id: number,
+	token: string,
+): Promise<JobRole | undefined> {
 	try {
-		const { data } = await apiClient.get<JobRole>(`/api/job-roles/${id}`);
+		const { data } = await apiClient.get<JobRole>(`/api/job-roles/${id}`, {
+			headers: authHeaders(token),
+		});
 		return data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {

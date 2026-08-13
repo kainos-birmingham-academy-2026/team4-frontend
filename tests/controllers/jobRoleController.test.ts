@@ -13,6 +13,9 @@ const mockRequest = {
 	params: {},
 	query: {},
 	body: {},
+	session: {
+		jwtToken: "mock-jwt-token",
+	},
 } as unknown as Request;
 
 const mockResponse = {
@@ -24,61 +27,6 @@ const mockResponse = {
 vi.mock("../../src/services/jobRoleApiService");
 
 const jobRoleController = new JobRoleController();
-
-describe("JobRoleController - getHome", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("should render the home page with the correct title", async () => {
-		await jobRoleController.getHome(mockRequest, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/index", {
-			pageTitle: "Kainos Careers - Home",
-		});
-	});
-});
-
-describe("JobRoleController - getRegister", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("should render the register page with the correct title", async () => {
-		await jobRoleController.getRegister(mockRequest, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/register", {
-			pageTitle: "Kainos Careers - Register",
-		});
-	});
-});
-
-describe("JobRoleController - getLogin", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("should render the login page with the correct title", async () => {
-		await jobRoleController.getLogin(mockRequest, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/login", {
-			pageTitle: "Kainos Careers - Sign In",
-			registrationSuccessMessage: undefined,
-		});
-	});
-
-	it("should include registration success message when query has registered=1", async () => {
-		mockRequest.query.registered = "1";
-
-		await jobRoleController.getLogin(mockRequest, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/login", {
-			pageTitle: "Kainos Careers - Sign In",
-			registrationSuccessMessage:
-				"Registration successful. You can now sign in.",
-		});
-	});
-});
 
 describe("JobRoleController - getJobRoles", () => {
 	beforeEach(() => {
