@@ -10,6 +10,7 @@ import { mockJobRoles } from "../mockJobRoles";
 vi.mock("../../src/services/jobRoleApiService", () => ({
 	getAllJobRoles: vi.fn(),
 	getJobRoleById: vi.fn(),
+	getPaginatedJobRoles: vi.fn(),
 }));
 
 vi.mock("../../src/middlewares/authMiddleware", () => ({

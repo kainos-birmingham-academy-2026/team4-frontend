@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobRoleController } from "../../src/controllers/jobRoleController";
 import {
+	getAllJobRoles,
 	getJobRoleById,
 	getPaginatedJobRoles,
 } from "../../src/services/jobRoleApiService";
@@ -49,7 +50,7 @@ describe("JobRoleController - getJobRoles", () => {
 
 		await jobRoleController.getJobRoles(mockRequest, mockResponse);
 
-		expect(getPaginatedJobRoles).toHaveBeenCalledWith(1);
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(1, "mock-jwt-token");
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
@@ -58,7 +59,11 @@ describe("JobRoleController - getJobRoles", () => {
 	});
 
 	it("should render the job roles page for a specific page", async () => {
-		const mockRequest2 = { ...mockRequest, query: { page: "2" } };
+		const mockRequest2 = {
+			...mockRequest,
+			query: { page: "2" },
+			session: { jwtToken: "mock-jwt-token" },
+		} as unknown as Request;
 		const mockPaginatedResponse = {
 			jobs: [mockJobRoles[0]],
 			pagination: {
@@ -74,7 +79,7 @@ describe("JobRoleController - getJobRoles", () => {
 
 		await jobRoleController.getJobRoles(mockRequest2, mockResponse);
 
-		expect(getPaginatedJobRoles).toHaveBeenCalledWith(2);
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(2, "mock-jwt-token");
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: [mockJobRoles[0]],
@@ -82,22 +87,38 @@ describe("JobRoleController - getJobRoles", () => {
 		});
 	});
 
-	it("should handle errors and render with empty pagination", async () => {
+	it("should try to render with no pagination if an error occurs", async () => {
 		vi.mocked(getPaginatedJobRoles).mockRejectedValue(new Error("API error"));
+		vi.mocked(getAllJobRoles).mockResolvedValue(mockJobRoles);
 
 		await jobRoleController.getJobRoles(mockRequest, mockResponse);
 
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
-			jobs: [],
+			jobs: mockJobRoles,
 			pagination: {
 				currentPage: 1,
 				totalPages: 1,
-				totalCount: 0,
-				pageSize: 10,
+				totalCount: mockJobRoles.length,
+				pageSize: mockJobRoles.length,
 				hasNext: false,
 				hasPrev: false,
 			},
+		});
+
+		expect(getAllJobRoles).toHaveBeenCalledWith("mock-jwt-token");
+	});
+
+	it("should render the error page if both paginated and non-paginated fetches fail", async () => {
+		vi.mocked(getPaginatedJobRoles).mockRejectedValue(new Error("API error"));
+		vi.mocked(getAllJobRoles).mockRejectedValue(new Error("API error"));
+
+		await jobRoleController.getJobRoles(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			message: "Error fetching job roles",
+			status: 500,
 		});
 	});
 });
