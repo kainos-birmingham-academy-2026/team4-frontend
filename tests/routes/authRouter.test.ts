@@ -11,11 +11,12 @@ const mockBody = {
 };
 
 vi.mock("../../src/middlewares/authMiddleware", () => ({
-	requireAuth: vi.fn((req, res, next) => next()),
+	requireAuth: vi.fn((_req, _res, next) => next()),
 }));
 
 vi.mock("../../src/services/authApiService", async (importOriginal) => {
-	const actual = (await importOriginal()) as any;
+	const actual =
+		(await importOriginal()) as typeof import("../../src/services/authApiService");
 	return {
 		AuthServiceError: actual.AuthServiceError,
 		login: vi.fn(),
