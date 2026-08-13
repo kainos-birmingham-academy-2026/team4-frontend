@@ -9,7 +9,7 @@
       </div>
 
       <div style="margin-bottom: 2rem;">
-        <form class="search-card" action="#" method="get" aria-label="Filter jobs">
+        <form class="search-card" action="/job-roles" method="get" aria-label="Filter jobs">
           <label for="search-jobs">Search by title, keyword, or skill</label>
           <div class="search-row">
             <input
@@ -17,11 +17,31 @@
               name="q"
               type="text"
               placeholder="e.g. Software Engineer, React, Data"
+              value="{{ filters.q or '' }}"
             />
+            <select name="capability" aria-label="Filter by role family">
+              <option value="">All role families</option>
+              {% for capabilityOption in capabilityOptions %}
+                <option value="{{ capabilityOption }}" {% if filters.capability == capabilityOption %}selected{% endif %}>
+                  {{ capabilityOption }}
+                </option>
+              {% endfor %}
+            </select>
             <button type="submit">Search</button>
           </div>
         </form>
       </div>
+
+      {% if filters.q or filters.capability %}
+        <div style="margin-bottom: 1rem; color: var(--kainos-muted);">
+          <p style="margin: 0;">
+            Filters applied
+            {% if filters.q %} - search: "{{ filters.q }}"{% endif %}
+            {% if filters.capability %} - role family: {{ filters.capability }}{% endif %}
+            <a href="/job-roles" style="margin-left: 0.4rem;">Clear filters</a>
+          </p>
+        </div>
+      {% endif %}
 
       <div style="margin-bottom: 2rem;">
         <h2 style="margin-top: 0; font-size: 1.3rem; color: var(--kainos-navy);">

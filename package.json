@@ -4,8 +4,10 @@
 	"description": "Team4 Frontend",
 	"main": "dist/server.js",
 	"scripts": {
-		"build": "shx rm -rf dist && tsc && shx cp -r src/views dist/views",
-		"dev": "tsx watch src/server.ts",
+		"build": "shx rm -rf dist && npm run build:server && npm run build:client",
+		"build:server": "tsc -p tsconfig.json && shx cp -r src/views dist/views",
+		"build:client": "tsc -p tsconfig.client.json",
+		"dev": "npm run build:client && tsx watch src/server.ts",
 		"start": "node dist/server.js",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",

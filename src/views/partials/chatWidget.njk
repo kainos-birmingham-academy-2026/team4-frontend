@@ -1,0 +1,57 @@
+<section class="career-chat" data-chat-widget data-chat-api="/api/chat" aria-label="Careers assistant">
+  <button
+    type="button"
+    class="career-chat-launcher"
+    data-chat-toggle
+    aria-expanded="false"
+    aria-controls="career-chat-panel"
+  >
+    <span class="career-chat-launcher-icon" aria-hidden="true">💬</span>
+    <span class="career-chat-launcher-text">Ask about roles</span>
+  </button>
+
+  <div
+    id="career-chat-panel"
+    class="career-chat-panel"
+    role="dialog"
+    aria-modal="false"
+    aria-label="Role discovery assistant"
+    hidden
+  >
+    <header class="career-chat-header">
+      <div>
+        <p class="career-chat-eyebrow">Kainos Careers</p>
+        <h2>Role Assistant</h2>
+      </div>
+      <button type="button" class="career-chat-close" data-chat-close aria-label="Close chat">✕</button>
+    </header>
+
+    <div class="career-chat-prompts" aria-label="Suggested prompts">
+      <button type="button" class="career-chat-prompt" data-chat-prompt="I am not sure what role suits me.">Help me choose</button>
+      <button type="button" class="career-chat-prompt" data-chat-prompt="Show me open roles in the engineering role family.">Engineering roles</button>
+      <button type="button" class="career-chat-prompt" data-chat-prompt="What does role family mean?">What is role family?</button>
+    </div>
+
+    <div class="career-chat-messages" data-chat-messages aria-live="polite" aria-label="Chat messages">
+      <article class="chat-bubble chat-bubble-bot">
+        Tell me what you enjoy, and I can recommend roles by capability, location, and level.
+      </article>
+    </div>
+
+    <form class="career-chat-form" data-chat-form>
+      <label for="career-chat-input" class="career-chat-input-label">Ask about job roles</label>
+      <div class="career-chat-input-row">
+        <input
+          id="career-chat-input"
+          name="message"
+          type="text"
+          required
+          maxlength="280"
+          placeholder="e.g. I like building apps but I am open to other options"
+          autocomplete="off"
+        />
+        <button type="submit">Send</button>
+      </div>
+    </form>
+  </div>
+</section>

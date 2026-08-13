@@ -1,0 +1,14 @@
+{
+	"compilerOptions": {
+		"target": "ES2021",
+		"module": "ES2020",
+		"lib": ["ES2021", "DOM"],
+		"strict": true,
+		"skipLibCheck": true,
+		"outDir": "dist/public/assets/js",
+		"rootDir": "src/client",
+		"noEmit": false
+	},
+	"include": ["src/client/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

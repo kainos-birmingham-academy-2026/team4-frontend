@@ -16,6 +16,9 @@
       {% block content %}{% endblock %}
     </main>
 
+    {% include "partials/chatWidget.njk" %}
+
     {% include "partials/footer.njk" %}
+    <script src="/assets/js/chatWidget.js" defer></script>
   </body>
 </html>

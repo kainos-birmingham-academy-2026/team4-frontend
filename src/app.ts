@@ -4,6 +4,7 @@ import express, { type Request, type Response } from "express";
 import session from "express-session";
 import nunjucks from "nunjucks";
 import authRouter from "./routes/authRouter";
+import chatRouter from "./routes/chatRouter";
 import jobRoleRouter from "./routes/jobRoleRouter";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -26,6 +27,10 @@ env.addFilter("formatDate", (value: string | Date) => {
 
 app.set("view engine", "njk");
 
+app.use(
+	"/assets/js",
+	express.static(path.join(process.cwd(), "dist/public/assets/js")),
+);
 app.use(express.static(path.join(__dirname, "../public")));
 
 app.use(express.urlencoded({ extended: true }));
@@ -43,6 +48,7 @@ app.use(
 		},
 	}),
 );
+app.use("/api/chat", chatRouter);
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
