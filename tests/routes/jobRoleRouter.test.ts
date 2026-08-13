@@ -2,8 +2,8 @@ import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
 import {
-	getPaginatedJobRoles,
 	getJobRoleById,
+	getPaginatedJobRoles,
 } from "../../src/services/jobRoleApiService";
 import { mockJobRoles } from "../mockJobRoles";
 
@@ -20,7 +20,7 @@ describe("GET /", () => {
 		const response = await request(app).get("/");
 
 		expect(response.status).toBe(200);
-		expect(response.text).toContain("<title>Kainos Careers</title>");
+		expect(response.text).toContain("<title>Kainos Careers - Home</title>");
 		expect(response.text).toContain("career-chat-launcher");
 	});
 });

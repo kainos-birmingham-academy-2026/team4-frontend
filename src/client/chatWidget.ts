@@ -30,8 +30,19 @@
 	const promptButtons =
 		widget.querySelectorAll<HTMLButtonElement>("[data-chat-prompt]");
 	const chatApi = widget.getAttribute("data-chat-api") || "/api/chat";
+	const submitButton = form?.querySelector<HTMLButtonElement>(
+		"button[type=submit]",
+	);
 
-	if (!panel || !toggleButton || !closeButton || !form || !input || !messages) {
+	if (
+		!panel ||
+		!toggleButton ||
+		!closeButton ||
+		!form ||
+		!input ||
+		!messages ||
+		!submitButton
+	) {
 		return;
 	}
 
@@ -145,8 +156,7 @@
 		appendBubble(message, "user");
 		input.value = "";
 		input.disabled = true;
-		form.querySelector<HTMLButtonElement>("button[type=submit]")!.disabled =
-			true;
+		submitButton.disabled = true;
 
 		try {
 			const response = await callChatApi(message);
@@ -159,8 +169,7 @@
 			);
 		} finally {
 			input.disabled = false;
-			form.querySelector<HTMLButtonElement>("button[type=submit]")!.disabled =
-				false;
+			submitButton.disabled = false;
 			input.focus();
 		}
 	};
