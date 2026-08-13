@@ -85,7 +85,7 @@ export class JobRoleController {
 					hasPrev: false,
 				},
 			});
-		} catch (error) {
+		} catch (_error) {
 			// If fetching paginated job roles fails, fallback to fetching all job roles
 			await this.getNonPaginatedJobRoles(req, res);
 		}
@@ -98,7 +98,11 @@ export class JobRoleController {
 		try {
 			const jobs = await getAllJobRoles(this.getJwtToken(req));
 			const safeJobs = jobs || [];
-			const filteredJobs = this.filterJobs(queryValue, capabilityValue, safeJobs);
+			const filteredJobs = this.filterJobs(
+				queryValue,
+				capabilityValue,
+				safeJobs,
+			);
 			const capabilityOptions = this.getCapabilityOptions(safeJobs);
 
 			res.render("pages/job-roles", {
@@ -118,7 +122,7 @@ export class JobRoleController {
 					hasPrev: false,
 				},
 			});
-		} catch (error) {
+		} catch (_error) {
 			res.render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
 				status: 500,

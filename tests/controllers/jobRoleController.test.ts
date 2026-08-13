@@ -101,7 +101,7 @@ describe("JobRoleController - getJobRoles", () => {
 		const mockRequest2 = {
 			...mockRequest,
 			query: { q: "data", capability: "Data" },
-		};
+		} as unknown as Request;
 		const mockPaginatedResponse = {
 			jobs: mockJobRoles,
 			pagination: {
