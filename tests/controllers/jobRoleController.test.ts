@@ -6,6 +6,7 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
 	updateJobRole,
@@ -13,6 +14,27 @@ import {
 import { mockJobRole1, mockJobRoles } from "../mockJobRoles";
 
 const mockRender = vi.fn();
+
+const emptyFilters = {
+	roleName: "",
+	location: "",
+	capability: [],
+	band: [],
+	status: [],
+	closingDate: "",
+};
+
+const mockFilterOptions = {
+	capabilities: ["Engineering", "Data"],
+	bands: ["Consultant"],
+	statuses: ["Open", "Closed"],
+};
+
+const emptyFilterOptions = {
+	capabilities: [],
+	bands: [],
+	statuses: [],
+};
 
 const mockRequest = {
 	params: {},
@@ -37,6 +59,7 @@ describe("JobRoleController - getJobRoles", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockRequest.session.jwtToken = "mock-jwt-token"; // Reset JWT token for each test
+		vi.mocked(getFilterOptions).mockResolvedValue(mockFilterOptions);
 	});
 
 	it("should render the job roles page with paginated jobs and default page 1", async () => {
@@ -55,16 +78,19 @@ describe("JobRoleController - getJobRoles", () => {
 
 		await jobRoleController.getJobRoles(mockRequest, mockResponse);
 
-		expect(getPaginatedJobRoles).toHaveBeenCalledWith(1, "mock-jwt-token");
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			"mock-jwt-token",
+			emptyFilters,
+		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
-			filters: {
-				q: "",
-				capability: "",
-			},
-			capabilityOptions: ["Data", "Engineering"],
 			pagination: mockPaginatedResponse.pagination,
+			filters: emptyFilters,
+			filterOptions: mockFilterOptions,
+			filterQuery: "",
+			hasActiveFilters: false,
 		});
 	});
 
@@ -89,49 +115,90 @@ describe("JobRoleController - getJobRoles", () => {
 
 		await jobRoleController.getJobRoles(mockRequest2, mockResponse);
 
-		expect(getPaginatedJobRoles).toHaveBeenCalledWith(2, "mock-jwt-token");
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			2,
+			"mock-jwt-token",
+			emptyFilters,
+		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: [mockJobRoles[0]],
-			filters: {
-				q: "",
-				capability: "",
-			},
-			capabilityOptions: ["Engineering"],
 			pagination: mockPaginatedResponse.pagination,
+			filters: emptyFilters,
+			filterOptions: mockFilterOptions,
+			filterQuery: "",
+			hasActiveFilters: false,
 		});
 	});
 
-	it("should apply text and capability filters to paginated jobs", async () => {
-		const mockRequest2 = {
+	it("should forward the requested filters and preserve them in the pagination query", async () => {
+		const mockRequest3 = {
 			...mockRequest,
-			query: { q: "data", capability: "Data" },
+			query: {
+				roleName: "engineer",
+				capability: ["Engineering", "Data"],
+				status: "Open",
+			},
+			session: { jwtToken: "mock-jwt-token" },
 		} as unknown as Request;
-		const mockPaginatedResponse = {
-			jobs: mockJobRoles,
+		const expectedFilters = {
+			roleName: "engineer",
+			location: "",
+			capability: ["Engineering", "Data"],
+			band: [],
+			status: ["Open"],
+			closingDate: "",
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: [],
 			pagination: {
 				currentPage: 1,
-				totalPages: 1,
-				totalCount: 2,
+				totalPages: 0,
+				totalCount: 0,
 				pageSize: 10,
 				hasNext: false,
 				hasPrev: false,
 			},
-		};
-		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
-
-		await jobRoleController.getJobRoles(mockRequest2, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
-			pageTitle: "Kainos Careers - Job Roles",
-			jobs: [mockJobRoles[1]],
-			filters: {
-				q: "data",
-				capability: "Data",
-			},
-			capabilityOptions: ["Data", "Engineering"],
-			pagination: mockPaginatedResponse.pagination,
 		});
+
+		await jobRoleController.getJobRoles(mockRequest3, mockResponse);
+
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			"mock-jwt-token",
+			expectedFilters,
+		);
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-roles",
+			expect.objectContaining({
+				filters: expectedFilters,
+				filterQuery:
+					"&roleName=engineer&capability=Engineering&capability=Data&status=Open",
+				hasActiveFilters: true,
+			}),
+		);
+	});
+
+	it("should still render when the filter options request fails", async () => {
+		vi.mocked(getFilterOptions).mockRejectedValue(new Error("API error"));
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: mockJobRoles.length,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+
+		await jobRoleController.getJobRoles(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-roles",
+			expect.objectContaining({ filterOptions: emptyFilterOptions }),
+		);
 	});
 
 	it("should try to render with no pagination if an error occurs", async () => {
@@ -143,11 +210,6 @@ describe("JobRoleController - getJobRoles", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
 			jobs: mockJobRoles,
-			filters: {
-				q: "",
-				capability: "",
-			},
-			capabilityOptions: ["Data", "Engineering"],
 			pagination: {
 				currentPage: 1,
 				totalPages: 1,
@@ -156,6 +218,10 @@ describe("JobRoleController - getJobRoles", () => {
 				hasNext: false,
 				hasPrev: false,
 			},
+			filters: emptyFilters,
+			filterOptions: emptyFilterOptions,
+			filterQuery: "",
+			hasActiveFilters: false,
 		});
 
 		expect(getAllJobRoles).toHaveBeenCalledWith("mock-jwt-token");

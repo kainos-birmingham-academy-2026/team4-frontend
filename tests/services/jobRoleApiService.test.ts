@@ -179,6 +179,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},
@@ -206,6 +207,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},
@@ -233,6 +235,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 2 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},

@@ -9,25 +9,83 @@
       </div>
 
       <div style="margin-bottom: 2rem;">
-        <form class="search-card" action="/job-roles" method="get" aria-label="Filter jobs">
-          <label for="search-jobs">Search by title, keyword, or skill</label>
-          <div class="search-row">
+        <form class="search-card" action="/job-roles" method="get" aria-label="Filter job roles">
+          <label for="filter-role-name">Search by role name</label>
+          <div class="search-row" style="width: 100%;">
             <input
-              id="search-jobs"
-              name="q"
+              id="filter-role-name"
+              name="roleName"
               type="text"
+              value="{{ filters.roleName }}"
               placeholder="e.g. Software Engineer, React, Data"
-              value="{{ filters.q or '' }}"
+              style="width: 100%;"
             />
-            <select name="capability" aria-label="Filter by role family">
-              <option value="">All role families</option>
-              {% for capabilityOption in capabilityOptions %}
-                <option value="{{ capabilityOption }}" {% if filters.capability == capabilityOption %}selected{% endif %}>
-                  {{ capabilityOption }}
-                </option>
-              {% endfor %}
-            </select>
             <button type="submit">Search</button>
+          </div>
+
+          {% set groups = [
+            { legend: "Capability", name: "capability", options: filterOptions.capabilities, selected: filters.capability },
+            { legend: "Band", name: "band", options: filterOptions.bands, selected: filters.band },
+            { legend: "Status", name: "status", options: filterOptions.statuses, selected: filters.status }
+          ] %}
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-top: 1.25rem; font-size: 0.85rem; align-items: start;">
+            <div>
+              <label for="filter-location" style="font-size: 0.85rem;">Location</label>
+              <input
+                id="filter-location"
+                name="location"
+                type="text"
+                value="{{ filters.location }}"
+                placeholder="e.g. Belfast"
+                style="width: 100%; font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+              />
+            </div>
+            <div>
+              <label for="filter-closing-date" style="font-size: 0.85rem;">Closing date</label>
+              <input
+                id="filter-closing-date"
+                name="closingDate"
+                type="date"
+                value="{{ filters.closingDate }}"
+                title="Show roles closing on or before this date"
+                style="width: 100%; font-size: 0.85rem; padding: 0.4rem 0.6rem;"
+              />
+            </div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+            {% for group in groups %}
+              {% if group.options.length %}
+                <details class="filter-dropdown">
+                  <summary>
+                    {{ group.legend }}
+                    {% if group.selected.length %}<span class="filter-dropdown-count">{{ group.selected.length }}</span>{% endif %}
+                    <span class="filter-dropdown-caret">▼</span>
+                  </summary>
+                  <div class="filter-dropdown-panel">
+                    {% for option in group.options %}
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="{{ group.name }}"
+                          value="{{ option }}"
+                          {% if option in group.selected %}checked{% endif %}
+                        />
+                        {{ option }}
+                      </label>
+                    {% endfor %}
+                  </div>
+                </details>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+            <button type="submit" style="font-size: 0.85rem; padding: 0.4rem 1rem;">Apply filters</button>
+            {% if hasActiveFilters %}
+              <a href="/job-roles" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 1rem;">Clear filters</a>
+            {% endif %}
           </div>
         </form>
       </div>
@@ -45,7 +103,7 @@
 
       <div style="margin-bottom: 2rem;">
         <h2 style="margin-top: 0; font-size: 1.3rem; color: var(--kainos-navy);">
-          {{ pagination.totalCount }} Open Positions
+          {{ pagination.totalCount }} {% if hasActiveFilters %}Matching{% else %}Open{% endif %} Positions
         </h2>
         <p style="color: var(--kainos-muted); margin: 0.5rem 0 0 0;">
           Showing {{ jobs.length }} of {{ pagination.totalCount }} results (Page {{ pagination.currentPage }} of {{ pagination.totalPages }})
@@ -79,20 +137,25 @@
               <a href="#" class="btn btn-secondary" style="margin-left: 0.5rem;">Save Job</a>
             </div>
           </div>
+        {% else %}
+          <p style="color: var(--kainos-muted);">
+            No job roles match your filters.
+            {% if hasActiveFilters %}<a href="/job-roles">Clear filters</a>{% endif %}
+          </p>
         {% endfor %}
       </div>
 
       <!-- Pagination Controls -->
       <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; padding: 2rem 0; border-top: 1px solid var(--kainos-border);">
-        <a href="/job-roles?page=1" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>First</a>
-        <a href="/job-roles?page={{ pagination.currentPage - 1 }}" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Previous</a>
+        <a href="/job-roles?page=1{{ filterQuery }}" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>First</a>
+        <a href="/job-roles?page={{ pagination.currentPage - 1 }}{{ filterQuery }}" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Previous</a>
         
         <span style="display: flex; align-items: center; padding: 0 1rem; color: var(--kainos-navy); font-weight: 600;">
           Page {{ pagination.currentPage }} of {{ pagination.totalPages }}
         </span>
         
-        <a href="/job-roles?page={{ pagination.currentPage + 1 }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Next</a>
-        <a href="/job-roles?page={{ pagination.totalPages }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Last</a>
+        <a href="/job-roles?page={{ pagination.currentPage + 1 }}{{ filterQuery }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Next</a>
+        <a href="/job-roles?page={{ pagination.totalPages }}{{ filterQuery }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Last</a>
       </div>
 
       <div style="text-align: center; margin-top: 2rem;">

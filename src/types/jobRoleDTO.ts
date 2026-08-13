@@ -13,3 +13,18 @@ export interface PaginatedResponse {
 	jobs: JobRole[];
 	pagination: PaginationMetadata;
 }
+
+export interface JobRoleFilters {
+	roleName: string;
+	location: string;
+	capability: string[];
+	band: string[];
+	status: string[];
+	closingDate: string;
+}
+
+export interface FilterOptions {
+	capabilities: string[];
+	bands: string[];
+	statuses: string[];
+}
