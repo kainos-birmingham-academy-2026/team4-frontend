@@ -136,8 +136,13 @@
 					title: String(role.roleName || role.title || "Role"),
 					location: String(role.location || ""),
 					capability: String(role.capability || ""),
-					url: String(role.url || ""),
-					why: String(role.why || ""),
+					url:
+						typeof role.url === "string" && role.url.length > 0
+							? role.url
+							: typeof role.jobRoleId === "number"
+								? `/job-roles/${role.jobRoleId}`
+								: "",
+					why: String(role.why || role.whyRecommended || ""),
 				}))
 			: [];
 
