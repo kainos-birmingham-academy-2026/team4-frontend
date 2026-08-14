@@ -5,6 +5,7 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
 	updateJobRole,
@@ -179,6 +180,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},
@@ -206,9 +208,39 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 1 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},
+		});
+	});
+
+	it("should include all supplied filters in the request", async () => {
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({
+			data: { jobs: [], pagination: {} },
+		});
+
+		await getPaginatedJobRoles(2, mockToken, {
+			roleName: "Engineer",
+			location: "Belfast",
+			capability: ["Data"],
+			band: ["Consultant"],
+			status: ["Open"],
+			closingDate: "2026-12-31",
+		});
+
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			params: {
+				page: 2,
+				roleName: "Engineer",
+				location: "Belfast",
+				capability: ["Data"],
+				band: ["Consultant"],
+				status: ["Open"],
+				closingDate: "2026-12-31",
+			},
+			paramsSerializer: { indexes: null },
+			headers: { Authorization: `Bearer ${mockToken}` },
 		});
 	});
 
@@ -233,6 +265,7 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		expect(result).toEqual(mockPaginatedResponse);
 		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
 			params: { page: 2 },
+			paramsSerializer: { indexes: null },
 			headers: {
 				Authorization: `Bearer ${mockToken}`,
 			},
@@ -282,6 +315,43 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 
 		await expect(getPaginatedJobRoles(1, mockToken)).rejects.toThrow(
 			"Network error",
+		);
+	});
+});
+
+describe("jobRoleApiService - getFilterOptions", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should return filter options from the API", async () => {
+		const options = {
+			capabilities: ["Data"],
+			bands: ["Consultant"],
+			statuses: ["Open"],
+		};
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({ data: options });
+
+		expect(await getFilterOptions(mockToken)).toEqual(options);
+	});
+
+	it("should throw the API error when filter options have no response status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		const originalError = new Error("Network error");
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(originalError);
+
+		await expect(getFilterOptions(mockToken)).rejects.toThrow("Network error");
+	});
+
+	it("should wrap a filter options API error with a response status", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Server error",
+			response: { status: 500 },
+		});
+
+		await expect(getFilterOptions(mockToken)).rejects.toThrow(
+			"Error fetching filter options: Server error",
 		);
 	});
 });

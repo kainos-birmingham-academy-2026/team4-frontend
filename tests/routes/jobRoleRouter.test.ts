@@ -65,51 +65,37 @@ describe("GET /job-roles", () => {
 		);
 	});
 
-	it("should filter roles by capability query", async () => {
+	it("should forward the filter query params to the API and render the result", async () => {
 		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
-			jobs: mockJobRoles,
+			jobs: [mockJobRoles[1]],
 			pagination: {
 				currentPage: 1,
 				totalPages: 1,
-				totalCount: 2,
+				totalCount: 1,
 				pageSize: 10,
 				hasNext: false,
 				hasPrev: false,
 			},
 		});
 
-		const response = await request(app).get("/job-roles?capability=Data");
+		const response = await request(app).get(
+			"/job-roles?capability=Data&roleName=Analyst",
+		);
 
 		expect(response.status).toBe(200);
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			expect.any(String),
+			expect.objectContaining({
+				roleName: "Analyst",
+				capability: ["Data"],
+			}),
+		);
 		expect(response.text).toContain(
 			'<h3 class="job-card-title">Data Analyst</h3>',
 		);
 		expect(response.text).not.toContain(
 			'<h3 class="job-card-title">Software Engineer</h3>',
-		);
-	});
-
-	it("should filter roles by search query", async () => {
-		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
-			jobs: mockJobRoles,
-			pagination: {
-				currentPage: 1,
-				totalPages: 1,
-				totalCount: 2,
-				pageSize: 10,
-				hasNext: false,
-				hasPrev: false,
-			},
-		});
-
-		const response = await request(app).get("/job-roles?q=Software");
-
-		expect(response.status).toBe(200);
-		expect(response.text).toContain(
-			'<h3 class="job-card-title">Software Engineer</h3>',
-		);
-		expect(response.text).not.toContain(
-			'<h3 class="job-card-title">Data Analyst</h3>',
 		);
 	});
 });

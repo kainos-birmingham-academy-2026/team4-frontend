@@ -102,6 +102,14 @@ describe("authApiService - login", () => {
 			login(mockLoginPayload.email, mockLoginPayload.password),
 		).rejects.toThrow("Network error");
 	});
+
+	it("should reject when login succeeds without returning a token", async () => {
+		vi.mocked(apiClient).post = vi.fn().mockResolvedValue({ data: {} });
+
+		await expect(
+			login(mockLoginPayload.email, mockLoginPayload.password),
+		).rejects.toThrow("Authentication succeeded but no JWT token was returned");
+	});
 });
 
 describe("authApiService - register", () => {
@@ -173,5 +181,16 @@ describe("authApiService - register", () => {
 		await expect(register(mockRegisterPayload)).rejects.toThrow(
 			"Network error",
 		);
+	});
+
+	it("should return an AuthServiceError when registration returns no token", async () => {
+		vi.mocked(apiClient).post = vi
+			.fn()
+			.mockResolvedValue({ data: {}, status: 201 });
+
+		await expect(register(mockRegisterPayload)).rejects.toMatchObject({
+			name: "AuthServiceError",
+			statusCode: 201,
+		});
 	});
 });

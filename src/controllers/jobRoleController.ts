@@ -3,10 +3,69 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
 	updateJobRole,
 } from "../services/jobRoleApiService";
+import type { FilterOptions, JobRoleFilters } from "../types/jobRoleDTO";
+
+const EMPTY_FILTER_OPTIONS: FilterOptions = {
+	capabilities: [],
+	bands: [],
+	statuses: [],
+};
+
+function toText(value: unknown): string {
+	return typeof value === "string" ? value.trim() : "";
+}
+
+function toStringArray(value: unknown): string[] {
+	if (Array.isArray(value)) {
+		return value.filter((v) => typeof v === "string");
+	}
+	if (typeof value === "string" && value.length > 0) {
+		return [value];
+	}
+	return [];
+}
+
+export function extractFilters(query: Request["query"]): JobRoleFilters {
+	return {
+		roleName: toText(query.roleName),
+		location: toText(query.location),
+		capability: toStringArray(query.capability),
+		band: toStringArray(query.band),
+		status: toStringArray(query.status),
+		closingDate: toText(query.closingDate),
+	};
+}
+
+export function buildFilterQuery(filters: JobRoleFilters): string {
+	const params = new URLSearchParams();
+
+	if (filters.roleName) {
+		params.append("roleName", filters.roleName);
+	}
+	if (filters.location) {
+		params.append("location", filters.location);
+	}
+	for (const value of filters.capability) {
+		params.append("capability", value);
+	}
+	for (const value of filters.band) {
+		params.append("band", value);
+	}
+	for (const value of filters.status) {
+		params.append("status", value);
+	}
+	if (filters.closingDate) {
+		params.append("closingDate", filters.closingDate);
+	}
+
+	const query = params.toString();
+	return query ? `&${query}` : "";
+}
 
 export class JobRoleController {
 	private getJwtToken(req: Request): string {
@@ -29,72 +88,28 @@ export class JobRoleController {
 		});
 	}
 
-	private filterJobs(
-		queryValue: string,
-		capabilityValue: string,
-		jobs: Array<{
-			roleName: string;
-			capability: string;
-			location: string;
-		}>,
-	) {
-		const normalizedQuery = queryValue.toLowerCase();
-		const normalizedCapability = capabilityValue.toLowerCase();
-
-		return jobs.filter((jobRole) => {
-			const roleNameMatches = jobRole.roleName
-				.toLowerCase()
-				.includes(normalizedQuery);
-			const capabilityMatchesText = jobRole.capability
-				.toLowerCase()
-				.includes(normalizedQuery);
-			const locationMatchesText = jobRole.location
-				.toLowerCase()
-				.includes(normalizedQuery);
-
-			const queryMatches =
-				normalizedQuery.length === 0 ||
-				roleNameMatches ||
-				capabilityMatchesText ||
-				locationMatchesText;
-
-			const capabilityMatches =
-				normalizedCapability.length === 0 ||
-				jobRole.capability.toLowerCase() === normalizedCapability;
-
-			return queryMatches && capabilityMatches;
-		});
-	}
-
-	private getCapabilityOptions(
-		jobs: Array<{
-			capability: string;
-		}>,
-	): string[] {
-		return Array.from(
-			new Set(jobs.map((jobRole) => jobRole.capability).filter(Boolean)),
-		).sort((left, right) => left.localeCompare(right));
-	}
-
 	async getJobRoles(req: Request, res: Response): Promise<void> {
 		const page = parseInt(req.query.page as string, 10) || 1;
-		const queryValue = String(req.query.q ?? "").trim();
-		const capabilityValue = String(req.query.capability ?? "").trim();
+		const filters = extractFilters(req.query);
+		const filterQuery = buildFilterQuery(filters);
+
+		let filterOptions = EMPTY_FILTER_OPTIONS;
+		try {
+			filterOptions =
+				(await getFilterOptions(this.getJwtToken(req))) ?? EMPTY_FILTER_OPTIONS;
+		} catch (_error) {
+			// A missing options list shouldn't stop the listing rendering
+		}
 
 		try {
-			const data = await getPaginatedJobRoles(page, this.getJwtToken(req));
-			const jobs = data?.jobs || [];
-			const filteredJobs = this.filterJobs(queryValue, capabilityValue, jobs);
-			const capabilityOptions = this.getCapabilityOptions(jobs);
-
+			const data = await getPaginatedJobRoles(
+				page,
+				this.getJwtToken(req),
+				filters,
+			);
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: filteredJobs,
-				filters: {
-					q: queryValue,
-					capability: capabilityValue,
-				},
-				capabilityOptions,
+				jobs: data?.jobs || [],
 				pagination: data?.pagination || {
 					currentPage: 1,
 					totalPages: 1,
@@ -103,6 +118,10 @@ export class JobRoleController {
 					hasNext: false,
 					hasPrev: false,
 				},
+				filters,
+				filterOptions,
+				filterQuery,
+				hasActiveFilters: filterQuery.length > 0,
 			});
 		} catch (_error) {
 			// If fetching paginated job roles fails, fallback to fetching all job roles
@@ -111,27 +130,13 @@ export class JobRoleController {
 	}
 
 	async getNonPaginatedJobRoles(req: Request, res: Response): Promise<void> {
-		const queryValue = String(req.query.q ?? "").trim();
-		const capabilityValue = String(req.query.capability ?? "").trim();
-
 		try {
 			const jobs = await getAllJobRoles(this.getJwtToken(req));
 			const safeJobs = jobs || [];
-			const filteredJobs = this.filterJobs(
-				queryValue,
-				capabilityValue,
-				safeJobs,
-			);
-			const capabilityOptions = this.getCapabilityOptions(safeJobs);
 
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: filteredJobs,
-				filters: {
-					q: queryValue,
-					capability: capabilityValue,
-				},
-				capabilityOptions,
+				jobs: safeJobs,
 				pagination: {
 					currentPage: 1,
 					totalPages: 1,
@@ -140,6 +145,10 @@ export class JobRoleController {
 					hasNext: false,
 					hasPrev: false,
 				},
+				filters: extractFilters({}),
+				filterOptions: EMPTY_FILTER_OPTIONS,
+				filterQuery: "",
+				hasActiveFilters: false,
 			});
 		} catch (_error) {
 			res.render("pages/error.njk", {
