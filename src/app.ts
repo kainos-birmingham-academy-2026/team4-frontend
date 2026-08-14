@@ -52,6 +52,7 @@ app.use("/api/chat", chatRouter);
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
+	res.locals.currentPath = req.path;
 	next();
 });
 
