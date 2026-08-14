@@ -59,10 +59,13 @@
 	const setOpenState = (open: boolean): void => {
 		isOpen = open;
 		panel.hidden = !open;
+		toggleButton.hidden = open;
 		toggleButton.setAttribute("aria-expanded", String(open));
 
 		if (open) {
 			input.focus();
+		} else {
+			toggleButton.focus();
 		}
 	};
 
@@ -201,10 +204,45 @@
 	});
 
 	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape" && isOpen) {
+		if (!isOpen) {
+			return;
+		}
+
+		if (e.key === "Escape") {
 			setOpenState(false);
+			return;
+		}
+
+		if (e.key !== "Tab") {
+			return;
+		}
+
+		// Keep keyboard focus inside the open dialog.
+		const focusable = Array.from(
+			panel.querySelectorAll<HTMLElement>(
+				"a[href], button:not([disabled]), input:not([disabled])",
+			),
+		).filter((element) => !element.hidden);
+
+		if (!focusable.length) {
+			return;
+		}
+
+		const first = focusable[0];
+		const last = focusable[focusable.length - 1];
+		const active = document.activeElement;
+
+		if (e.shiftKey && (active === first || !panel.contains(active))) {
+			e.preventDefault();
+			last.focus();
+		} else if (!e.shiftKey && active === last) {
+			e.preventDefault();
+			first.focus();
 		}
 	});
 
-	setOpenState(false);
+	isOpen = false;
+	panel.hidden = true;
+	toggleButton.hidden = false;
+	toggleButton.setAttribute("aria-expanded", "false");
 })();

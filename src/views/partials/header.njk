@@ -8,15 +8,34 @@
       />
     </a>
 
-    <nav aria-label="Primary navigation" class="primary-nav">
-      <a href="/job-roles">Browse Roles</a>
+    <button
+      type="button"
+      class="nav-toggle"
+      data-nav-toggle
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      aria-label="Open menu"
+    >
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+      <span class="nav-toggle-bar" aria-hidden="true"></span>
+    </button>
+
+    <nav id="primary-nav" aria-label="Primary navigation" class="primary-nav">
+      {% set navLinks = [{ href: "/job-roles", label: "Browse Roles" }] %}
       {% if isAuthenticated %}
-      <a href="/logout">Log Out</a>
+        {% set navLinks = navLinks.concat([{ href: "/logout", label: "Log Out" }]) %}
       {% else %}
-      <a href="/register">Sign Up</a>
-      <a href="/login">Log In</a>
+        {% set navLinks = navLinks.concat([{ href: "/register", label: "Sign Up" }, { href: "/login", label: "Log In" }]) %}
       {% endif %}
-      
+
+      {% for link in navLinks %}
+        {% if currentPath == link.href %}
+          <span class="nav-link-current" aria-current="page">{{ link.label }}</span>
+        {% else %}
+          <a href="{{ link.href }}">{{ link.label }}</a>
+        {% endif %}
+      {% endfor %}
     </nav>
   </div>
 </header>

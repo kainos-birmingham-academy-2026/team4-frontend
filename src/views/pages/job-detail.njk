@@ -43,7 +43,7 @@
           <section class="detail-section">
             <h2>About This Role</h2>
             <p>{{ job.description }}</p>
-            <p><a href={{ job.sharepointUrl }}>View this role in SharePoint.</a></p>
+            <p><a href="{{ job.sharepointUrl }}" target="_blank" rel="noopener noreferrer">View this role in SharePoint (opens in a new tab).</a></p>
           </section>
 
           <section class="detail-section">
@@ -58,22 +58,10 @@
         <aside class="job-detail-sidebar">
           {% if job.status == "Open" %}
           <div class="sidebar-card">
-            <h3>Ready to Apply?</h3>
-            <p>We have {{ job.numberOfOpenPositions }} open positions for this role. Take the next step in your career at Kainos:</p>
-            <button class="btn" style="width: 100%;">Apply Now</button>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 0.75rem;">Save Job</button>
+            <h3>Open Positions</h3>
+            <p>We have {{ job.numberOfOpenPositions }} open positions for this role.</p>
           </div>
           {% endif %}
-
-          <div class="sidebar-card">
-            <h3>Share This Role</h3>
-            <p>Know someone perfect for this position?</p>
-            <div class="share-buttons">
-              <a href="#" class="share-btn" title="Share on LinkedIn">in</a>
-              <a href="#" class="share-btn" title="Share on Twitter">𝕏</a>
-              <a href="#" class="share-btn" title="Share via Email">✉</a>
-            </div>
-          </div>
 
           <div class="sidebar-card">
             <h3>Questions?</h3>

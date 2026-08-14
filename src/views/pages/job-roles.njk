@@ -106,7 +106,7 @@
           {{ pagination.totalCount }} {% if hasActiveFilters %}Matching{% else %}Open{% endif %} Positions
         </h2>
         <p style="color: var(--kainos-muted); margin: 0.5rem 0 0 0;">
-          Showing {{ jobs.length }} of {{ pagination.totalCount }} results (Page {{ pagination.currentPage }} of {{ pagination.totalPages }})
+          Showing {{ jobs.length }} of {{ pagination.totalCount }} results (Page {% if pagination.totalPages < 1 %}0{% else %}{{ pagination.currentPage }}{% endif %} of {{ pagination.totalPages }})
         </p>
       </div>
 
@@ -134,7 +134,6 @@
 
             <div style="margin-top: 1rem;">
               <a href="/job-roles/{{ job.jobRoleId }}" class="btn">View Details</a>
-              <a href="#" class="btn btn-secondary" style="margin-left: 0.5rem;">Save Job</a>
             </div>
           </div>
         {% else %}
@@ -146,14 +145,14 @@
       </div>
 
       <!-- Pagination Controls -->
-      <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; padding: 2rem 0; border-top: 1px solid var(--kainos-border);">
+      <div class="pagination">
         <a href="/job-roles?page=1{{ filterQuery }}" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>First</a>
         <a href="/job-roles?page={{ pagination.currentPage - 1 }}{{ filterQuery }}" class="btn {% if not pagination.hasPrev %}btn-disabled{% endif %}" {% if not pagination.hasPrev %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Previous</a>
-        
-        <span style="display: flex; align-items: center; padding: 0 1rem; color: var(--kainos-navy); font-weight: 600;">
-          Page {{ pagination.currentPage }} of {{ pagination.totalPages }}
+
+        <span class="pagination-status">
+          Page {% if pagination.totalPages < 1 %}0{% else %}{{ pagination.currentPage }}{% endif %} of {{ pagination.totalPages }}
         </span>
-        
+
         <a href="/job-roles?page={{ pagination.currentPage + 1 }}{{ filterQuery }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Next</a>
         <a href="/job-roles?page={{ pagination.totalPages }}{{ filterQuery }}" class="btn {% if not pagination.hasNext %}btn-disabled{% endif %}" {% if not pagination.hasNext %}aria-disabled="true" style="pointer-events: none; opacity: 0.5;"{% endif %}>Last</a>
       </div>
