@@ -81,7 +81,7 @@ export async function getJobRoleById(
 			if (!status) throw error;
 
 			if (status === 404) {
-				return undefined;
+				throw new Error("Job role not found.");
 			} else if (status >= 500) {
 				throw new Error(`Error fetching job role: ${error.message}`);
 			} else {
