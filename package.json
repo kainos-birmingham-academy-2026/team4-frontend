@@ -13,6 +13,9 @@
 		"typecheck": "tsc --noEmit",
 		"prepare": "lefthook install",
 		"test": "vitest run",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"test:e2e:debug": "playwright test --debug",
 		"test:ui": "vitest --ui --run",
 		"test:coverage": "vitest run --coverage"
 	},
@@ -36,6 +39,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.7",
+		"@playwright/test": "^1.62.1",
 		"@types/express": "^5.0.3",
 		"@types/express-session": "^1.19.0",
 		"@types/node": "^24.2.0",

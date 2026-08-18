@@ -57,6 +57,30 @@ Use these commands when you want to lint manually outside of git hooks.
 - `npm run test:coverage`
 	- Runs tests and generates a coverage report in `./coverage`
 
+### Playwright UI Tests
+
+The end-to-end tests use Playwright Test with page objects, fixtures, API clients,
+environment configuration, and global setup/teardown. UI tests are in
+`tests/playwright/`; reusable page objects are in `tests/pages/`; API clients and
+API tests are in `tests/api/`.
+
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+npm run test:e2e:debug
+```
+
+Local tests use `http://127.0.0.1:3000` and start the frontend automatically. To
+target another environment, provide its URL explicitly:
+
+```bash
+TEST_ENV=staging STAGING_BASE_URL=https://staging.example.com npm run test:e2e
+TEST_ENV=production PRODUCTION_BASE_URL=https://production.example.com npm run test:e2e
+```
+
+Use `PLAYWRIGHT_BASE_URL` to override any environment URL. Install browser
+binaries once with `npx playwright install` if required.
+
 ## Docker Compose (Full-Stack Setup)
 
 For a complete development environment with frontend + backend + database, the compose file is included in this repository:
