@@ -1,16 +1,17 @@
 import type { Locator } from "@playwright/test";
+import { homepageContent } from "../fixtures/testData";
 import { BasePage } from "./basePage";
 
 export class PlaywrightHomePage extends BasePage {
 	readonly heading: Locator = this.page.getByRole("heading", {
-		name: "Build your career on work that matters",
+		name: homepageContent.heading,
 	});
 	readonly browseRolesLink: Locator = this.page.getByRole("link", {
-		name: "Browse open roles",
+		name: homepageContent.browseRolesLink,
 	});
 	readonly chatLauncher: Locator = this.page.locator("[data-chat-toggle]");
 	readonly chatDialog: Locator = this.page.getByRole("dialog", {
-		name: "Role discovery assistant",
+		name: homepageContent.chat.dialog,
 	});
 
 	async openChat(): Promise<void> {
@@ -18,6 +19,8 @@ export class PlaywrightHomePage extends BasePage {
 	}
 
 	async closeChat(): Promise<void> {
-		await this.page.getByRole("button", { name: "Close chat" }).click();
+		await this.page
+			.getByRole("button", { name: homepageContent.chat.close })
+			.click();
 	}
 }

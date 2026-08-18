@@ -1,4 +1,5 @@
 import { expect, test } from "../fixtures/pageObjectsFixture";
+import { homepageContent } from "../fixtures/testData";
 
 test.describe("home page", () => {
 	test.beforeEach(async ({ homePage }) => {
@@ -9,10 +10,10 @@ test.describe("home page", () => {
 		page,
 		homePage,
 	}) => {
-		await expect(page).toHaveTitle("Kainos Careers - Home");
+		await expect(page).toHaveTitle(homepageContent.title);
 		await expect(homePage.heading).toBeVisible();
 		await expect(
-			page.getByText("Careers at Kainos", { exact: true }),
+			page.getByText(homepageContent.eyebrow, { exact: true }),
 		).toBeVisible();
 	});
 
@@ -63,20 +64,24 @@ test.describe("home page", () => {
 				status: 200,
 				contentType: "application/json",
 				body: JSON.stringify({
-					message: "Engineering roles could be a great fit.",
+					message: homepageContent.chat.response,
 					recommendations: [],
 				}),
 			});
 		});
 
-		await page.getByRole("button", { name: "Ask about roles" }).click();
-		await page.getByRole("button", { name: "Engineering roles" }).click();
+		await page
+			.getByRole("button", { name: homepageContent.chat.launcher })
+			.click();
+		await page
+			.getByRole("button", { name: homepageContent.chat.engineeringPrompt })
+			.click();
 
 		const messages = page.getByLabel("Chat messages");
-		await expect(messages).toContainText("Show me open roles in Engineering.");
 		await expect(messages).toContainText(
-			"Engineering roles could be a great fit.",
+			homepageContent.chat.engineeringMessage,
 		);
+		await expect(messages).toContainText(homepageContent.chat.response);
 	});
 
 	test("shows a friendly message when chat is unavailable", async ({
@@ -86,14 +91,16 @@ test.describe("home page", () => {
 			await route.fulfill({ status: 503, body: "Unavailable" });
 		});
 
-		await page.getByRole("button", { name: "Ask about roles" }).click();
+		await page
+			.getByRole("button", { name: homepageContent.chat.launcher })
+			.click();
 		await page
 			.getByRole("textbox", { name: "Ask about job roles" })
 			.fill("What role suits me?");
 		await page.getByRole("button", { name: "Send" }).click();
 
 		await expect(page.getByLabel("Chat messages")).toContainText(
-			"Sorry, I'm having trouble connecting. Please try again.",
+			homepageContent.chat.unavailableMessage,
 		);
 	});
 
