@@ -40,6 +40,7 @@ export const mockJobRole = {
 } as const;
 
 export const jobRoleDetailContent = {
+	listHeading: "Explore Job Roles",
 	aboutHeading: "About This Role",
 	locationLabel: "Location",
 	bandLabel: "Band",

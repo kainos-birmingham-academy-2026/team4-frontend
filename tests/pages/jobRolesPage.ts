@@ -1,14 +1,15 @@
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { BasePage } from "./basePage";
 
 export class JobRolesPage extends BasePage {
-	readonly heading: Locator = this.page.getByRole("heading", {
-		name: "Explore Job Roles",
-	});
-	readonly firstJobRole: Locator = this.page
-		.locator(".job-card")
-		.first()
-		.getByRole("link", { name: "View Details" });
+	readonly heading: Locator;
+	readonly firstJobRole: Locator;
+
+	constructor(page: Page) {
+		super(page);
+		this.heading = page.locator("main h1");
+		this.firstJobRole = page.locator(".job-card").first().locator(".btn");
+	}
 
 	async openFirstJobRole(): Promise<void> {
 		await this.firstJobRole.click();

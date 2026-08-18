@@ -11,28 +11,23 @@ test.describe("home page", () => {
 		homePage,
 	}) => {
 		await expect(page).toHaveTitle(homepageContent.title);
-		await expect(homePage.heading).toBeVisible();
-		await expect(
-			page.getByText(homepageContent.eyebrow, { exact: true }),
-		).toBeVisible();
+		await expect(homePage.heading).toHaveText(homepageContent.heading);
+		await expect(homePage.eyebrow).toHaveText(homepageContent.eyebrow);
 	});
 
-	test("exposes the primary navigation links", async ({ page }) => {
-		await expect(
-			page.getByRole("link", { name: "Browse Roles" }),
-		).toHaveAttribute("href", "/job-roles");
-		await expect(page.getByRole("link", { name: "Sign Up" })).toHaveAttribute(
+	test("exposes the primary navigation links", async ({ homePage }) => {
+		await expect(homePage.primaryBrowseRolesLink).toHaveAttribute(
 			"href",
-			"/register",
+			"/job-roles",
 		);
-		await expect(page.getByRole("link", { name: "Log In" })).toHaveAttribute(
-			"href",
-			"/login",
-		);
+		await expect(homePage.signUpLink).toHaveAttribute("href", "/register");
+		await expect(homePage.loginLink).toHaveAttribute("href", "/login");
 	});
 
 	test("provides a route to browse open roles", async ({ homePage }) => {
-		await expect(homePage.browseRolesLink).toBeVisible();
+		await expect(homePage.browseRolesLink).toHaveText(
+			homepageContent.browseRolesLink,
+		);
 		await expect(homePage.browseRolesLink).toHaveAttribute(
 			"href",
 			"/job-roles",
@@ -58,6 +53,7 @@ test.describe("home page", () => {
 
 	test("sends a suggested chat prompt and displays the response", async ({
 		page,
+		homePage,
 	}) => {
 		await page.route("**/api/chat", async (route) => {
 			await route.fulfill({
@@ -70,51 +66,44 @@ test.describe("home page", () => {
 			});
 		});
 
-		await page
-			.getByRole("button", { name: homepageContent.chat.launcher })
-			.click();
-		await page
-			.getByRole("button", { name: homepageContent.chat.engineeringPrompt })
-			.click();
+		await homePage.openChat();
+		await homePage.selectChatPrompt(homepageContent.chat.engineeringPrompt);
 
-		const messages = page.getByLabel("Chat messages");
-		await expect(messages).toContainText(
+		await expect(homePage.chatMessages).toContainText(
 			homepageContent.chat.engineeringMessage,
 		);
-		await expect(messages).toContainText(homepageContent.chat.response);
+		await expect(homePage.chatMessages).toContainText(
+			homepageContent.chat.response,
+		);
 	});
 
 	test("shows a friendly message when chat is unavailable", async ({
 		page,
+		homePage,
 	}) => {
 		await page.route("**/api/chat", async (route) => {
 			await route.fulfill({ status: 503, body: "Unavailable" });
 		});
 
-		await page
-			.getByRole("button", { name: homepageContent.chat.launcher })
-			.click();
-		await page
-			.getByRole("textbox", { name: "Ask about job roles" })
-			.fill("What role suits me?");
-		await page.getByRole("button", { name: "Send" }).click();
+		await homePage.openChat();
+		await homePage.sendChatMessage("What role suits me?");
 
-		await expect(page.getByLabel("Chat messages")).toContainText(
+		await expect(homePage.chatMessages).toContainText(
 			homepageContent.chat.unavailableMessage,
 		);
 	});
 
-	test("renders the footer contact and social links", async ({ page }) => {
-		const footer = page.getByRole("contentinfo", { name: "Footer" });
-
-		await expect(footer).toContainText("careers@kainos.com");
-		await expect(
-			footer.getByRole("link", { name: "LinkedIn" }),
-		).toHaveAttribute("href", "https://www.linkedin.com/company/kainos/");
-		await expect(
-			footer.getByRole("link", { name: "X / Twitter" }),
-		).toHaveAttribute("href", "https://twitter.com/KainosSoftware");
-		await expect(footer.getByRole("link", { name: "YouTube" })).toHaveAttribute(
+	test("renders the footer contact and social links", async ({ homePage }) => {
+		await expect(homePage.footer).toContainText("careers@kainos.com");
+		await expect(homePage.linkedInLink).toHaveAttribute(
+			"href",
+			"https://www.linkedin.com/company/kainos/",
+		);
+		await expect(homePage.twitterLink).toHaveAttribute(
+			"href",
+			"https://twitter.com/KainosSoftware",
+		);
+		await expect(homePage.youtubeLink).toHaveAttribute(
 			"href",
 			"https://www.youtube.com/@kainos",
 		);
