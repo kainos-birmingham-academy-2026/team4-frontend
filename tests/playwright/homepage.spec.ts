@@ -11,7 +11,9 @@ test.describe("home page", () => {
 	}) => {
 		await expect(page).toHaveTitle("Kainos Careers - Home");
 		await expect(homePage.heading).toBeVisible();
-		await expect(page.getByText("Your Kainos story starts here")).toBeVisible();
+		await expect(
+			page.getByText("Careers at Kainos", { exact: true }),
+		).toBeVisible();
 	});
 
 	test("exposes the primary navigation links", async ({ page }) => {
@@ -28,14 +30,12 @@ test.describe("home page", () => {
 		);
 	});
 
-	test("provides a job search form", async ({ homePage }) => {
-		await expect(homePage.searchInput).toHaveAttribute(
-			"placeholder",
-			"e.g. Software Engineer",
+	test("provides a route to browse open roles", async ({ homePage }) => {
+		await expect(homePage.browseRolesLink).toBeVisible();
+		await expect(homePage.browseRolesLink).toHaveAttribute(
+			"href",
+			"/job-roles",
 		);
-		await homePage.searchInput.fill("Software Engineer");
-		await expect(homePage.searchInput).toHaveValue("Software Engineer");
-		await expect(homePage.searchButton).toBeVisible();
 	});
 
 	test("opens and closes the careers assistant", async ({ homePage }) => {

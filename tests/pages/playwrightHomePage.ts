@@ -3,17 +3,12 @@ import { BasePage } from "./basePage";
 
 export class PlaywrightHomePage extends BasePage {
 	readonly heading: Locator = this.page.getByRole("heading", {
-		name: "Find your next role at Kainos",
+		name: "Build your career on work that matters",
 	});
-	readonly searchInput: Locator = this.page.getByRole("textbox", {
-		name: "Search by title, keyword, or skill",
+	readonly browseRolesLink: Locator = this.page.getByRole("link", {
+		name: "Browse open roles",
 	});
-	readonly searchButton: Locator = this.page.getByRole("button", {
-		name: "Search",
-	});
-	readonly chatLauncher: Locator = this.page.getByRole("button", {
-		name: "Ask about roles",
-	});
+	readonly chatLauncher: Locator = this.page.locator("[data-chat-toggle]");
 	readonly chatDialog: Locator = this.page.getByRole("dialog", {
 		name: "Role discovery assistant",
 	});
