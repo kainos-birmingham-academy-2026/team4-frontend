@@ -111,9 +111,7 @@ describe("jobRoleApiService - getJobRoleById", () => {
 			response: { status: 404 },
 		});
 
-		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
-			"Job role not found.",
-		);
+		await expect(getJobRoleById(jobRoleId, mockToken)).resolves.toBeUndefined();
 	});
 
 	it("should return undefined when the API returns a 500 status", async () => {

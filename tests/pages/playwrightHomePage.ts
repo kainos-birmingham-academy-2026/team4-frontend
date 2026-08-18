@@ -19,6 +19,8 @@ export class PlaywrightHomePage extends BasePage {
 	readonly linkedInLink: Locator;
 	readonly twitterLink: Locator;
 	readonly youtubeLink: Locator;
+	readonly navToggle: Locator;
+	readonly primaryNav: Locator;
 
 	constructor(page: Page) {
 		super(page);
@@ -39,6 +41,8 @@ export class PlaywrightHomePage extends BasePage {
 		this.linkedInLink = this.footer.locator('a[href*="linkedin.com"]');
 		this.twitterLink = this.footer.locator('a[href*="twitter.com"]');
 		this.youtubeLink = this.footer.locator('a[href*="youtube.com"]');
+		this.navToggle = page.locator("[data-nav-toggle]");
+		this.primaryNav = page.locator("#primary-nav");
 	}
 
 	async openChat(): Promise<void> {
@@ -56,5 +60,9 @@ export class PlaywrightHomePage extends BasePage {
 	async sendChatMessage(message: string): Promise<void> {
 		await this.chatInput.fill(message);
 		await this.sendChatButton.click();
+	}
+
+	async toggleNavigation(): Promise<void> {
+		await this.navToggle.click();
 	}
 }
