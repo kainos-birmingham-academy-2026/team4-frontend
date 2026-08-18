@@ -1,0 +1,115 @@
+import { expect, test } from "../fixtures/pageObjectsFixture";
+
+test.describe("home page", () => {
+	test.beforeEach(async ({ homePage }) => {
+		await homePage.open();
+	});
+
+	test("renders the page title and primary content", async ({
+		page,
+		homePage,
+	}) => {
+		await expect(page).toHaveTitle("Kainos Careers - Home");
+		await expect(homePage.heading).toBeVisible();
+		await expect(page.getByText("Your Kainos story starts here")).toBeVisible();
+	});
+
+	test("exposes the primary navigation links", async ({ page }) => {
+		await expect(
+			page.getByRole("link", { name: "Browse Roles" }),
+		).toHaveAttribute("href", "/job-roles");
+		await expect(page.getByRole("link", { name: "Sign Up" })).toHaveAttribute(
+			"href",
+			"/register",
+		);
+		await expect(page.getByRole("link", { name: "Log In" })).toHaveAttribute(
+			"href",
+			"/login",
+		);
+	});
+
+	test("provides a job search form", async ({ homePage }) => {
+		await expect(homePage.searchInput).toHaveAttribute(
+			"placeholder",
+			"e.g. Software Engineer",
+		);
+		await homePage.searchInput.fill("Software Engineer");
+		await expect(homePage.searchInput).toHaveValue("Software Engineer");
+		await expect(homePage.searchButton).toBeVisible();
+	});
+
+	test("opens and closes the careers assistant", async ({ homePage }) => {
+		await expect(homePage.chatDialog).toBeHidden();
+		await homePage.openChat();
+		await expect(homePage.chatDialog).toBeVisible();
+		await expect(homePage.chatLauncher).toHaveAttribute(
+			"aria-expanded",
+			"true",
+		);
+
+		await homePage.closeChat();
+		await expect(homePage.chatDialog).toBeHidden();
+		await expect(homePage.chatLauncher).toHaveAttribute(
+			"aria-expanded",
+			"false",
+		);
+	});
+
+	test("sends a suggested chat prompt and displays the response", async ({
+		page,
+	}) => {
+		await page.route("**/api/chat", async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify({
+					message: "Engineering roles could be a great fit.",
+					recommendations: [],
+				}),
+			});
+		});
+
+		await page.getByRole("button", { name: "Ask about roles" }).click();
+		await page.getByRole("button", { name: "Engineering roles" }).click();
+
+		const messages = page.getByLabel("Chat messages");
+		await expect(messages).toContainText("Show me open roles in Engineering.");
+		await expect(messages).toContainText(
+			"Engineering roles could be a great fit.",
+		);
+	});
+
+	test("shows a friendly message when chat is unavailable", async ({
+		page,
+	}) => {
+		await page.route("**/api/chat", async (route) => {
+			await route.fulfill({ status: 503, body: "Unavailable" });
+		});
+
+		await page.getByRole("button", { name: "Ask about roles" }).click();
+		await page
+			.getByRole("textbox", { name: "Ask about job roles" })
+			.fill("What role suits me?");
+		await page.getByRole("button", { name: "Send" }).click();
+
+		await expect(page.getByLabel("Chat messages")).toContainText(
+			"Sorry, I'm having trouble connecting. Please try again.",
+		);
+	});
+
+	test("renders the footer contact and social links", async ({ page }) => {
+		const footer = page.getByRole("contentinfo", { name: "Footer" });
+
+		await expect(footer).toContainText("careers@kainos.com");
+		await expect(
+			footer.getByRole("link", { name: "LinkedIn" }),
+		).toHaveAttribute("href", "https://www.linkedin.com/company/kainos/");
+		await expect(
+			footer.getByRole("link", { name: "X / Twitter" }),
+		).toHaveAttribute("href", "https://twitter.com/KainosSoftware");
+		await expect(footer.getByRole("link", { name: "YouTube" })).toHaveAttribute(
+			"href",
+			"https://www.youtube.com/@kainos",
+		);
+	});
+});
