@@ -1122,12 +1122,12 @@ tbody tr:hover {
 .filter-dropdown[open] > summary {
 	border-color: var(--kainos-navy);
 }
-.filter-dropdown[open] > summary .filter-dropdown-caret {
-	transform: rotate(180deg);
-}
 .filter-dropdown-caret {
 	font-size: 0.7rem;
 	transition: transform 0.15s ease;
+}
+.filter-dropdown[open] > summary .filter-dropdown-caret {
+	transform: rotate(180deg);
 }
 .filter-dropdown-count {
 	background: var(--kainos-navy);

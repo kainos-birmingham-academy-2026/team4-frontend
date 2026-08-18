@@ -15,7 +15,13 @@ if (!(environment in urls) || !urls[environment]) {
 	);
 }
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? urls[environment];
+
+if (!baseURL) {
+	throw new Error("PLAYWRIGHT_BASE_URL must not be empty.");
+}
+
 export const testConfiguration = {
 	environment,
-	baseURL: process.env.PLAYWRIGHT_BASE_URL ?? urls[environment]!,
+	baseURL,
 };
