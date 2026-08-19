@@ -5,6 +5,7 @@ export class JobRolesPage extends BasePage {
 	readonly heading: Locator;
 	readonly firstJobRole: Locator;
 	readonly firstJobRoleTitle: Locator;
+	readonly jobRoleTitles: Locator;
 	readonly roleNameInput: Locator;
 	readonly locationInput: Locator;
 	readonly closingDateInput: Locator;
@@ -24,6 +25,7 @@ export class JobRolesPage extends BasePage {
 			.locator(".job-card")
 			.first()
 			.locator(".job-card-title");
+		this.jobRoleTitles = page.locator(".job-card-title");
 		this.roleNameInput = page.locator("#filter-role-name");
 		this.locationInput = page.locator("#filter-location");
 		this.closingDateInput = page.locator("#filter-closing-date");
