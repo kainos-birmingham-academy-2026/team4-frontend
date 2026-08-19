@@ -39,7 +39,7 @@ export const mockJobRole = {
 	numberOfOpenPositions: 3,
 } as const;
 
-export const mockJobRoles = [
+const featuredJobRoles = [
 	mockJobRole,
 	{
 		jobRoleId: 2,
@@ -68,7 +68,35 @@ export const mockJobRoles = [
 		sharepointUrl: "https://example.com/delivery-manager",
 		numberOfOpenPositions: 0,
 	},
-] as const;
+];
+
+// Filler roles so pagination has more than five full pages to move through.
+const paginationJobRoles = Array.from({ length: 57 }, (_, index) => {
+	const jobRoleId = index + featuredJobRoles.length + 1;
+	return {
+		jobRoleId,
+		roleName: `Platform Specialist ${jobRoleId}`,
+		location: "Belfast",
+		capability: "Platforms",
+		band: "Band 2",
+		closingDate: "2026-09-30T00:00:00.000Z",
+		status: "Open",
+		description: "Keep Kainos platforms reliable for customer teams.",
+		responsibilities: ["Support platform services", "Improve automation"],
+		sharepointUrl: `https://example.com/platform-specialist-${jobRoleId}`,
+		numberOfOpenPositions: 1,
+	};
+});
+
+export const mockJobRoles = [...featuredJobRoles, ...paginationJobRoles];
+
+const jobRolePageSize = 10;
+
+export const jobRoleListContent = {
+	pageSize: jobRolePageSize,
+	totalRoles: mockJobRoles.length,
+	totalPages: Math.ceil(mockJobRoles.length / jobRolePageSize),
+} as const;
 
 export const jobRoleDetailContent = {
 	listHeading: "Explore Job Roles",

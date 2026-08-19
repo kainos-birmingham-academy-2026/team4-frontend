@@ -1,5 +1,9 @@
 import express from "express";
-import { mockJobRoles, testUser } from "../fixtures/testData.ts";
+import {
+	jobRoleListContent,
+	mockJobRoles,
+	testUser,
+} from "../fixtures/testData.ts";
 
 const PORT = Number(process.env.PORT) || 4001;
 
@@ -61,7 +65,7 @@ app.get("/api/job-roles", (req, res) => {
 			(!status.length || status.includes(role.status)) &&
 			(!closingDate || role.closingDate.slice(0, 10) <= closingDate),
 	);
-	const pageSize = 2;
+	const pageSize = jobRoleListContent.pageSize;
 	const requestedPage = Number(req.query.page) || 1;
 	const totalPages = Math.ceil(filteredRoles.length / pageSize);
 	const page = Math.min(Math.max(requestedPage, 1), Math.max(totalPages, 1));
