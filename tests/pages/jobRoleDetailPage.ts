@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { BasePage } from "./basePage";
+import { BasePage } from "./basePage.ts";
 
 export class JobRoleDetailPage extends BasePage {
 	readonly heading: Locator;
