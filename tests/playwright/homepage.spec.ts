@@ -93,6 +93,32 @@ test.describe("home page", () => {
 		);
 	});
 
+	test("sends a typed chat message and displays the response", async ({
+		page,
+		homePage,
+	}) => {
+		await page.route("**/api/chat", async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: "application/json",
+				body: JSON.stringify({
+					message: "You might enjoy a Software Engineer role.",
+					recommendations: [],
+				}),
+			});
+		});
+
+		await homePage.openChat();
+		await homePage.sendChatMessage("I enjoy building web applications.");
+
+		await expect(homePage.chatMessages).toContainText(
+			"I enjoy building web applications.",
+		);
+		await expect(homePage.chatMessages).toContainText(
+			"You might enjoy a Software Engineer role.",
+		);
+	});
+
 	test("renders the footer contact and social links", async ({ homePage }) => {
 		await expect(homePage.footer).toContainText("careers@kainos.com");
 		await expect(homePage.linkedInLink).toHaveAttribute(
@@ -107,5 +133,20 @@ test.describe("home page", () => {
 			"href",
 			"https://www.youtube.com/@kainos",
 		);
+	});
+});
+
+test.describe("home page on mobile", () => {
+	test.use({ viewport: { width: 375, height: 667 } });
+
+	test("opens and closes the primary navigation", async ({ homePage }) => {
+		await homePage.open();
+		await homePage.toggleNavigation();
+
+		await expect(homePage.navToggle).toHaveAttribute("aria-expanded", "true");
+		await expect(homePage.primaryNav).toHaveClass(/is-open/);
+
+		await homePage.toggleNavigation();
+		await expect(homePage.navToggle).toHaveAttribute("aria-expanded", "false");
 	});
 });
