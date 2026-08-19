@@ -1,7 +1,7 @@
 import express from "express";
-import { mockJobRoles, testUser } from "../fixtures/testData";
+import { mockJobRoles, testUser } from "../fixtures/testData.ts";
 
-const PORT = 4001;
+const PORT = Number(process.env.PORT) || 4001;
 
 const app = express();
 app.use(express.json());

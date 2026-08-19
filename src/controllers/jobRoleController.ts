@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import type { JobRole } from "../models/jobRole";
 import {
 	createJobRole,
 	deleteJobRole,
@@ -170,7 +171,20 @@ export class JobRoleController {
 			return;
 		}
 
-		const jobRole = await getJobRoleById(id, this.getJwtToken(req));
+		let jobRole: JobRole | undefined;
+		try {
+			jobRole = await getJobRoleById(id, this.getJwtToken(req));
+		} catch (error) {
+			if (error instanceof Error && error.message === "Job role not found.") {
+				res.status(404).render("pages/error.njk", {
+					pageTitle: "Kainos Careers - Error",
+					status: 404,
+					message: "Job role not found",
+				});
+				return;
+			}
+			throw error;
+		}
 		if (!jobRole) {
 			res.status(404).render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
