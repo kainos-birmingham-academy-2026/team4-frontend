@@ -5,9 +5,5 @@ Feature: View job role details
 
   Scenario: Candidate views the details of an advertised job role
     Given I am signed in to Kainos Careers
-    When I view the available job roles
-    And I select the first job role
-    Then I should see the selected job role title
-    And I should see the job description
-    And I should see the role location, band, and capability
-    And I should see the key responsibilities and open positions
+    When I select a job role from the available job roles
+    Then I should see the details of the selected job role

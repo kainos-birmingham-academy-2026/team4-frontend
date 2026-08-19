@@ -23,34 +23,30 @@ When("I view the available job roles", async function (this: CareersWorld) {
 	);
 });
 
-When("I select the first job role", async function (this: CareersWorld) {
-	const jobRolesPage = new JobRolesPage(this.getPage());
-	await expect(jobRolesPage.firstJobRole).toBeVisible();
-	await jobRolesPage.openFirstJobRole();
-});
-
-Then(
-	"I should see the selected job role title",
+When(
+	"I select a job role from the available job roles",
 	async function (this: CareersWorld) {
-		const page = this.getPage();
-		const detailPage = new JobRoleDetailPage(page);
-		await expect(page).toHaveURL(`/job-roles/${mockJobRole.jobRoleId}`);
-		await expect(detailPage.heading).toHaveText(mockJobRole.roleName);
+		const jobRolesPage = new JobRolesPage(this.getPage());
+		await expect(jobRolesPage.heading).toHaveText(
+			jobRoleDetailContent.listHeading,
+		);
+		await expect(jobRolesPage.firstJobRole).toBeVisible();
+		await jobRolesPage.openFirstJobRole();
 	},
 );
 
-Then("I should see the job description", async function (this: CareersWorld) {
-	const detailPage = new JobRoleDetailPage(this.getPage());
-	await expect(detailPage.aboutHeading).toHaveText(
-		jobRoleDetailContent.aboutHeading,
-	);
-	await expect(detailPage.description).toHaveText(mockJobRole.description);
-});
-
 Then(
-	"I should see the role location, band, and capability",
+	"I should see the details of the selected job role",
 	async function (this: CareersWorld) {
-		const detailPage = new JobRoleDetailPage(this.getPage());
+		const page = this.getPage();
+		const detailPage = new JobRoleDetailPage(page);
+
+		await expect(page).toHaveURL(`/job-roles/${mockJobRole.jobRoleId}`);
+		await expect(detailPage.heading).toHaveText(mockJobRole.roleName);
+		await expect(detailPage.aboutHeading).toHaveText(
+			jobRoleDetailContent.aboutHeading,
+		);
+		await expect(detailPage.description).toHaveText(mockJobRole.description);
 		await expect(
 			detailPage.metadataLabel(jobRoleDetailContent.locationLabel),
 		).toBeVisible();
@@ -65,13 +61,6 @@ Then(
 		await expect(
 			detailPage.metadataValue(mockJobRole.capability),
 		).toBeVisible();
-	},
-);
-
-Then(
-	"I should see the key responsibilities and open positions",
-	async function (this: CareersWorld) {
-		const detailPage = new JobRoleDetailPage(this.getPage());
 		await expect(detailPage.responsibilities.first()).toHaveText(
 			mockJobRole.responsibilities[0],
 		);

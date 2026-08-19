@@ -4,6 +4,7 @@ import { BasePage } from "./basePage.ts";
 export class JobRolesPage extends BasePage {
 	readonly heading: Locator;
 	readonly firstJobRole: Locator;
+	readonly firstJobRoleTitle: Locator;
 	readonly roleNameInput: Locator;
 	readonly locationInput: Locator;
 	readonly applyFiltersButton: Locator;
@@ -18,6 +19,10 @@ export class JobRolesPage extends BasePage {
 		super(page);
 		this.heading = page.locator("main h1");
 		this.firstJobRole = page.locator(".job-card").first().locator(".btn");
+		this.firstJobRoleTitle = page
+			.locator(".job-card")
+			.first()
+			.locator(".job-card-title");
 		this.roleNameInput = page.locator("#filter-role-name");
 		this.locationInput = page.locator("#filter-location");
 		this.applyFiltersButton = page.getByRole("button", {
