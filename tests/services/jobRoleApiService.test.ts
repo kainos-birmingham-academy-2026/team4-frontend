@@ -103,7 +103,7 @@ describe("jobRoleApiService - getJobRoleById", () => {
 		);
 	});
 
-	it("should return undefined when the API returns a 404 status", async () => {
+	it("should throw an error when the API returns a 404 status", async () => {
 		const jobRoleId = 999;
 		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
@@ -111,7 +111,9 @@ describe("jobRoleApiService - getJobRoleById", () => {
 			response: { status: 404 },
 		});
 
-		await expect(getJobRoleById(jobRoleId, mockToken)).resolves.toBeUndefined();
+		await expect(getJobRoleById(jobRoleId, mockToken)).rejects.toThrow(
+			"Job role not found.",
+		);
 	});
 
 	it("should return undefined when the API returns a 500 status", async () => {
