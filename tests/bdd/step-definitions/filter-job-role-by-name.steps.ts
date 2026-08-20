@@ -8,6 +8,7 @@ When(
 	async function (this: CareersWorld, roleName: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
 		await jobRolesPage.applyRoleNameFilter(roleName);
+		await jobRolesPage.expectFilterApplied("roleName", roleName);
 	},
 );
 
