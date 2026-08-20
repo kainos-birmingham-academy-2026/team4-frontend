@@ -7,7 +7,7 @@ import {
 	BeforeAll,
 	setDefaultTimeout,
 } from "@cucumber/cucumber";
-import { chromium } from "@playwright/test";
+import { chromium, request as playwrightRequest } from "@playwright/test";
 import type { CareersWorld } from "./world.ts";
 
 const frontendPort = 3002;
@@ -62,9 +62,13 @@ Before(async function (this: CareersWorld) {
 	this.browser = await chromium.launch();
 	this.context = await this.browser.newContext({ baseURL: frontendUrl });
 	this.page = await this.context.newPage();
+	this.apiRequest = await playwrightRequest.newContext({
+		baseURL: `http://127.0.0.1:${apiPort}`,
+	});
 });
 
 After(async function (this: CareersWorld) {
+	await this.apiRequest?.dispose();
 	await this.context?.close();
 	await this.browser?.close();
 });
