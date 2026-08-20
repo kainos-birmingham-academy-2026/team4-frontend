@@ -11,6 +11,7 @@ export class CareersWorld extends World {
 	browser?: Browser;
 	context?: BrowserContext;
 	page?: Page;
+	notedJobRoleTitle?: string;
 	apiRequest?: APIRequestContext;
 	apiResponse?: APIResponse;
 

@@ -41,6 +41,8 @@ function toSingleFilter(filterType: string): JobRoleSingleFilter {
 
 export class JobRolesPage extends BasePage {
 	readonly heading: Locator;
+	readonly jobCards: Locator;
+	readonly jobCardTitles: Locator;
 	readonly firstJobRole: Locator;
 	readonly firstJobRoleTitle: Locator;
 	readonly jobRoleTitles: Locator;
@@ -51,13 +53,17 @@ export class JobRolesPage extends BasePage {
 	readonly clearFiltersLink: Locator;
 	readonly noResultsMessage: Locator;
 	readonly paginationStatus: Locator;
+	readonly firstPageLink: Locator;
 	readonly nextPageLink: Locator;
 	readonly previousPageLink: Locator;
+	readonly lastPageLink: Locator;
 	readonly logoutLink: Locator;
 
 	constructor(page: Page) {
 		super(page);
 		this.heading = page.locator("main h1");
+		this.jobCards = page.locator(".job-card");
+		this.jobCardTitles = page.locator(".job-card-title");
 		this.firstJobRole = page.locator(".job-card").first().locator(".btn");
 		this.firstJobRoleTitle = page
 			.locator(".job-card")
@@ -73,8 +79,10 @@ export class JobRolesPage extends BasePage {
 		this.clearFiltersLink = page.getByRole("link", { name: "Clear filters" });
 		this.noResultsMessage = page.locator(".jobs-listing");
 		this.paginationStatus = page.locator(".pagination-status");
+		this.firstPageLink = page.getByRole("link", { name: "First" });
 		this.nextPageLink = page.getByRole("link", { name: "Next" });
 		this.previousPageLink = page.getByRole("link", { name: "Previous" });
+		this.lastPageLink = page.getByRole("link", { name: "Last" });
 		this.logoutLink = page.locator('header a[href="/logout"]');
 	}
 
@@ -301,8 +309,20 @@ export class JobRolesPage extends BasePage {
 		await this.clearFiltersLink.first().click();
 	}
 
+	async goToFirstPage(): Promise<void> {
+		await this.firstPageLink.click();
+	}
+
+	async goToPreviousPage(): Promise<void> {
+		await this.previousPageLink.click();
+	}
+
 	async goToNextPage(): Promise<void> {
 		await this.nextPageLink.click();
+	}
+
+	async goToLastPage(): Promise<void> {
+		await this.lastPageLink.click();
 	}
 
 	async logout(): Promise<void> {
