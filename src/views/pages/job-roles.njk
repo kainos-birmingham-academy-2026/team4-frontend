@@ -57,26 +57,29 @@
           <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
             {% for group in groups %}
               {% if group.options.length %}
-                <details class="filter-dropdown">
-                  <summary>
-                    {{ group.legend }}
-                    {% if group.selected.length %}<span class="filter-dropdown-count">{{ group.selected.length }}</span>{% endif %}
-                    <span class="filter-dropdown-caret">▼</span>
-                  </summary>
-                  <div class="filter-dropdown-panel">
-                    {% for option in group.options %}
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="{{ group.name }}"
-                          value="{{ option }}"
-                          {% if option in group.selected %}checked{% endif %}
-                        />
-                        {{ option }}
-                      </label>
-                    {% endfor %}
-                  </div>
-                </details>
+                <fieldset class="filter-fieldset">
+                  <legend>{{ group.legend }}</legend>
+                  <details class="filter-dropdown" aria-label="{{ group.legend }} filters">
+                    <summary>
+                      {{ group.legend }}
+                      {% if group.selected.length %}<span class="filter-dropdown-count">{{ group.selected.length }}</span>{% endif %}
+                      <span class="filter-dropdown-caret">▼</span>
+                    </summary>
+                    <div class="filter-dropdown-panel">
+                      {% for option in group.options %}
+                        <label>
+                          <input
+                            type="checkbox"
+                            name="{{ group.name }}"
+                            value="{{ option }}"
+                            {% if option in group.selected %}checked{% endif %}
+                          />
+                          {{ option }}
+                        </label>
+                      {% endfor %}
+                    </div>
+                  </details>
+                </fieldset>
               {% endif %}
             {% endfor %}
           </div>
