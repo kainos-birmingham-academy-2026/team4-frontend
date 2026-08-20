@@ -79,7 +79,7 @@ const paginationJobRoles = Array.from({ length: 57 }, (_, index) => {
 		location: "Belfast",
 		capability: "Platforms",
 		band: "Band 2",
-		closingDate: "2026-09-30T00:00:00.000Z",
+		closingDate: "2027-09-30T00:00:00.000Z",
 		status: "Open",
 		description: "Keep Kainos platforms reliable for customer teams.",
 		responsibilities: ["Support platform services", "Improve automation"],

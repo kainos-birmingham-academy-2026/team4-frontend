@@ -11,24 +11,28 @@ test.describe("Job roles API", () => {
 		).getJobRoles();
 
 		expect(response.ok()).toBe(true);
-		expect(await response.json()).toMatchObject({
-			jobs: [
-				{
+		const body = await response.json();
+		expect(body.jobs).toHaveLength(10);
+		expect(body.jobs).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
 					jobRoleId: 1,
 					roleName: "Software Engineer",
 					capability: "Engineering",
-				},
-				{
+				}),
+				expect.objectContaining({
 					jobRoleId: 2,
 					roleName: "Data Analyst",
 					capability: "Data",
-				},
-			],
+				}),
+			]),
+		);
+		expect(body).toMatchObject({
 			pagination: {
 				currentPage: 1,
-				totalPages: 2,
-				totalCount: 3,
-				pageSize: 2,
+				totalPages: 6,
+				totalCount: 60,
+				pageSize: 10,
 				hasNext: true,
 				hasPrev: false,
 			},
