@@ -98,6 +98,90 @@ test.describe("job role listing", () => {
 		);
 	});
 
+	test("filters roles by location", async ({ page }) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.applyLocationFilter("London");
+
+		await expect(page).toHaveURL(/location=London/);
+		await expect(jobRolesPage.locationInput).toHaveValue("London");
+		await expect(page.locator(".job-card-title")).toHaveText([
+			"Software Engineer",
+			"Delivery Manager",
+		]);
+	});
+
+	test("filters roles by band", async ({ page }) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.applyBandFilter("Band 3");
+
+		await expect(page).toHaveURL(/band=Band\+3/);
+		await expect(page.locator(".job-card-title")).toHaveText(["Data Analyst"]);
+	});
+
+	test("filters roles by status", async ({ page }) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.applyStatusFilter("Closed");
+
+		await expect(page).toHaveURL(/status=Closed/);
+		await expect(page.locator(".job-card-title")).toHaveText([
+			"Delivery Manager",
+		]);
+	});
+
+	test("filters roles by closing date", async ({ page }) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.applyClosingDateFilter("2026-11-30");
+
+		await expect(page).toHaveURL(/closingDate=2026-11-30/);
+		await expect(page.locator(".job-card-title")).toHaveText([
+			"Data Analyst",
+			"Delivery Manager",
+		]);
+	});
+
+	test("combines multiple filters using AND logic", async ({ page }) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.locationInput.fill("London");
+		await jobRolesPage.toggleCheckboxFilter("status", "Closed");
+		await jobRolesPage.applyFiltersButton.click();
+
+		await expect(page).toHaveURL(/location=London/);
+		await expect(page).toHaveURL(/status=Closed/);
+		await expect(page.locator(".job-card-title")).toHaveText([
+			"Delivery Manager",
+		]);
+	});
+
+	test("shows the active filter count on a checkbox dropdown", async ({
+		page,
+	}) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.toggleCheckboxFilter("band", "Band 2");
+		await jobRolesPage.toggleCheckboxFilter("band", "Band 3");
+		await jobRolesPage.applyFiltersButton.click();
+
+		await expect(jobRolesPage.filterDropdownCount("band")).toHaveText("2");
+	});
+
+	test("clear filters resets text, checkbox, and date filters", async ({
+		page,
+	}) => {
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.roleNameInput.fill("Software");
+		await jobRolesPage.locationInput.fill("London");
+		await jobRolesPage.closingDateInput.fill("2026-12-31");
+		await jobRolesPage.toggleCheckboxFilter("status", "Open");
+		await jobRolesPage.applyFiltersButton.click();
+
+		await jobRolesPage.clearFilters();
+
+		await expect(page).toHaveURL("/job-roles");
+		await expect(jobRolesPage.roleNameInput).toHaveValue("");
+		await expect(jobRolesPage.locationInput).toHaveValue("");
+		await expect(jobRolesPage.closingDateInput).toHaveValue("");
+		await expect(jobRolesPage.filterOption("status", "Open")).not.toBeChecked();
+	});
+
 	test("preserves filters while moving between result pages", async ({
 		page,
 	}) => {

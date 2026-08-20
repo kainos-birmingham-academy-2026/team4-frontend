@@ -1,8 +1,4 @@
-import {
-	type IWorldOptions,
-	setWorldConstructor,
-	World,
-} from "@cucumber/cucumber";
+import { setWorldConstructor, World } from "@cucumber/cucumber";
 import type { Browser, BrowserContext, Page } from "@playwright/test";
 
 export class CareersWorld extends World {
@@ -10,10 +6,6 @@ export class CareersWorld extends World {
 	context?: BrowserContext;
 	page?: Page;
 	notedJobRoleTitle?: string;
-
-	constructor(options: IWorldOptions) {
-		super(options);
-	}
 
 	getPage(): Page {
 		if (!this.page) {
