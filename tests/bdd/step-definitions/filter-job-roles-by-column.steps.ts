@@ -1,37 +1,13 @@
 import { Given, Then, When } from "@cucumber/cucumber";
-import { expect } from "@playwright/test";
 import { JobRolesPage } from "../../pages/jobRolesPage.ts";
 import type { CareersWorld } from "../support/world.ts";
 
 When(
-	"I filter job roles by location {string}",
-	async function (this: CareersWorld, location: string) {
+	"I filter job roles by {string} {string}",
+	async function (this: CareersWorld, filterType: string, value: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.applyLocationFilter(location);
-	},
-);
-
-When(
-	"I filter job roles by band {string}",
-	async function (this: CareersWorld, band: string) {
-		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.applyBandFilter(band);
-	},
-);
-
-When(
-	"I filter job roles by status {string}",
-	async function (this: CareersWorld, status: string) {
-		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.applyStatusFilter(status);
-	},
-);
-
-When(
-	"I filter job roles by closing date {string}",
-	async function (this: CareersWorld, closingDate: string) {
-		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.applyClosingDateFilter(closingDate);
+		await jobRolesPage.applySingleFilter(filterType, value);
+		await jobRolesPage.expectSingleFilterApplied(filterType, value);
 	},
 );
 
@@ -39,9 +15,9 @@ When(
 	"I filter job roles by location {string} and status {string}",
 	async function (this: CareersWorld, location: string, status: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.locationInput.fill(location);
-		await jobRolesPage.toggleCheckboxFilter("status", status);
-		await jobRolesPage.applyFiltersButton.click();
+		await jobRolesPage.applyFilters({ location, status });
+		await jobRolesPage.expectFilterApplied("location", location);
+		await jobRolesPage.expectCheckboxFilterApplied("status", status);
 	},
 );
 
@@ -49,9 +25,10 @@ When(
 	"I select the band filters {string} and {string}",
 	async function (this: CareersWorld, firstBand: string, secondBand: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.toggleCheckboxFilter("band", firstBand);
-		await jobRolesPage.toggleCheckboxFilter("band", secondBand);
-		await jobRolesPage.applyFiltersButton.click();
+		await jobRolesPage.applyFilters({ band: [firstBand, secondBand] });
+		await jobRolesPage.expectCheckboxFilterApplied("band", firstBand);
+		await jobRolesPage.expectCheckboxFilterApplied("band", secondBand);
+		await jobRolesPage.expectFilterCount("band", "2");
 	},
 );
 
@@ -59,35 +36,54 @@ Given(
 	"I have applied role name, location, closing date and status filters",
 	async function (this: CareersWorld) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await jobRolesPage.roleNameInput.fill("Software");
-		await jobRolesPage.locationInput.fill("London");
-		await jobRolesPage.closingDateInput.fill("2026-12-31");
-		await jobRolesPage.toggleCheckboxFilter("status", "Open");
-		await jobRolesPage.applyFiltersButton.click();
+		await jobRolesPage.applyFilters({
+			roleName: "Software",
+			location: "London",
+			closingDate: "2026-12-31",
+			status: "Open",
+		});
+		await jobRolesPage.expectFilterApplied("roleName", "Software");
+		await jobRolesPage.expectFilterApplied("location", "London");
+		await jobRolesPage.expectFilterApplied("closingDate", "2026-12-31");
+		await jobRolesPage.expectCheckboxFilterApplied("status", "Open");
 	},
 );
 
 When("I clear the job role filters", async function (this: CareersWorld) {
 	const jobRolesPage = new JobRolesPage(this.getPage());
 	await jobRolesPage.clearFilters();
+	await jobRolesPage.expectFiltersCleared();
 });
 
 Then(
 	"I should see only the {string} role",
 	async function (this: CareersWorld, roleName: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await expect(jobRolesPage.jobRoleTitles).toHaveText([roleName]);
+		await jobRolesPage.expectVisibleRoleTitles([roleName]);
 	},
 );
+
+Then(
+	"I should see the job roles {string}",
+	async function (this: CareersWorld, expectedRoles: string) {
+		const jobRolesPage = new JobRolesPage(this.getPage());
+		const roleNames = expectedRoles
+			.split(",")
+			.map((roleName) => roleName.trim());
+		await jobRolesPage.expectVisibleRoleTitles(roleNames);
+	},
+);
+
+Then("I should see no matching job roles", async function (this: CareersWorld) {
+	const jobRolesPage = new JobRolesPage(this.getPage());
+	await jobRolesPage.expectNoMatchingRoles();
+});
 
 Then(
 	"I should see the {string} and {string} roles",
 	async function (this: CareersWorld, firstRole: string, secondRole: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await expect(jobRolesPage.jobRoleTitles).toHaveText([
-			firstRole,
-			secondRole,
-		]);
+		await jobRolesPage.expectVisibleRoleTitles([firstRole, secondRole]);
 	},
 );
 
@@ -95,19 +91,14 @@ Then(
 	"the band filter count should show {string}",
 	async function (this: CareersWorld, count: string) {
 		const jobRolesPage = new JobRolesPage(this.getPage());
-		await expect(jobRolesPage.filterDropdownCount("band")).toHaveText(count);
+		await jobRolesPage.expectFilterCount("band", count);
 	},
 );
 
 Then(
 	"all job role filters should be cleared",
 	async function (this: CareersWorld) {
-		const page = this.getPage();
-		const jobRolesPage = new JobRolesPage(page);
-		await expect(page).toHaveURL("/job-roles");
-		await expect(jobRolesPage.roleNameInput).toHaveValue("");
-		await expect(jobRolesPage.locationInput).toHaveValue("");
-		await expect(jobRolesPage.closingDateInput).toHaveValue("");
-		await expect(jobRolesPage.filterOption("status", "Open")).not.toBeChecked();
+		const jobRolesPage = new JobRolesPage(this.getPage());
+		await jobRolesPage.expectFiltersCleared();
 	},
 );
