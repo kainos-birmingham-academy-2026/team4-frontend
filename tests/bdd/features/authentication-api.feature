@@ -1,28 +1,26 @@
-Feature: Authentication API
-  As a test engineer
-  I want to verify the authentication API
-  So that authentication responses are reliable for the application
+Feature: Account authentication
+  As a careers website user
+  I want to sign in and create an account
+  So that I can access the job opportunities
 
-  Scenario: User logs in with valid credentials
-    Given the authentication API is available
-    When I submit valid login credentials
-    Then the login response should be successful
-    And the response should contain an authentication token
+  Scenario: Registered user logs in successfully
+    Given I have a registered account
+    When I sign in with valid credentials
+    Then I am authenticated successfully
 
   Scenario: User cannot log in with invalid credentials
-    Given the authentication API is available
-    When I submit invalid login credentials
-    Then the login response should be unauthorized
-    And the response should contain the error "Invalid email or password"
+    Given I have a registered account
+    When I sign in with invalid credentials
+    Then I am not authenticated
+    And I am informed that my credentials are invalid
 
-  Scenario: User registers successfully
-    Given the authentication API is available
-    When I submit valid registration details
-    Then the registration response should be successful
-    And the response should contain an authentication token
+  Scenario: New user creates an account successfully
+    Given I am ready to create an account
+    When I provide valid registration details
+    Then my account is created successfully
 
-  Scenario: Existing user cannot register again
-    Given the authentication API is available
-    When I submit registration details for an existing user
-    Then the registration response should be rejected
-    And the response should contain the error "An account already exists for this email."
+  Scenario: User cannot create an account with an existing email address
+    Given I am ready to create an account
+    When I use an email address that is already registered
+    Then my account is not created
+    And I am informed that the email address is already in use

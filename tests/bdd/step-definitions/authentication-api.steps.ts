@@ -1,37 +1,46 @@
 import { Given, Then, When } from "@cucumber/cucumber";
 import { expect } from "@playwright/test";
 import { testUser } from "../../fixtures/testData.ts";
+import { JobRolesPage } from "../../pages/jobRolesPage.ts";
+import { LoginPage } from "../../pages/loginPage.ts";
 import type { CareersWorld } from "../support/world.ts";
 
-Given(
-	"the authentication API is available",
-	async function (this: CareersWorld) {
-		const response = await this.getApiRequest().get("/auth/login");
+Given("I have a registered account", async function (this: CareersWorld) {
+	const response = await this.getApiRequest().get("/auth/login");
 
-		expect(response.status()).toBe(404);
-	},
-);
+	expect(response.status()).toBe(404);
+	await new LoginPage(this.getPage()).open("/login");
+});
 
-When("I submit valid login credentials", async function (this: CareersWorld) {
+Given("I am ready to create an account", async function (this: CareersWorld) {
+	const response = await this.getApiRequest().get("/auth/register");
+
+	expect(response.status()).toBe(404);
+	await this.getPage().goto("/register");
+});
+
+When("I sign in with valid credentials", async function (this: CareersWorld) {
 	this.apiResponse = await this.getApiRequest().post("/auth/login", {
 		data: {
 			email: testUser.email,
 			password: testUser.password,
 		},
 	});
+	await new LoginPage(this.getPage()).login(testUser.email, testUser.password);
 });
 
-When("I submit invalid login credentials", async function (this: CareersWorld) {
+When("I sign in with invalid credentials", async function (this: CareersWorld) {
 	this.apiResponse = await this.getApiRequest().post("/auth/login", {
 		data: {
 			email: "invalid@example.com",
 			password: "wrong-password",
 		},
 	});
+	await new LoginPage(this.getPage()).login(testUser.email, "wrong-password");
 });
 
 When(
-	"I submit valid registration details",
+	"I provide valid registration details",
 	async function (this: CareersWorld) {
 		this.apiResponse = await this.getApiRequest().post("/auth/register", {
 			data: {
@@ -43,7 +52,7 @@ When(
 );
 
 When(
-	"I submit registration details for an existing user",
+	"I use an email address that is already registered",
 	async function (this: CareersWorld) {
 		this.apiResponse = await this.getApiRequest().post("/auth/register", {
 			data: {
@@ -55,45 +64,51 @@ When(
 	},
 );
 
-Then("the login response should be successful", function (this: CareersWorld) {
+Then("I am authenticated successfully", async function (this: CareersWorld) {
 	expect(this.apiResponse?.status()).toBe(200);
+	expect(await this.apiResponse?.json()).toMatchObject({
+		token: testUser.token,
+	});
+	await expect(this.getPage()).toHaveURL(/\/job-roles$/);
+	await expect(new JobRolesPage(this.getPage()).heading).toHaveText(
+		"Explore Job Roles",
+	);
+});
+
+Then("I am not authenticated", async function (this: CareersWorld) {
+	expect(this.apiResponse?.status()).toBe(401);
+	await expect(this.getPage()).toHaveURL(/\/login$/);
 });
 
 Then(
-	"the login response should be unauthorized",
-	function (this: CareersWorld) {
-		expect(this.apiResponse?.status()).toBe(401);
-	},
-);
-
-Then(
-	"the registration response should be successful",
-	function (this: CareersWorld) {
-		expect(this.apiResponse?.status()).toBe(200);
-	},
-);
-
-Then(
-	"the registration response should be rejected",
-	function (this: CareersWorld) {
-		expect(this.apiResponse?.status()).toBe(400);
-	},
-);
-
-Then(
-	"the response should contain an authentication token",
+	"I am informed that my credentials are invalid",
 	async function (this: CareersWorld) {
-		const body = await this.apiResponse?.json();
-
-		expect(body).toMatchObject({ token: testUser.token });
+		expect(await this.apiResponse?.json()).toEqual({
+			error: "Invalid email or password",
+		});
+		await expect(new LoginPage(this.getPage()).errorSummary).toContainText(
+			"Invalid email or password",
+		);
 	},
 );
 
-Then(
-	"the response should contain the error {string}",
-	async function (this: CareersWorld, expectedError: string) {
-		const body = await this.apiResponse?.json();
+Then("my account is created successfully", async function (this: CareersWorld) {
+	expect(this.apiResponse?.status()).toBe(200);
+	expect(await this.apiResponse?.json()).toMatchObject({
+		token: testUser.token,
+	});
+});
 
-		expect(body).toEqual({ error: expectedError });
+Then("my account is not created", function (this: CareersWorld) {
+	expect(this.apiResponse?.status()).toBe(400);
+});
+
+Then(
+	"I am informed that the email address is already in use",
+	async function (this: CareersWorld) {
+		expect(this.apiResponse?.status()).toBe(400);
+		expect(await this.apiResponse?.json()).toEqual({
+			error: "An account already exists for this email.",
+		});
 	},
 );
