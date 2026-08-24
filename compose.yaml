@@ -18,6 +18,36 @@ services:
     networks:
       - team4-network
 
+  team4-backend-migrate:
+    image: backend-migrate:latest
+    build:
+      context: ../team4-backend
+      dockerfile: .dockerfile
+      target: build
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
+    command: npx prisma migrate deploy
+    depends_on:
+      job-db:
+        condition: service_healthy
+    networks:
+      - team4-network
+
+  team4-backend-seed:
+    image: backend-seed:latest
+    build:
+      context: ../team4-backend
+      dockerfile: .dockerfile
+      target: build
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
+    command: npx prisma db seed
+    depends_on:
+      team4-backend-migrate:
+        condition: service_completed_successfully
+    networks:
+      - team4-network
+
   team4-backend:
     build:
       context: ../team4-backend
@@ -29,10 +59,10 @@ services:
     environment:
       - PORT=4000
       - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+      - JWT_SECRET=${JWT_SECRET:-dev-jwt-secret}
     depends_on:
-      job-db:
-        condition: service_healthy
+      team4-backend-seed:
+        condition: service_completed_successfully
     networks:
       - team4-network
 
@@ -47,6 +77,7 @@ services:
     environment:
       - PORT=3000
       - API_BASE_URL=http://team4-backend:4000
+      - SESSION_COOKIE_SECURE=false
     depends_on:
       team4-backend:
         condition: service_started

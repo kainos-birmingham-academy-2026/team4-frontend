@@ -8,6 +8,10 @@ import chatRouter from "./routes/chatRouter";
 import jobRoleRouter from "./routes/jobRoleRouter";
 
 const isDev = process.env.NODE_ENV !== "production";
+const useSecureSessionCookie =
+	process.env.SESSION_COOKIE_SECURE === "true" ||
+	(process.env.NODE_ENV === "production" &&
+		process.env.SESSION_COOKIE_SECURE !== "false");
 const app = express();
 const env = nunjucks.configure(path.join(__dirname, "views"), {
 	autoescape: true,
@@ -43,7 +47,7 @@ app.use(
 		saveUninitialized: false,
 		cookie: {
 			httpOnly: true,
-			secure: process.env.NODE_ENV === "production",
+			secure: useSecureSessionCookie,
 			maxAge: 1000 * 60 * 60,
 		},
 	}),

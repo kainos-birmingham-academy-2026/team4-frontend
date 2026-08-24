@@ -1,27 +1,29 @@
-FROM node:24-slim
-
-# Ensure proper SSL/TLS support for production-ready environment.
-RUN apt-get update -y \
-	&& apt-get install -y openssl ca-certificates \
-	&& update-ca-certificates \
-	&& rm -rf /var/lib/apt/lists/*
+FROM node:24-slim AS deps
 
 WORKDIR /team4-frontend
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies (skip repository hook scripts in containers).
 RUN npm ci --ignore-scripts
 
-# Copy source code
+FROM deps AS build
+
 COPY . .
+RUN npm run build \
+	&& npm prune --omit=dev
 
-# Build TypeScript
-RUN npm run build
+FROM node:24-slim AS runtime
 
-RUN chmod +x /team4-frontend/entrypoint.sh
+ENV NODE_ENV=production \
+	PORT=3000
+
+WORKDIR /team4-frontend
+
+COPY --from=build --chown=node:node /team4-frontend/node_modules ./node_modules
+COPY --from=build --chown=node:node /team4-frontend/dist ./dist
+COPY --from=build --chown=node:node /team4-frontend/public ./public
+
+USER node
 
 EXPOSE 3000
 
-ENTRYPOINT ["/team4-frontend/entrypoint.sh"]
+CMD ["node", "dist/server.js"]
