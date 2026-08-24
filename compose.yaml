@@ -18,6 +18,21 @@ services:
     networks:
       - team4-network
 
+  team4-backend-migrate:
+    image: backend-migrate:latest
+    build:
+      context: ../team4-backend
+      dockerfile: .dockerfile
+      target: build
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
+    command: npx prisma migrate deploy
+    depends_on:
+      job-db:
+        condition: service_healthy
+    networks:
+      - team4-network
+
   team4-backend:
     build:
       context: ../team4-backend
@@ -29,10 +44,9 @@ services:
     environment:
       - PORT=4000
       - DATABASE_URL=postgresql://postgres:password@job-db:5432/jobRoles
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     depends_on:
-      job-db:
-        condition: service_healthy
+      team4-backend-migrate:
+        condition: service_completed_successfully
     networks:
       - team4-network
 
