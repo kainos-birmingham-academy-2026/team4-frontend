@@ -17,8 +17,17 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    key_vault {
+      # Dev-friendly: destroy can purge a soft-deleted vault so the name can be reused.
+      purge_soft_delete_on_destroy    = true
+      recover_soft_deleted_key_vaults = true
+    }
+  }
 }
+
+# Tenant of the identity running Terraform (you locally, the OIDC app in CI).
+data "azurerm_client_config" "current" {}
 
 module "resource_group" {
   source = "./modules/resource-group"
@@ -32,5 +41,16 @@ module "resource_group" {
 moved {
   from = azurerm_resource_group.this
   to   = module.resource_group.azurerm_resource_group.this
+}
+
+# Secrets are added manually in the portal, never in code.
+module "key_vault" {
+  source = "./modules/key-vault"
+
+  name                = var.key_vault_name
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  environment         = var.environment
+  tenant_id           = data.azurerm_client_config.current.tenant_id
 }
 

@@ -20,3 +20,14 @@ variable "environment" {
     error_message = "Environment must be dev, test, or prod."
   }
 }
+
+variable "key_vault_name" {
+  description = "Globally unique Key Vault name. Must be 3-24 characters and unique across Azure."
+  type        = string
+  default     = "kv-team4-frontend-dev"
+
+  validation {
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9-]{1,22}[a-zA-Z0-9]$", var.key_vault_name))
+    error_message = "Key Vault name must be 3-24 characters, start with a letter, and contain only letters, numbers, or hyphens."
+  }
+}
