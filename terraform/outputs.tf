@@ -27,3 +27,23 @@ output "key_vault_uri" {
   description = "Key Vault URI referenced by Container App secrets."
   value       = module.key_vault.uri
 }
+
+output "managed_identity_name" {
+  description = "Name of the user-assigned managed identity."
+  value       = module.managed_identity.name
+}
+
+output "managed_identity_id" {
+  description = "Resource ID to attach to the Container App."
+  value       = module.managed_identity.id
+}
+
+output "managed_identity_client_id" {
+  description = "Client ID the Container App uses when assuming this identity."
+  value       = module.managed_identity.client_id
+}
+
+output "managed_identity_principal_id" {
+  description = "Object ID granted Key Vault and ACR access."
+  value       = module.managed_identity.principal_id
+}

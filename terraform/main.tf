@@ -54,3 +54,31 @@ module "key_vault" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
 }
 
+# Identity the Container App will use to read Key Vault secrets and pull from ACR.
+module "managed_identity" {
+  source = "./modules/managed-identity"
+
+  name                = var.managed_identity_name
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  environment         = var.environment
+}
+
+# Shared academy registry, owned outside this configuration.
+data "azurerm_container_registry" "shared" {
+  name                = var.acr_name
+  resource_group_name = var.acr_resource_group_name
+}
+
+resource "azurerm_role_assignment" "identity_acr_pull" {
+  scope                = data.azurerm_container_registry.shared.id
+  role_definition_name = "AcrPull"
+  principal_id         = module.managed_identity.principal_id
+}
+
+resource "azurerm_role_assignment" "identity_key_vault_secrets" {
+  scope                = module.key_vault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.managed_identity.principal_id
+}
+
