@@ -82,3 +82,12 @@ resource "azurerm_role_assignment" "identity_key_vault_secrets" {
   principal_id         = module.managed_identity.principal_id
 }
 
+module "container_app_environment" {
+  source = "./modules/container-app-environment"
+
+  name                = var.container_app_environment_name
+  resource_group_name = module.resource_group.name
+  location            = var.location
+  environment         = var.environment
+}
+

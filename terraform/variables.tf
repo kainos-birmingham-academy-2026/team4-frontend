@@ -49,3 +49,9 @@ variable "acr_resource_group_name" {
   type        = string
   default     = "rg-ai-academy-26"
 }
+
+variable "container_app_environment_name" {
+  description = "Name of the Container Apps environment."
+  type        = string
+  default     = "cae-team4-frontend-dev"
+}

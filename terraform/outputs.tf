@@ -47,3 +47,18 @@ output "managed_identity_principal_id" {
   description = "Object ID granted Key Vault and ACR access."
   value       = module.managed_identity.principal_id
 }
+
+output "container_app_environment_name" {
+  description = "Name of the Container Apps environment."
+  value       = module.container_app_environment.name
+}
+
+output "container_app_environment_id" {
+  description = "Resource ID of the Container Apps environment."
+  value       = module.container_app_environment.id
+}
+
+output "container_app_environment_default_domain" {
+  description = "Default domain apps in this environment are published under."
+  value       = module.container_app_environment.default_domain
+}
