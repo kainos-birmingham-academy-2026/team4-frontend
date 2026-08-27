@@ -44,12 +44,6 @@ variable "acr_name" {
   default     = "acraiacademy26"
 }
 
-variable "acr_resource_group_name" {
-  description = "Resource group that owns the shared Azure Container Registry."
-  type        = string
-  default     = "rg-ai-academy-26"
-}
-
 variable "container_app_environment_name" {
   description = "Name of the Container Apps environment."
   type        = string

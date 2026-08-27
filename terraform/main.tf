@@ -64,17 +64,8 @@ module "managed_identity" {
   environment         = var.environment
 }
 
-# Shared academy registry, owned outside this configuration.
-data "azurerm_container_registry" "shared" {
-  name                = var.acr_name
-  resource_group_name = var.acr_resource_group_name
-}
-
-resource "azurerm_role_assignment" "identity_acr_pull" {
-  scope                = data.azurerm_container_registry.shared.id
-  role_definition_name = "AcrPull"
-  principal_id         = module.managed_identity.principal_id
-}
+# The shared academy registry lives in rg-ai-academy-26, which the CI identity cannot
+# read. Its AcrPull assignment for this identity is managed manually, outside Terraform.
 
 resource "azurerm_role_assignment" "identity_key_vault_secrets" {
   scope                = module.key_vault.id
