@@ -83,6 +83,8 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_frontend_image_tag: sha-${{ github.sha }}
+      TF_VAR_api_base_url: ${{ vars.API_BASE_URL }}
     steps:
       - uses: actions/checkout@v5
 
