@@ -62,3 +62,18 @@ output "container_app_environment_default_domain" {
   description = "Default domain apps in this environment are published under."
   value       = module.container_app_environment.default_domain
 }
+
+output "frontend_container_app_name" {
+  description = "Name of the frontend Container App."
+  value       = module.frontend_container_app.name
+}
+
+output "frontend_container_app_id" {
+  description = "Resource ID of the frontend Container App."
+  value       = module.frontend_container_app.id
+}
+
+output "frontend_container_app_fqdn" {
+  description = "Public FQDN of the frontend Container App."
+  value       = module.frontend_container_app.fqdn
+}

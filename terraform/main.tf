@@ -29,6 +29,20 @@ provider "azurerm" {
 # Tenant of the identity running Terraform (you locally, the OIDC app in CI).
 data "azurerm_client_config" "current" {}
 
+module "shared_network" {
+  source = "./modules/shared-network"
+
+  resource_group_name            = var.network_resource_group_name
+  location                       = var.location
+  name                           = var.network_name
+  address_space                  = var.network_address_space
+  frontend_subnet_name           = var.frontend_subnet_name
+  frontend_subnet_address_prefix = var.frontend_subnet_address_prefix
+  backend_subnet_name            = var.backend_subnet_name
+  backend_subnet_address_prefix  = var.backend_subnet_address_prefix
+  environment                    = var.environment
+}
+
 module "resource_group" {
   source = "./modules/resource-group"
 
@@ -76,9 +90,25 @@ resource "azurerm_role_assignment" "identity_key_vault_secrets" {
 module "container_app_environment" {
   source = "./modules/container-app-environment"
 
-  name                = var.container_app_environment_name
-  resource_group_name = module.resource_group.name
-  location            = var.location
-  environment         = var.environment
+  name                     = var.container_app_environment_name
+  resource_group_name      = module.resource_group.name
+  location                 = var.location
+  infrastructure_subnet_id = module.shared_network.frontend_subnet_id
+  environment              = var.environment
+}
+
+module "frontend_container_app" {
+  source = "./modules/container-app"
+
+  name                         = var.container_app_name
+  resource_group_name          = module.resource_group.name
+  container_app_environment_id = module.container_app_environment.id
+  managed_identity_id          = module.managed_identity.id
+  registry_server              = "${var.acr_name}.azurecr.io"
+  image                        = "${var.acr_name}.azurecr.io/${var.frontend_image_name}:${var.frontend_image_tag}"
+  session_secret_id            = "${module.key_vault.uri}secrets/${var.session_secret_name}"
+  api_base_url                 = var.api_base_url
+  feature_flags_enabled        = var.feature_flags_enabled
+  environment                  = var.environment
 }
 

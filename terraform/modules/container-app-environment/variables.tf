@@ -17,3 +17,8 @@ variable "environment" {
   description = "Deployment environment used for tags."
   type        = string
 }
+
+variable "infrastructure_subnet_id" {
+  description = "Delegated subnet used for Container Apps environment infrastructure."
+  type        = string
+}
