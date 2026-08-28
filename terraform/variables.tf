@@ -92,6 +92,18 @@ variable "container_app_environment_name" {
   default     = "cae-team4-frontend-dev"
 }
 
+variable "shared_container_app_environment_name" {
+  description = "Existing Container Apps environment shared with the backend."
+  type        = string
+  default     = "cae-team4-backend-dev"
+}
+
+variable "shared_container_app_environment_resource_group_name" {
+  description = "Resource group containing the shared Container Apps environment."
+  type        = string
+  default     = "team4-backend-terraform"
+}
+
 variable "container_app_name" {
   description = "Name of the frontend Container App."
   type        = string
@@ -119,7 +131,7 @@ variable "session_secret_name" {
 variable "api_base_url" {
   description = "Backend URL used by the frontend Container App."
   type        = string
-  default     = "https://team4-backend.example.com"
+  default     = "http://ca-team4-backend-dev"
 
   validation {
     condition     = length(trimspace(var.api_base_url)) > 0
