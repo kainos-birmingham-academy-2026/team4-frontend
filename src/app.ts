@@ -40,6 +40,8 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.set("trust proxy", 1);
+
 app.use(
 	session({
 		secret: process.env.SESSION_SECRET ?? "dev-session-secret",

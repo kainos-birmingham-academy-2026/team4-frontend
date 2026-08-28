@@ -87,14 +87,9 @@ resource "azurerm_role_assignment" "identity_key_vault_secrets" {
   principal_id         = module.managed_identity.principal_id
 }
 
-module "container_app_environment" {
-  source = "./modules/container-app-environment"
-
-  name                     = var.container_app_environment_name
-  resource_group_name      = module.resource_group.name
-  location                 = var.location
-  infrastructure_subnet_id = module.shared_network.frontend_subnet_id
-  environment              = var.environment
+data "azurerm_container_app_environment" "shared" {
+  name                = var.shared_container_app_environment_name
+  resource_group_name = var.shared_container_app_environment_resource_group_name
 }
 
 module "frontend_container_app" {
@@ -102,7 +97,7 @@ module "frontend_container_app" {
 
   name                         = var.container_app_name
   resource_group_name          = module.resource_group.name
-  container_app_environment_id = module.container_app_environment.id
+  container_app_environment_id = data.azurerm_container_app_environment.shared.id
   managed_identity_id          = module.managed_identity.id
   registry_server              = "${var.acr_name}.azurecr.io"
   image                        = "${var.acr_name}.azurecr.io/${var.frontend_image_name}:${var.frontend_image_tag}"
