@@ -84,7 +84,14 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       TF_VAR_frontend_image_tag: sha-${{ github.sha }}
-      TF_VAR_api_base_url: ${{ vars.API_BASE_URL }}
+            az role assignment list \
+        --assignee "$BACKEND_OBJECT_ID" \
+        --scope "$(az group show \
+          --name team4-shared-network-dev \
+          --query id \
+          --output tsv)" \
+        --query "[].{role:roleDefinitionName,scope:scope}" \
+        --output tableapi_base_url: ${{ vars.API_BASE_URL }}
     steps:
       - uses: actions/checkout@v5
 
