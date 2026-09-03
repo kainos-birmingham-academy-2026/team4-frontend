@@ -28,3 +28,19 @@ export interface FilterOptions {
 	bands: string[];
 	statuses: string[];
 }
+
+export type JobRoleSortBy =
+	| "jobRoleId"
+	| "roleName"
+	| "location"
+	| "capability"
+	| "band"
+	| "closingDate"
+	| "status";
+
+export type JobRoleSortOrder = "asc" | "desc";
+
+export interface JobRoleOrdering {
+	sortBy?: JobRoleSortBy;
+	sortOrder?: JobRoleSortOrder;
+}

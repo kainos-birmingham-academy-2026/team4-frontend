@@ -82,6 +82,7 @@ describe("JobRoleController - getJobRoles", () => {
 			1,
 			"mock-jwt-token",
 			emptyFilters,
+			{ sortBy: undefined, sortOrder: undefined },
 		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
@@ -91,6 +92,9 @@ describe("JobRoleController - getJobRoles", () => {
 			filterOptions: mockFilterOptions,
 			filterQuery: "",
 			hasActiveFilters: false,
+			ordering: { sortBy: undefined, sortOrder: undefined },
+			sortLinks: expect.any(Object),
+			sortQuery: expect.any(Function),
 		});
 	});
 
@@ -119,6 +123,7 @@ describe("JobRoleController - getJobRoles", () => {
 			2,
 			"mock-jwt-token",
 			emptyFilters,
+			{ sortBy: undefined, sortOrder: undefined },
 		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
@@ -128,6 +133,9 @@ describe("JobRoleController - getJobRoles", () => {
 			filterOptions: mockFilterOptions,
 			filterQuery: "",
 			hasActiveFilters: false,
+			ordering: { sortBy: undefined, sortOrder: undefined },
+			sortLinks: expect.any(Object),
+			sortQuery: expect.any(Function),
 		});
 	});
 
@@ -167,6 +175,7 @@ describe("JobRoleController - getJobRoles", () => {
 			1,
 			"mock-jwt-token",
 			expectedFilters,
+			{ sortBy: undefined, sortOrder: undefined },
 		);
 		expect(mockRender).toHaveBeenCalledWith(
 			"pages/job-roles",
@@ -175,7 +184,47 @@ describe("JobRoleController - getJobRoles", () => {
 				filterQuery:
 					"&roleName=engineer&capability=Engineering&capability=Data&status=Open",
 				hasActiveFilters: true,
+				ordering: { sortBy: undefined, sortOrder: undefined },
+				sortQuery: expect.any(Function),
 			}),
+		);
+	});
+
+	it("should forward ordering and generate the next sort link", async () => {
+		const requestWithOrdering = {
+			...mockRequest,
+			query: {
+				roleName: "engineer",
+				sortBy: "roleName",
+				sortOrder: "asc",
+			},
+		} as unknown as Request;
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: [],
+			pagination: {
+				currentPage: 1,
+				totalPages: 0,
+				totalCount: 0,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+
+		await jobRoleController.getJobRoles(requestWithOrdering, mockResponse);
+
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			"mock-jwt-token",
+			expect.objectContaining({ roleName: "engineer" }),
+			{ sortBy: "roleName", sortOrder: "asc" },
+		);
+
+		const renderData = mockRender.mock.calls.at(-1)?.[1] as {
+			sortQuery: (column: string) => string;
+		};
+		expect(renderData.sortQuery("roleName")).toBe(
+			"&roleName=engineer&sortBy=roleName&sortOrder=desc",
 		);
 	});
 

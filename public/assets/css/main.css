@@ -500,6 +500,71 @@ tbody tr:hover {
 	background: var(--kainos-light);
 }
 
+/* Job Roles Ordering */
+.job-role-ordering {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	flex-wrap: wrap;
+	margin-bottom: 1.5rem;
+	padding: 0.85rem 1rem;
+	background: var(--kainos-white);
+	border: 1px solid var(--kainos-border);
+	border-radius: var(--radius);
+}
+
+.job-role-ordering > span {
+	color: var(--kainos-muted);
+	font-size: 0.9rem;
+	font-weight: 700;
+	margin-right: 0.25rem;
+}
+
+.job-role-ordering a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.45rem 0.7rem;
+	border: 1px solid var(--kainos-border);
+	border-radius: 6px;
+	background: var(--kainos-light);
+	color: var(--kainos-navy);
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition:
+		background-color 0.2s ease,
+		border-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.job-role-ordering a:hover {
+	background: var(--kainos-blue);
+	border-color: var(--kainos-blue);
+	color: var(--kainos-white);
+}
+
+.job-role-ordering a:focus-visible {
+	outline: 3px solid rgba(0, 115, 230, 0.35);
+	outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+	.job-role-ordering {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.job-role-ordering > span {
+		margin-bottom: 0.15rem;
+	}
+
+	.job-role-ordering a {
+		justify-content: space-between;
+		width: 100%;
+	}
+}
+
 /* Job Cards and Listings */
 .job-card {
 	background: var(--kainos-white);

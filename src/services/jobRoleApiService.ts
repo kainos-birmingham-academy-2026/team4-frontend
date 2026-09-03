@@ -4,6 +4,7 @@ import type { JobRole } from "../models/jobRole";
 import type {
 	FilterOptions,
 	JobRoleFilters,
+	JobRoleOrdering,
 	PaginatedResponse,
 } from "../types/jobRoleDTO";
 
@@ -14,31 +15,24 @@ function authHeaders(token: string): { Authorization: string } {
 function toRequestParams(
 	page: number,
 	filters?: JobRoleFilters,
+	ordering?: JobRoleOrdering,
 ): Record<string, string | number | string[]> {
 	const params: Record<string, string | number | string[]> = { page };
 
-	if (!filters) {
-		return params;
+	if (filters) {
+		if (filters.roleName) params.roleName = filters.roleName;
+		if (filters.location) params.location = filters.location;
+		if (filters.capability.length) params.capability = filters.capability;
+		if (filters.band.length) params.band = filters.band;
+		if (filters.status.length) params.status = filters.status;
+		if (filters.closingDate) params.closingDate = filters.closingDate;
 	}
 
-	if (filters.roleName) {
-		params.roleName = filters.roleName;
+	if (ordering?.sortBy && ordering.sortOrder) {
+		params.sortBy = ordering.sortBy;
+		params.sortOrder = ordering.sortOrder;
 	}
-	if (filters.location) {
-		params.location = filters.location;
-	}
-	if (filters.capability.length) {
-		params.capability = filters.capability;
-	}
-	if (filters.band.length) {
-		params.band = filters.band;
-	}
-	if (filters.status.length) {
-		params.status = filters.status;
-	}
-	if (filters.closingDate) {
-		params.closingDate = filters.closingDate;
-	}
+
 	return params;
 }
 
@@ -95,10 +89,11 @@ export async function getPaginatedJobRoles(
 	page: number = 1,
 	token: string,
 	filters?: JobRoleFilters,
+	ordering?: JobRoleOrdering,
 ): Promise<PaginatedResponse | undefined> {
 	try {
 		const { data } = await apiClient.get<PaginatedResponse>("/api/job-roles", {
-			params: toRequestParams(page, filters),
+			params: toRequestParams(page, filters, ordering),
 			paramsSerializer: { indexes: null }, // This ensures arrays are serialized without indices
 			headers: authHeaders(token),
 		});

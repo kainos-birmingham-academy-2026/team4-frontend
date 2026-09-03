@@ -244,6 +244,36 @@ describe("jobRoleApiService - getPaginatedJobRoles", () => {
 		});
 	});
 
+	it("should include ordering in the request", async () => {
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({
+			data: { jobs: [], pagination: {} },
+		});
+
+		await getPaginatedJobRoles(
+			1,
+			mockToken,
+			{
+				roleName: "",
+				location: "",
+				capability: [],
+				band: [],
+				status: [],
+				closingDate: "",
+			},
+			{ sortBy: "roleName", sortOrder: "desc" },
+		);
+
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles", {
+			params: {
+				page: 1,
+				sortBy: "roleName",
+				sortOrder: "desc",
+			},
+			paramsSerializer: { indexes: null },
+			headers: { Authorization: `Bearer ${mockToken}` },
+		});
+	});
+
 	it("should return paginated results for page 2", async () => {
 		const mockPaginatedResponse = {
 			jobs: [mockJobRoles[2]],
