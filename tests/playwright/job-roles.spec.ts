@@ -98,6 +98,47 @@ test.describe("job role listing", () => {
 		);
 	});
 
+	test("orders roles ascending, descending, then resets ordering", async ({
+		page,
+	}) => {
+		const jobRolesPage = new JobRolesPage(page);
+
+		await jobRolesPage.sortBy("roleName");
+		await expect(page).toHaveURL(/sortBy=roleName&sortOrder=asc/);
+		await expect(jobRolesPage.firstJobRoleTitle).toHaveText("Data Analyst");
+
+		await jobRolesPage.sortBy("roleName");
+		await expect(page).toHaveURL(/sortBy=roleName&sortOrder=desc/);
+		await expect(jobRolesPage.firstJobRoleTitle).toHaveText(
+			"Software Engineer",
+		);
+
+		await jobRolesPage.sortBy("roleName");
+		await expect(page).not.toHaveURL(/sortBy=/);
+		await expect(page).not.toHaveURL(/sortOrder=/);
+		await expect(jobRolesPage.firstJobRoleTitle).toHaveText(
+			"Software Engineer",
+		);
+	});
+
+	test("shows a clickable ordering link for every displayed role field", async ({
+		page,
+	}) => {
+		const jobRolesPage = new JobRolesPage(page);
+		const sortableColumns = [
+			"roleName",
+			"location",
+			"capability",
+			"band",
+			"closingDate",
+			"status",
+		] as const;
+
+		for (const column of sortableColumns) {
+			await expect(jobRolesPage.sortLink(column)).toBeVisible();
+		}
+	});
+
 	test("filters roles by location", async ({ page }) => {
 		const jobRolesPage = new JobRolesPage(page);
 		await jobRolesPage.applyLocationFilter("London");

@@ -17,6 +17,14 @@ type JobRoleSingleFilter =
 	| "band"
 	| "status";
 
+type JobRoleSortColumn =
+	| "roleName"
+	| "location"
+	| "capability"
+	| "band"
+	| "closingDate"
+	| "status";
+
 const filterLabels = {
 	roleName: "role name",
 	location: "location",
@@ -25,6 +33,15 @@ const filterLabels = {
 	band: "band",
 	status: "status",
 } as const;
+
+const sortLabels: Record<JobRoleSortColumn, string> = {
+	roleName: "Role name",
+	location: "Location",
+	capability: "Capability",
+	band: "Band",
+	closingDate: "Closing date",
+	status: "Status",
+};
 
 function toSingleFilter(filterType: string): JobRoleSingleFilter {
 	switch (filterType.toLowerCase()) {
@@ -188,6 +205,31 @@ export class JobRolesPage extends BasePage {
 			this.noResultsMessage,
 			"Expected an empty state message when no job roles match the applied filters",
 		).toContainText("No job roles match your filters.");
+	}
+
+	sortLink(column: JobRoleSortColumn): Locator {
+		return this.page
+			.locator(".job-role-ordering a")
+			.filter({ hasText: sortLabels[column] })
+			.first();
+	}
+
+	async sortBy(column: JobRoleSortColumn): Promise<void> {
+		await this.sortLink(column).click();
+	}
+
+	async expectSortApplied(
+		column: JobRoleSortColumn,
+		order: "asc" | "desc",
+	): Promise<void> {
+		await expect(this.page).toHaveURL(
+			new RegExp(`sortBy=${column}&sortOrder=${order}`),
+		);
+	}
+
+	async expectNoSortApplied(): Promise<void> {
+		await expect(this.page).not.toHaveURL(/sortBy=/);
+		await expect(this.page).not.toHaveURL(/sortOrder=/);
 	}
 
 	async expectFiltersCleared(): Promise<void> {

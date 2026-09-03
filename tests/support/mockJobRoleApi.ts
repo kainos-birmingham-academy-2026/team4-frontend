@@ -65,18 +65,41 @@ app.get("/api/job-roles", (req, res) => {
 			(!status.length || status.includes(role.status)) &&
 			(!closingDate || role.closingDate.slice(0, 10) <= closingDate),
 	);
+	const sortBy = String(req.query.sortBy ?? "");
+	const sortOrder = String(req.query.sortOrder ?? "");
+	const sortableColumns = [
+		"roleName",
+		"location",
+		"capability",
+		"band",
+		"closingDate",
+		"status",
+	] as const;
+	const orderedRoles = [...filteredRoles];
+	if (
+		sortableColumns.includes(sortBy as (typeof sortableColumns)[number]) &&
+		(sortOrder === "asc" || sortOrder === "desc")
+	) {
+		orderedRoles.sort((left, right) => {
+			const column = sortBy as (typeof sortableColumns)[number];
+			const comparison = String(left[column]).localeCompare(
+				String(right[column]),
+			);
+			return sortOrder === "asc" ? comparison : -comparison;
+		});
+	}
 	const pageSize = jobRoleListContent.pageSize;
 	const requestedPage = Number(req.query.page) || 1;
-	const totalPages = Math.ceil(filteredRoles.length / pageSize);
+	const totalPages = Math.ceil(orderedRoles.length / pageSize);
 	const page = Math.min(Math.max(requestedPage, 1), Math.max(totalPages, 1));
-	const jobs = filteredRoles.slice((page - 1) * pageSize, page * pageSize);
+	const jobs = orderedRoles.slice((page - 1) * pageSize, page * pageSize);
 
 	res.json({
 		jobs,
 		pagination: {
 			currentPage: page,
 			totalPages,
-			totalCount: filteredRoles.length,
+			totalCount: orderedRoles.length,
 			pageSize,
 			hasNext: page < totalPages,
 			hasPrev: page > 1,

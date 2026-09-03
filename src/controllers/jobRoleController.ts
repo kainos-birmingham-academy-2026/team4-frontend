@@ -9,7 +9,13 @@ import {
 	getPaginatedJobRoles,
 	updateJobRole,
 } from "../services/jobRoleApiService";
-import type { FilterOptions, JobRoleFilters } from "../types/jobRoleDTO";
+import type {
+	FilterOptions,
+	JobRoleFilters,
+	JobRoleOrdering,
+	JobRoleSortBy,
+	JobRoleSortOrder,
+} from "../types/jobRoleDTO";
 
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
 	capabilities: [],
@@ -31,6 +37,37 @@ function toStringArray(value: unknown): string[] {
 	return [];
 }
 
+function extractOrdering(query: Request["query"]): JobRoleOrdering {
+	const validSortColumns: JobRoleSortBy[] = [
+		"jobRoleId",
+		"roleName",
+		"location",
+		"capability",
+		"band",
+		"closingDate",
+		"status",
+	];
+
+	const sortBy = query.sortBy as JobRoleSortBy;
+	const sortOrder = query.sortOrder as JobRoleSortOrder;
+
+	return {
+		sortBy: validSortColumns.includes(sortBy) ? sortBy : undefined,
+		sortOrder:
+			sortOrder === "asc" || sortOrder === "desc" ? sortOrder : undefined,
+	};
+}
+
+function getNextSortOrder(
+	currentSortBy: JobRoleSortBy | undefined,
+	currentSortOrder: JobRoleSortOrder | undefined,
+	column: JobRoleSortBy,
+): JobRoleSortOrder | undefined {
+	if (currentSortBy !== column) return "asc";
+	if (currentSortOrder === "asc") return "desc";
+	return undefined;
+}
+
 export function extractFilters(query: Request["query"]): JobRoleFilters {
 	return {
 		roleName: toText(query.roleName),
@@ -42,7 +79,10 @@ export function extractFilters(query: Request["query"]): JobRoleFilters {
 	};
 }
 
-export function buildFilterQuery(filters: JobRoleFilters): string {
+export function buildFilterQuery(
+	filters: JobRoleFilters,
+	ordering: JobRoleOrdering,
+): string {
 	const params = new URLSearchParams();
 
 	if (filters.roleName) {
@@ -62,6 +102,10 @@ export function buildFilterQuery(filters: JobRoleFilters): string {
 	}
 	if (filters.closingDate) {
 		params.append("closingDate", filters.closingDate);
+	}
+	if (ordering.sortBy && ordering.sortOrder) {
+		params.append("sortBy", ordering.sortBy);
+		params.append("sortOrder", ordering.sortOrder);
 	}
 
 	const query = params.toString();
@@ -92,7 +136,46 @@ export class JobRoleController {
 	async getJobRoles(req: Request, res: Response): Promise<void> {
 		const page = parseInt(req.query.page as string, 10) || 1;
 		const filters = extractFilters(req.query);
-		const filterQuery = buildFilterQuery(filters);
+		const ordering = extractOrdering(req.query);
+		const filterQuery = buildFilterQuery(filters, ordering);
+
+		const sortLinks = {
+			roleName: getNextSortOrder(
+				ordering.sortBy,
+				ordering.sortOrder,
+				"roleName",
+			),
+			location: getNextSortOrder(
+				ordering.sortBy,
+				ordering.sortOrder,
+				"location",
+			),
+			capability: getNextSortOrder(
+				ordering.sortBy,
+				ordering.sortOrder,
+				"capability",
+			),
+			band: getNextSortOrder(ordering.sortBy, ordering.sortOrder, "band"),
+			closingDate: getNextSortOrder(
+				ordering.sortBy,
+				ordering.sortOrder,
+				"closingDate",
+			),
+			status: getNextSortOrder(ordering.sortBy, ordering.sortOrder, "status"),
+		};
+
+		const sortQuery = (column: JobRoleSortBy): string => {
+			const nextSortOrder = getNextSortOrder(
+				ordering.sortBy,
+				ordering.sortOrder,
+				column,
+			);
+
+			return buildFilterQuery(filters, {
+				sortBy: nextSortOrder ? column : undefined,
+				sortOrder: nextSortOrder,
+			});
+		};
 
 		let filterOptions = EMPTY_FILTER_OPTIONS;
 		try {
@@ -107,7 +190,9 @@ export class JobRoleController {
 				page,
 				this.getJwtToken(req),
 				filters,
+				ordering,
 			);
+
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
 				jobs: data?.jobs || [],
@@ -123,6 +208,9 @@ export class JobRoleController {
 				filterOptions,
 				filterQuery,
 				hasActiveFilters: filterQuery.length > 0,
+				ordering,
+				sortLinks,
+				sortQuery,
 			});
 		} catch (_error) {
 			// If fetching paginated job roles fails, fallback to fetching all job roles

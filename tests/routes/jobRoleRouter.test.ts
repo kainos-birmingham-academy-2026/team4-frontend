@@ -90,12 +90,40 @@ describe("GET /job-roles", () => {
 				roleName: "Analyst",
 				capability: ["Data"],
 			}),
+			{ sortBy: undefined, sortOrder: undefined },
 		);
 		expect(response.text).toContain(
 			'<h3 class="job-card-title">Data Analyst</h3>',
 		);
 		expect(response.text).not.toContain(
 			'<h3 class="job-card-title">Software Engineer</h3>',
+		);
+		expect(response.text).toContain("📊 Band 1");
+	});
+
+	it("should forward ordering query params to the API", async () => {
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: mockJobRoles.length,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+
+		const response = await request(app).get(
+			"/job-roles?sortBy=roleName&sortOrder=desc",
+		);
+
+		expect(response.status).toBe(200);
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			expect.any(String),
+			expect.any(Object),
+			{ sortBy: "roleName", sortOrder: "desc" },
 		);
 	});
 });

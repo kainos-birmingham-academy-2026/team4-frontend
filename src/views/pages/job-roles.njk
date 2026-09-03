@@ -113,6 +113,51 @@
         </p>
       </div>
 
+      <div class="job-role-ordering" aria-label="Order job roles">
+        <span>Order by:</span>
+
+        <a href="/job-roles?page=1{{ sortQuery('roleName') }}">
+          Role name
+          {% if ordering.sortBy == "roleName" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+
+        <a href="/job-roles?page=1{{ sortQuery('location') }}">
+          Location
+          {% if ordering.sortBy == "location" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+
+        <a href="/job-roles?page=1{{ sortQuery('capability') }}">
+          Capability
+          {% if ordering.sortBy == "capability" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+
+        <a href="/job-roles?page=1{{ sortQuery('band') }}">
+          Band
+          {% if ordering.sortBy == "band" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+
+        <a href="/job-roles?page=1{{ sortQuery('closingDate') }}">
+          Closing date
+          {% if ordering.sortBy == "closingDate" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+
+        <a href="/job-roles?page=1{{ sortQuery('status') }}">
+          Status
+          {% if ordering.sortBy == "status" %}
+            {% if ordering.sortOrder == "asc" %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+      </div>
 
       <div class="jobs-listing">
         {% for job in jobs %}
@@ -132,6 +177,7 @@
             <div class="job-card-meta">
               <span class="job-badge location">📍 {{ job.location }}</span>
               <span class="job-badge">💪{{ job.capability }}</span>
+              <span class="job-badge">📊 {{ job.band }}</span>
               {% if job.status == "Open" %} <span class="job-badge">Closes on {{ job.closingDate | formatDate }}</span> {% endif %}
             </div>
 
