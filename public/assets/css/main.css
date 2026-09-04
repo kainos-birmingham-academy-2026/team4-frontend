@@ -645,6 +645,36 @@ tbody tr:hover {
 	border: 1px solid rgba(255, 77, 77, 0.5);
 }
 
+.job-status-badge.in-progress {
+	background: rgba(0, 115, 230, 0.15);
+	color: var(--kainos-navy);
+	border: 1px solid rgba(0, 115, 230, 0.5);
+}
+
+.applied-banner {
+	background: rgba(92, 192, 137, 0.15);
+	border: 1px solid rgba(92, 192, 137, 0.5);
+	color: var(--kainos-navy);
+	padding: 1rem 1.5rem;
+	border-radius: 8px;
+	margin-bottom: 1.5rem;
+	font-weight: 600;
+	animation: applied-banner-fade-out 4s ease-in-out forwards;
+}
+
+@keyframes applied-banner-fade-out {
+	0% {
+		opacity: 1;
+	}
+	70% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
 .job-card-meta {
 	display: flex;
 	gap: 1rem;

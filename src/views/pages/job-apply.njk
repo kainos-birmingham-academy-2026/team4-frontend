@@ -1,0 +1,47 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="container">
+      <a href="/job-roles/{{ job.jobRoleId }}" class="breadcrumb-link">← Back to {{ job.roleName }}</a>
+
+      <div style="max-width: 600px; margin: 0 auto;">
+        <div class="page-header">
+          <h1>Apply for {{ job.roleName }}</h1>
+          <p>Register your interest in this role at Kainos.</p>
+        </div>
+
+        <div class="form-card">
+          {% if errorMessage %}
+            <div class="form-error-summary" role="alert" aria-live="polite">
+              <p>{{ errorMessage }}</p>
+            </div>
+          {% endif %}
+
+          <form action="/job-roles/{{ job.jobRoleId }}/apply" method="post" novalidate>
+            <div class="form-group {% if errorMessage %}form-group-error{% endif %}">
+              <label for="message">Application Message</label>
+              <p class="form-hint" id="message-hint">Tell us why you are interested in this role.</p>
+              <textarea
+                id="message"
+                name="message"
+                rows="8"
+                required
+                placeholder="Share why you are interested in this role and what makes you a good fit."
+                aria-describedby="message-hint{% if errorMessage %} message-error{% endif %}"
+                {% if errorMessage %}aria-invalid="true"{% endif %}
+              >{{ formValues.message }}</textarea>
+              {% if errorMessage %}
+                <p class="form-error-text" id="message-error">{{ errorMessage }}</p>
+              {% endif %}
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn">Submit Application</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

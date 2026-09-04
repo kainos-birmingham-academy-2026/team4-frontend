@@ -3,16 +3,23 @@
 {% block content %}
   <section class="page-section">
     <div class="container">
+      {% if applied %}
+      <div class="applied-banner" role="status">
+        ✅ Your application has been submitted and is now in progress.
+      </div>
+      {% endif %}
       <a href="/job-roles" class="breadcrumb-link">← Back to Job Roles</a>
 
       <div class="job-detail-header">
         <div>
           <h1 class="job-detail-title">{{ job.roleName }}</h1>
         </div>
-        {% if job.status == "Open" %}
-        <span class="job-status-badge open">{{ job.status }}</span>
+        {% if displayStatus == "Open" %}
+        <span class="job-status-badge open">{{ displayStatus }}</span>
+        {% elif displayStatus == "In Progress" %}
+        <span class="job-status-badge in-progress">{{ displayStatus }}</span>
         {% else %}
-        <span class="job-status-badge closed">{{ job.status }}</span>
+        <span class="job-status-badge closed">{{ displayStatus }}</span>
         {% endif %}
       </div>
 
@@ -60,10 +67,13 @@
           </section>
 
         <aside class="job-detail-sidebar">
-          {% if job.status == "Open" %}
+          {% if job.status == "Open" and job.numberOfOpenPositions > 0 %}
           <div class="sidebar-card">
             <h3>Open Positions</h3>
             <p>We have {{ job.numberOfOpenPositions }} open positions for this role.</p>
+            {% if isApplicant and not applied %}
+            <a href="/job-roles/{{ job.jobRoleId }}/apply" class="btn" style="width: 100%; display: block; text-align: center;">Apply Now</a>
+            {% endif %}
           </div>
           {% endif %}
 
