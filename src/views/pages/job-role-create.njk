@@ -4,15 +4,15 @@
 <section class="page-section">
   <div class="container">
     <div class="page-header">
-      <h1>Add New Job Role</h1>
-      <p>Create a role for an existing capability and band.</p>
+      <h1>{% if isEdit %}Edit Job Role{% else %}Add New Job Role{% endif %}</h1>
+      <p>{% if isEdit %}Update the role information below.{% else %}Create a role for an existing capability and band.{% endif %}</p>
     </div>
 
     {% if errors.general %}
       <p class="form-error" role="alert">{{ errors.general }}</p>
     {% endif %}
 
-    <form method="post" action="/job-roles" class="form-card">
+    <form method="post" action="{% if isEdit %}/job-roles/{{ formActionId }}{% else %}/job-roles{% endif %}" class="form-card">
       <div class="form-group">
         <label for="roleName">Job role name</label>
         <input class="form-control" id="roleName" name="roleName" type="text" value="{{ formValues.roleName }}" required />
@@ -102,8 +102,21 @@
         {% if errors.bandId %}<p class="form-error">{{ errors.bandId }}</p>{% endif %}
       </div>
 
+      {% if isEdit %}
+      <div class="form-group">
+        <label for="statusId">Status</label>
+        <select id="statusId" name="statusId" required>
+          <option value="">Select a status</option>
+          {% for status in options.statuses %}
+            <option value="{{ status.id }}" {% if formValues.statusId == status.id | string %}selected{% endif %}>{{ status.name }}</option>
+          {% endfor %}
+        </select>
+        {% if errors.statusId %}<p class="form-error">{{ errors.statusId }}</p>{% endif %}
+      </div>
+      {% endif %}
+
       <div class="form-group form-actions">
-        <button type="submit">Create job role</button>
+        <button type="submit">{% if isEdit %}Save changes{% else %}Create job role{% endif %}</button>
         <a href="/job-roles" class="btn btn-secondary">Cancel</a>
       </div>
     </form>

@@ -4,8 +4,11 @@ export class JobRole {
 	private _location: string;
 	private _capability: string;
 	private _band: string;
-	private _closingDate: Date;
+	private _closingDate: Date | null;
 	private _status: string;
+	public readonly capabilityId?: number;
+	public readonly bandId?: number;
+	public readonly statusId?: number;
 
 	constructor(
 		jobRoleId: number,
@@ -13,8 +16,11 @@ export class JobRole {
 		location: string,
 		capability: string,
 		band: string,
-		closingDate: Date,
+		closingDate: Date | null,
 		status: string,
+		capabilityId?: number,
+		bandId?: number,
+		statusId?: number,
 	) {
 		this._jobRoleId = jobRoleId;
 		this._roleName = roleName;
@@ -23,6 +29,9 @@ export class JobRole {
 		this._band = band;
 		this._closingDate = closingDate;
 		this._status = status;
+		this.capabilityId = capabilityId;
+		this.bandId = bandId;
+		this.statusId = statusId;
 	}
 
 	public get id(): number {
@@ -45,7 +54,7 @@ export class JobRole {
 		return this._band;
 	}
 
-	public get closingDate(): Date {
+	public get closingDate(): Date | null {
 		return this._closingDate;
 	}
 
@@ -72,8 +81,22 @@ export class JobRoleDetail extends JobRole {
 		responsibilities: string[],
 		sharepointUrl: string,
 		numberOfOpenPositions: number,
+		capabilityId?: number,
+		bandId?: number,
+		statusId?: number,
 	) {
-		super(jobRoleId, roleName, location, capability, band, closingDate, status);
+		super(
+			jobRoleId,
+			roleName,
+			location,
+			capability,
+			band,
+			closingDate,
+			status,
+			capabilityId,
+			bandId,
+			statusId,
+		);
 		this._description = description;
 		this._responsibilities = responsibilities;
 		this._sharepointUrl = sharepointUrl;

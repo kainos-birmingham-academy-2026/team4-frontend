@@ -488,21 +488,37 @@ describe("JobRoleController - create", () => {
 });
 
 describe("JobRoleController - update", () => {
+	const validUpdateForm = {
+		roleName: "Updated Role",
+		description: "Updated description",
+		sharepointUrl: "https://sharepoint.example.com/job-role",
+		responsibilities: "Write code\nReview code",
+		numberOfOpenPositions: "2",
+		location: "Belfast",
+		closingDate: "2026-12-31",
+		capabilityId: "1",
+		bandId: "2",
+		statusId: "3",
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockRequest.params.id = "1";
+		mockRequest.body = validUpdateForm;
 	});
 
 	it("should call updateJobRole and handle success", async () => {
-		const mockJobRoleData = { roleName: "Updated Role" };
-		mockRequest.params.id = "1";
-		mockRequest.body = mockJobRoleData;
 		vi.mocked(updateJobRole).mockResolvedValue(mockJobRole1);
 
 		await jobRoleController.update(mockRequest, mockResponse);
 
 		expect(updateJobRole).toHaveBeenCalledWith(
 			1,
-			mockJobRoleData,
+			expect.objectContaining({
+				roleName: "Updated Role",
+				statusId: 3,
+				responsibilities: ["Write code", "Review code"],
+			}),
 			"mock-jwt-token",
 		);
 	});

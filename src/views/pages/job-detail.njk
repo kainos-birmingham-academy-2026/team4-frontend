@@ -16,6 +16,10 @@
         {% endif %}
       </div>
 
+      {% if isAdmin %}
+      <p><a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn">Edit this role</a></p>
+      {% endif %}
+
       <div class="job-detail-meta">
         <div class="meta-item">
           <span class="meta-label">📍 Location</span>

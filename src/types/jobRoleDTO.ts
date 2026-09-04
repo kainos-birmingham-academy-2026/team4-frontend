@@ -53,6 +53,7 @@ export interface JobRoleOption {
 export interface CreateJobRoleOptions {
 	capabilities: JobRoleOption[];
 	bands: JobRoleOption[];
+	statuses?: JobRoleOption[];
 }
 
 export interface CreateJobRoleInput {
@@ -65,4 +66,8 @@ export interface CreateJobRoleInput {
 	closingDate: string;
 	capabilityId: number;
 	bandId: number;
+}
+
+export interface UpdateJobRoleInput extends CreateJobRoleInput {
+	statusId: number;
 }

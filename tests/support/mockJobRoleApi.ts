@@ -7,6 +7,7 @@ import {
 } from "../fixtures/testData.ts";
 
 const PORT = Number(process.env.PORT) || 4001;
+let lastUpdate: { id: number; body: Record<string, unknown> } | null = null;
 
 const app = express();
 app.use(express.json());
@@ -54,6 +55,10 @@ app.get("/api/job-roles/create-options", (_req, res) => {
 		bands: [
 			{ id: 1, name: "Band 2" },
 			{ id: 2, name: "Band 3" },
+		],
+		statuses: [
+			{ id: 1, name: "Open" },
+			{ id: 2, name: "Closed" },
 		],
 	});
 });
@@ -144,6 +149,29 @@ app.get("/api/job-roles/:id", (req, res) => {
 	}
 
 	res.json(role);
+});
+
+app.put("/api/job-roles/:id", (req, res) => {
+	const role = mockJobRoles.find(
+		(candidate) => candidate.jobRoleId === Number(req.params.id),
+	);
+	if (!role) {
+		res.status(404).json({ error: "Job role not found" });
+		return;
+	}
+	lastUpdate = { id: Number(req.params.id), body: req.body };
+
+	res.json({
+		...role,
+		...req.body,
+		capability: req.body.capabilityId === 2 ? "Data" : role.capability,
+		band: req.body.bandId === 2 ? "Band 3" : role.band,
+		status: req.body.statusId === 2 ? "Closed" : role.status,
+	});
+});
+
+app.get("/__test__/last-update", (_req, res) => {
+	res.json(lastUpdate);
 });
 
 app.listen(PORT, "127.0.0.1", () => {

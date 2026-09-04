@@ -195,6 +195,7 @@
 
             <div style="margin-top: 1rem;">
               <a href="/job-roles/{{ job.jobRoleId }}" class="btn">View Details</a>
+              {% if isAdmin %}<a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn btn-secondary">Edit</a>{% endif %}
             </div>
           </div>
         {% else %}
