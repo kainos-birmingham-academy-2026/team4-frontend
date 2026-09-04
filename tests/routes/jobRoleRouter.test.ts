@@ -2,12 +2,14 @@ import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
 import {
+	getCreateJobRoleOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
 } from "../../src/services/jobRoleApiService";
 import { mockJobRoles } from "../mockJobRoles";
 
 vi.mock("../../src/services/jobRoleApiService", () => ({
+	getCreateJobRoleOptions: vi.fn(),
 	getPaginatedJobRoles: vi.fn(),
 	getJobRoleById: vi.fn(),
 }));
@@ -125,6 +127,44 @@ describe("GET /job-roles", () => {
 			expect.any(Object),
 			{ sortBy: "roleName", sortOrder: "desc" },
 		);
+	});
+
+	it("should show a success message after creating a job role", async () => {
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: mockJobRoles.length,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+
+		const response = await request(app).get("/job-roles?created=1");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Job role successfully created.");
+		expect(response.text).toContain('role="status"');
+	});
+});
+
+describe("GET /job-roles/new", () => {
+	it("renders the add-role form instead of treating new as an ID", async () => {
+		vi.mocked(getCreateJobRoleOptions).mockResolvedValue({
+			capabilities: [{ id: 1, name: "Engineering" }],
+			bands: [{ id: 2, name: "Trainee" }],
+		});
+
+		const response = await request(app).get("/job-roles/new");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain(
+			"<title>Kainos Careers - Add Job Role</title>",
+		);
+		expect(response.text).toContain('name="capabilityId"');
+		expect(response.text).toContain('name="bandId"');
 	});
 });
 

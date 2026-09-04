@@ -18,7 +18,15 @@ export const homepageContent = {
 export const testUser = {
 	email: "tester@example.com",
 	password: "Password123!",
-	token: "e2e-test-token",
+	token: "eyJhbGciOiJub25lIn0.eyJyb2xlIjoiVVNFUiJ9.",
+	role: "USER",
+} as const;
+
+export const adminUser = {
+	email: "admin@example.com",
+	password: "AdminPassword123!",
+	token: "eyJhbGciOiJub25lIn0.eyJyb2xlIjoiQURNSU4ifQ.",
+	role: "ADMIN",
 } as const;
 
 export const mockJobRole = {

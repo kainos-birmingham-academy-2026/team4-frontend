@@ -4,6 +4,7 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getCreateJobRoleOptions,
 	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
@@ -112,6 +113,67 @@ export function buildFilterQuery(
 	return query ? `&${query}` : "";
 }
 
+function getCreateFormValues(body: Record<string, unknown>) {
+	return {
+		roleName: String(body.roleName ?? ""),
+		description: String(body.description ?? ""),
+		sharepointUrl: String(body.sharepointUrl ?? ""),
+		responsibilities: String(body.responsibilities ?? ""),
+		numberOfOpenPositions: String(body.numberOfOpenPositions ?? ""),
+		location: String(body.location ?? ""),
+		closingDate: String(body.closingDate ?? ""),
+		capabilityId: String(body.capabilityId ?? ""),
+		bandId: String(body.bandId ?? ""),
+	};
+}
+
+function validateCreateForm(
+	values: ReturnType<typeof getCreateFormValues>,
+): Record<string, string> {
+	const errors: Record<string, string> = {};
+
+	if (!values.roleName.trim()) {
+		errors.roleName = "Enter a job role name.";
+	}
+
+	if (!values.description.trim()) {
+		errors.description = "Enter a job specification summary.";
+	}
+
+	if (!values.sharepointUrl.trim()) {
+		errors.sharepointUrl = "Enter a SharePoint link.";
+	} else if (!/^https?:\/\/\S+$/i.test(values.sharepointUrl)) {
+		errors.sharepointUrl = "Enter a valid SharePoint link.";
+	}
+
+	if (!values.responsibilities.trim()) {
+		errors.responsibilities = "Enter at least one responsibility.";
+	}
+
+	if (!values.location.trim()) {
+		errors.location = "Enter a location.";
+	}
+
+	const openPositions = Number(values.numberOfOpenPositions);
+	if (!Number.isInteger(openPositions) || openPositions < 0) {
+		errors.numberOfOpenPositions = "Enter a whole number of open positions.";
+	}
+
+	if (!values.closingDate) {
+		errors.closingDate = "Select a closing date.";
+	}
+
+	if (!values.capabilityId) {
+		errors.capabilityId = "Select a capability.";
+	}
+
+	if (!values.bandId) {
+		errors.bandId = "Select a band.";
+	}
+
+	return errors;
+}
+
 export class JobRoleController {
 	private getJwtToken(req: Request): string {
 		return req.session.jwtToken ?? "";
@@ -135,6 +197,8 @@ export class JobRoleController {
 
 	async getJobRoles(req: Request, res: Response): Promise<void> {
 		const page = parseInt(req.query.page as string, 10) || 1;
+		const successMessage =
+			req.query.created === "1" ? "Job role successfully created." : undefined;
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
 		const filterQuery = buildFilterQuery(filters, ordering);
@@ -195,6 +259,7 @@ export class JobRoleController {
 
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
+				...(successMessage ? { successMessage } : {}),
 				jobs: data?.jobs || [],
 				pagination: data?.pagination || {
 					currentPage: 1,
@@ -289,24 +354,92 @@ export class JobRoleController {
 	}
 
 	async create(req: Request, res: Response): Promise<void> {
-		//Placeholder for creating a new job role
+		const formValues = getCreateFormValues(req.body);
+		const errors = validateCreateForm(formValues);
+
+		if (Object.keys(errors).length > 0) {
+			const options = await getCreateJobRoleOptions(this.getJwtToken(req));
+
+			res.status(400).render("pages/job-role-create.njk", {
+				pageTitle: "Kainos Careers - Add Job Role",
+				options,
+				formValues,
+				errors,
+			});
+			return;
+		}
+
 		try {
-			await createJobRole(req.body, this.getJwtToken(req));
+			await createJobRole(
+				{
+					roleName: formValues.roleName.trim(),
+					description: formValues.description.trim(),
+					sharepointUrl: formValues.sharepointUrl.trim(),
+					responsibilities: formValues.responsibilities
+						.split("\n")
+						.map((responsibility) => responsibility.trim())
+						.filter(Boolean),
+					numberOfOpenPositions: Number(formValues.numberOfOpenPositions),
+					location: formValues.location.trim(),
+					closingDate: formValues.closingDate,
+					capabilityId: Number(formValues.capabilityId),
+					bandId: Number(formValues.bandId),
+				},
+				this.getJwtToken(req),
+			);
+
+			res.redirect("/job-roles?created=1");
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unable to create job role";
 
 			if (message === "Forbidden") {
 				this.handleForbiddenError(res);
-			} else if (message === "Unauthorized") {
-				this.handleUnauthorizedError(res);
-			} else {
-				res.status(500).render("pages/error.njk", {
-					pageTitle: "Kainos Careers - Error",
-					status: 500,
-					message: message,
-				});
+				return;
 			}
+
+			if (message === "Unauthorized") {
+				this.handleUnauthorizedError(res);
+				return;
+			}
+
+			const options = await getCreateJobRoleOptions(this.getJwtToken(req));
+
+			res.status(400).render("pages/job-role-create.njk", {
+				pageTitle: "Kainos Careers - Add Job Role",
+				options,
+				formValues,
+				errors: { general: message },
+			});
+		}
+	}
+
+	async showCreateForm(req: Request, res: Response): Promise<void> {
+		try {
+			const options = await getCreateJobRoleOptions(this.getJwtToken(req));
+
+			res.render("pages/job-role-create.njk", {
+				pageTitle: "Kainos Careers - Add Job Role",
+				options,
+				formValues: {
+					roleName: "",
+					description: "",
+					sharepointUrl: "",
+					responsibilities: "",
+					numberOfOpenPositions: "",
+					location: "",
+					closingDate: "",
+					capabilityId: "",
+					bandId: "",
+				},
+				errors: {},
+			});
+		} catch (_error) {
+			res.status(500).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 500,
+				message: "Unable to load job role options",
+			});
 		}
 	}
 

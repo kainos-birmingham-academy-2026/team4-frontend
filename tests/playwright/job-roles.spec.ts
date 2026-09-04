@@ -1,11 +1,13 @@
 import { expect, test } from "../fixtures/pageObjectsFixture";
 import {
+	adminUser,
 	jobRoleDetailContent,
 	jobRoleListContent,
 	mockJobRole,
 	testUser,
 } from "../fixtures/testData";
 import { ErrorPage } from "../pages/errorPage";
+import { JobRoleCreatePage } from "../pages/jobRoleCreatePage";
 import { JobRoleDetailPage } from "../pages/jobRoleDetailPage";
 import { JobRolesPage } from "../pages/jobRolesPage";
 import { LoginPage } from "../pages/loginPage";
@@ -15,6 +17,71 @@ async function signIn(page: import("@playwright/test").Page): Promise<void> {
 	await loginPage.open("/login");
 	await loginPage.login(testUser.email, testUser.password);
 }
+
+async function signInAsAdmin(
+	page: import("@playwright/test").Page,
+): Promise<void> {
+	const loginPage = new LoginPage(page);
+	await loginPage.open("/login");
+	await loginPage.login(adminUser.email, adminUser.password);
+}
+
+test.describe("add new job role", () => {
+	test("does not show the Add new role action to a User", async ({ page }) => {
+		await signIn(page);
+
+		await expect(
+			page.getByRole("link", { name: "Add new role" }),
+		).not.toBeVisible();
+	});
+
+	test("allows an Admin to complete the form and see confirmation", async ({
+		page,
+	}) => {
+		await signInAsAdmin(page);
+		const jobRolesPage = new JobRolesPage(page);
+		await expect(
+			page.getByRole("link", { name: "Add new role" }),
+		).toBeVisible();
+		await page.getByRole("link", { name: "Add new role" }).click();
+
+		const createPage = new JobRoleCreatePage(page);
+		await expect(createPage.heading).toHaveText("Add New Job Role");
+		await createPage.roleNameInput.fill("Platform Engineer");
+		await createPage.descriptionInput.fill("Build reliable platforms.");
+		await createPage.sharepointUrlInput.fill(
+			"https://sharepoint.example.com/platform-engineer",
+		);
+		await createPage.responsibilitiesInput.fill(
+			"Build platform services\nReview technical designs",
+		);
+		await createPage.openPositionsInput.fill("2");
+		await createPage.locationInput.fill("Belfast");
+		await createPage.closingDateInput.fill("2026-12-31");
+		await createPage.capabilitySelect.selectOption("1");
+		await createPage.bandSelect.selectOption("1");
+		await createPage.submitButton.click();
+
+		await expect(page).toHaveURL(/\/job-roles\?created=1/);
+		await expect(page.getByRole("status")).toContainText(
+			"Job role successfully created.",
+		);
+		await expect(jobRolesPage.heading).toHaveText("Explore Job Roles");
+	});
+
+	test("prevents submission when required fields are empty", async ({
+		page,
+	}) => {
+		await signInAsAdmin(page);
+		await page.getByRole("link", { name: "Add new role" }).click();
+
+		const createPage = new JobRoleCreatePage(page);
+		await createPage.submitButton.click();
+
+		await expect(page).toHaveURL(/\/job-roles\/new/);
+		await expect(createPage.roleNameInput).toBeFocused();
+	});
+});
 
 test.describe("job role details", () => {
 	test("displays the selected role title, description, and relevant information", async ({
