@@ -17,7 +17,12 @@
       </div>
 
       {% if isAdmin %}
-      <p><a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn">Edit this role</a></p>
+      <div class="job-detail-actions">
+        <a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn">Edit this role</a>
+        <form method="post" action="/job-roles/{{ job.jobRoleId }}/delete" onsubmit="return confirm('Are you sure you want to delete this job role?');">
+          <button type="submit" class="btn btn-secondary">Delete this role</button>
+        </form>
+      </div>
       {% endif %}
 
       <div class="job-detail-meta">

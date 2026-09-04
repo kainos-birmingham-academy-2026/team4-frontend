@@ -211,7 +211,9 @@ export class JobRoleController {
 				? "Job role successfully created."
 				: req.query.updated === "1"
 					? "Job role successfully updated."
-					: undefined;
+					: req.query.deleted === "1"
+						? "Job role successfully deleted."
+						: undefined;
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
 		const filterQuery = buildFilterQuery(filters, ordering);
@@ -363,6 +365,7 @@ export class JobRoleController {
 		res.render("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${jobRole.roleName}`,
 			job: jobRole,
+			isAdmin: res.locals.isAdmin,
 		});
 	}
 
@@ -594,6 +597,12 @@ export class JobRoleController {
 				this.handleForbiddenError(res);
 			} else if (message === "Unauthorized") {
 				this.handleUnauthorizedError(res);
+			} else if (message === "Job role not found.") {
+				res.status(404).render("pages/error.njk", {
+					pageTitle: "Kainos Careers - Error",
+					status: 404,
+					message: "Job role not found",
+				});
 			} else {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
@@ -601,6 +610,9 @@ export class JobRoleController {
 					message: message,
 				});
 			}
+			return;
 		}
+
+		res.redirect("/job-roles?deleted=1");
 	}
 }

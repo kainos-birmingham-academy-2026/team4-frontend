@@ -10,6 +10,7 @@ export class JobRoleDetailPage extends BasePage {
 	readonly metadataValues: Locator;
 	readonly responsibilities: Locator;
 	readonly openPositions: Locator;
+	readonly deleteButton: Locator;
 
 	constructor(page: Page) {
 		super(page);
@@ -28,6 +29,7 @@ export class JobRoleDetailPage extends BasePage {
 		this.openPositions = page
 			.locator(".job-detail-sidebar .sidebar-card")
 			.first();
+		this.deleteButton = page.getByRole("button", { name: "Delete this role" });
 	}
 
 	metadataLabel(label: string): Locator {

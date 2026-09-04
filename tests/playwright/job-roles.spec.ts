@@ -4,6 +4,7 @@ import {
 	jobRoleDetailContent,
 	jobRoleListContent,
 	mockJobRole,
+	mockJobRoles,
 	testUser,
 } from "../fixtures/testData";
 import { ErrorPage } from "../pages/errorPage";
@@ -12,6 +13,8 @@ import { JobRoleDetailPage } from "../pages/jobRoleDetailPage";
 import { JobRoleEditPage } from "../pages/jobRoleEditPage";
 import { JobRolesPage } from "../pages/jobRolesPage";
 import { LoginPage } from "../pages/loginPage";
+
+const deletableJobRole = mockJobRoles[mockJobRoles.length - 1];
 
 async function signIn(page: import("@playwright/test").Page): Promise<void> {
 	const loginPage = new LoginPage(page);
@@ -85,6 +88,44 @@ test.describe("add new job role", () => {
 });
 
 test.describe("job role details", () => {
+	test("shows a confirmation before deleting from the specification page", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${deletableJobRole.jobRoleId}`);
+
+		page.once("dialog", async (dialog) => {
+			expect(dialog.type()).toBe("confirm");
+			expect(dialog.message()).toContain("delete this job role");
+			await dialog.dismiss();
+		});
+
+		const detailPage = new JobRoleDetailPage(page);
+		await detailPage.deleteButton.click();
+		await expect(page).toHaveURL(`/job-roles/${deletableJobRole.jobRoleId}`);
+		await expect(detailPage.heading).toHaveText(deletableJobRole.roleName);
+	});
+
+	test("allows an Admin to delete a role from the specification page", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${deletableJobRole.jobRoleId}`);
+
+		page.once("dialog", (dialog) => dialog.accept());
+		await page.getByRole("button", { name: "Delete this role" }).click();
+
+		await expect(page).toHaveURL(/\/job-roles\?deleted=1/);
+		await expect(page.getByRole("status")).toContainText(
+			"Job role successfully deleted.",
+		);
+		await expect(page.getByText(deletableJobRole.roleName)).not.toBeVisible();
+	});
+
 	test("allows an Admin to open editing from the job role specification", async ({
 		page,
 	}) => {
@@ -237,7 +278,8 @@ test.describe("edit job role", () => {
 });
 
 test.describe("job role listing", () => {
-	test.beforeEach(async ({ page }) => {
+	test.beforeEach(async ({ page, request }) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
 		await signIn(page);
 	});
 
@@ -254,6 +296,26 @@ test.describe("job role listing", () => {
 		await jobRolesPage.clearFilters();
 		await expect(page).toHaveURL("/job-roles");
 		await expect(jobRolesPage.roleNameInput).toHaveValue("");
+	});
+
+	test("allows an Admin to delete a role from the job roles list", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await page.goto("/logout");
+		await signInAsAdmin(page);
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.applyRoleNameFilter(deletableJobRole.roleName);
+
+		page.once("dialog", (dialog) => dialog.accept());
+		await jobRolesPage.deleteButtons.click();
+
+		await expect(page).toHaveURL(/\/job-roles\?deleted=1/);
+		await expect(page.getByRole("status")).toContainText(
+			"Job role successfully deleted.",
+		);
+		await expect(page.getByText(deletableJobRole.roleName)).not.toBeVisible();
 	});
 
 	test("shows an empty state for filters with no matching roles", async ({

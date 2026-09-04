@@ -775,6 +775,17 @@ tbody tr:hover {
 	font-size: 1rem;
 }
 
+.job-detail-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.job-detail-actions form {
+	margin: 0;
+}
+
 .job-detail-meta {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

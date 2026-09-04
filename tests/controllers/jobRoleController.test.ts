@@ -51,6 +51,7 @@ const mockResponse = {
 	json: vi.fn(),
 	render: mockRender,
 	redirect: vi.fn(),
+	locals: { isAdmin: true },
 } as unknown as Response;
 
 vi.mock("../../src/services/jobRoleApiService");
@@ -308,6 +309,7 @@ describe("JobRoleController - getJobRoleDetails", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${mockJobRole.roleName}`,
 			job: mockJobRole,
+			isAdmin: true,
 		});
 	});
 
@@ -592,6 +594,7 @@ describe("JobRoleController - delete", () => {
 		await jobRoleController.delete(mockRequest, mockResponse);
 
 		expect(deleteJobRole).toHaveBeenCalledWith(1, "mock-jwt-token");
+		expect(mockResponse.redirect).toHaveBeenCalledWith("/job-roles?deleted=1");
 	});
 
 	it("should redirect to the login page if the user is not authorized", async () => {
@@ -633,6 +636,22 @@ describe("JobRoleController - delete", () => {
 			pageTitle: "Kainos Careers - Error",
 			status: 500,
 			message: "Unexpected error",
+		});
+	});
+
+	it("should render a not found page when the role does not exist", async () => {
+		mockRequest.params.id = "1";
+		vi.mocked(deleteJobRole).mockRejectedValue(
+			new Error("Job role not found."),
+		);
+
+		await jobRoleController.delete(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(404);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 404,
+			message: "Job role not found",
 		});
 	});
 
