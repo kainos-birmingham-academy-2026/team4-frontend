@@ -1,6 +1,6 @@
 import axios from "axios";
 import apiClient from "../config/apiClient";
-import type { JobRole } from "../models/jobRole";
+import type { JobRole, JobRoleDetail } from "../models/jobRole";
 import type {
 	CreateJobRoleInput,
 	CreateJobRoleOptions,
@@ -8,6 +8,7 @@ import type {
 	JobRoleFilters,
 	JobRoleOrdering,
 	PaginatedResponse,
+	UpdateJobRoleInput,
 } from "../types/jobRoleDTO";
 
 function authHeaders(token: string): { Authorization: string } {
@@ -65,11 +66,14 @@ export async function getAllJobRoles(
 export async function getJobRoleById(
 	id: number,
 	token: string,
-): Promise<JobRole | undefined> {
+): Promise<JobRoleDetail | undefined> {
 	try {
-		const { data } = await apiClient.get<JobRole>(`/api/job-roles/${id}`, {
-			headers: authHeaders(token),
-		});
+		const { data } = await apiClient.get<JobRoleDetail>(
+			`/api/job-roles/${id}`,
+			{
+				headers: authHeaders(token),
+			},
+		);
 		return data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
@@ -166,7 +170,7 @@ export async function getCreateJobRoleOptions(
 
 export async function updateJobRole(
 	id: number,
-	jobRoleData: Partial<Omit<JobRole, "id">>,
+	jobRoleData: UpdateJobRoleInput,
 	token: string,
 ): Promise<JobRole | undefined> {
 	try {

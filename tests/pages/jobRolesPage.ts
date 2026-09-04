@@ -81,7 +81,10 @@ export class JobRolesPage extends BasePage {
 		this.heading = page.locator("main h1");
 		this.jobCards = page.locator(".job-card");
 		this.jobCardTitles = page.locator(".job-card-title");
-		this.firstJobRole = page.locator(".job-card").first().locator(".btn");
+		this.firstJobRole = page
+			.locator(".job-card")
+			.first()
+			.getByRole("link", { name: "View Details" });
 		this.firstJobRoleTitle = page
 			.locator(".job-card")
 			.first()

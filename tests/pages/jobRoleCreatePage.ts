@@ -27,11 +27,11 @@ export class JobRoleCreatePage extends BasePage {
 		this.closingDateInput = page.locator("#closingDate");
 		this.capabilitySelect = page.locator("#capabilityId");
 		this.bandSelect = page.locator("#bandId");
-		this.submitButton = page.getByRole("button", { name: "Create job role" });
+		this.submitButton = page.locator('form.form-card button[type="submit"]');
 		this.cancelLink = page.getByRole("link", { name: "Cancel" });
 	}
 
-	async open(): Promise<void> {
-		await super.open("/job-roles/new");
+	async open(path = "/job-roles/new"): Promise<void> {
+		await super.open(path);
 	}
 }

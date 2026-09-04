@@ -9,6 +9,7 @@ import {
 import { ErrorPage } from "../pages/errorPage";
 import { JobRoleCreatePage } from "../pages/jobRoleCreatePage";
 import { JobRoleDetailPage } from "../pages/jobRoleDetailPage";
+import { JobRoleEditPage } from "../pages/jobRoleEditPage";
 import { JobRolesPage } from "../pages/jobRolesPage";
 import { LoginPage } from "../pages/loginPage";
 
@@ -84,6 +85,20 @@ test.describe("add new job role", () => {
 });
 
 test.describe("job role details", () => {
+	test("allows an Admin to open editing from the job role specification", async ({
+		page,
+	}) => {
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
+
+		await page.getByRole("link", { name: "Edit this role" }).click();
+
+		const editPage = new JobRoleEditPage(page);
+		await expect(page).toHaveURL(`/job-roles/${mockJobRole.jobRoleId}/edit`);
+		await expect(editPage.heading).toHaveText("Edit Job Role");
+		await expect(editPage.roleNameInput).toHaveValue(mockJobRole.roleName);
+	});
+
 	test("displays the selected role title, description, and relevant information", async ({
 		page,
 	}) => {
@@ -130,6 +145,93 @@ test.describe("job role details", () => {
 		);
 		await expect(jobRoleDetailPage.openPositions).toContainText(
 			jobRoleDetailContent.openPositions,
+		);
+	});
+});
+
+test.describe("edit job role", () => {
+	test("opens from the job roles list and pre-populates every field", async ({
+		page,
+	}) => {
+		await signInAsAdmin(page);
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.jobCards
+			.first()
+			.getByRole("link", { name: "Edit" })
+			.click();
+
+		const editPage = new JobRoleEditPage(page);
+		await expect(page).toHaveURL(`/job-roles/${mockJobRole.jobRoleId}/edit`);
+		await expect(editPage.heading).toHaveText("Edit Job Role");
+		await expect(editPage.roleNameInput).toHaveValue(mockJobRole.roleName);
+		await expect(editPage.descriptionInput).toHaveValue(
+			mockJobRole.description,
+		);
+		await expect(editPage.sharepointUrlInput).toHaveValue(
+			mockJobRole.sharepointUrl,
+		);
+		await expect(editPage.responsibilitiesInput).toHaveValue(
+			mockJobRole.responsibilities.join("\n"),
+		);
+		await expect(editPage.openPositionsInput).toHaveValue(
+			String(mockJobRole.numberOfOpenPositions),
+		);
+		await expect(editPage.locationInput).toHaveValue(mockJobRole.location);
+		await expect(editPage.closingDateInput).toHaveValue("2026-12-31");
+		await expect(editPage.capabilitySelect).toHaveValue(
+			String(mockJobRole.capabilityId),
+		);
+		await expect(editPage.bandSelect).toHaveValue(String(mockJobRole.bandId));
+		await expect(editPage.statusSelect).toHaveValue(
+			String(mockJobRole.statusId),
+		);
+	});
+
+	test("validates the required status before submitting", async ({ page }) => {
+		await signInAsAdmin(page);
+		const editPage = new JobRoleEditPage(page);
+		await editPage.openRole(mockJobRole.jobRoleId);
+		await editPage.statusSelect.selectOption("");
+		await editPage.submitButton.click();
+
+		await expect(page).toHaveURL(`/job-roles/${mockJobRole.jobRoleId}/edit`);
+		await expect(editPage.statusSelect).toBeFocused();
+	});
+
+	test("submits the edited role and shows confirmation", async ({
+		page,
+		request,
+	}) => {
+		await signInAsAdmin(page);
+		const editPage = new JobRoleEditPage(page);
+		await editPage.openRole(mockJobRole.jobRoleId);
+		await editPage.roleNameInput.fill("Senior Software Engineer");
+		await editPage.descriptionInput.fill("Lead reliable software delivery.");
+		await editPage.responsibilitiesInput.fill("Lead delivery\nReview designs");
+		await editPage.openPositionsInput.fill("4");
+		await editPage.locationInput.fill("Belfast");
+		await editPage.statusSelect.selectOption("2");
+
+		await editPage.submitButton.click();
+
+		const updateResponse = await request.get(
+			"http://127.0.0.1:4001/__test__/last-update",
+		);
+		const update = await updateResponse.json();
+		expect(update).toMatchObject({
+			id: mockJobRole.jobRoleId,
+			body: {
+				roleName: "Senior Software Engineer",
+				description: "Lead reliable software delivery.",
+				responsibilities: ["Lead delivery", "Review designs"],
+				numberOfOpenPositions: 4,
+				location: "Belfast",
+				statusId: 2,
+			},
+		});
+		await expect(page).toHaveURL(/\/job-roles\?updated=1/);
+		await expect(page.getByRole("status")).toContainText(
+			"Job role successfully updated.",
 		);
 	});
 });

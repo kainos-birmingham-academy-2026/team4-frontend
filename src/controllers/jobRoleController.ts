@@ -113,7 +113,10 @@ export function buildFilterQuery(
 	return query ? `&${query}` : "";
 }
 
-function getCreateFormValues(body: Record<string, unknown>) {
+function getCreateFormValues(
+	body: Record<string, unknown>,
+	includeStatus = false,
+) {
 	return {
 		roleName: String(body.roleName ?? ""),
 		description: String(body.description ?? ""),
@@ -124,11 +127,13 @@ function getCreateFormValues(body: Record<string, unknown>) {
 		closingDate: String(body.closingDate ?? ""),
 		capabilityId: String(body.capabilityId ?? ""),
 		bandId: String(body.bandId ?? ""),
+		...(includeStatus ? { statusId: String(body.statusId ?? "") } : {}),
 	};
 }
 
 function validateCreateForm(
 	values: ReturnType<typeof getCreateFormValues>,
+	isEdit = false,
 ): Record<string, string> {
 	const errors: Record<string, string> = {};
 
@@ -171,6 +176,10 @@ function validateCreateForm(
 		errors.bandId = "Select a band.";
 	}
 
+	if (isEdit && !values.statusId) {
+		errors.statusId = "Select a status.";
+	}
+
 	return errors;
 }
 
@@ -198,7 +207,11 @@ export class JobRoleController {
 	async getJobRoles(req: Request, res: Response): Promise<void> {
 		const page = parseInt(req.query.page as string, 10) || 1;
 		const successMessage =
-			req.query.created === "1" ? "Job role successfully created." : undefined;
+			req.query.created === "1"
+				? "Job role successfully created."
+				: req.query.updated === "1"
+					? "Job role successfully updated."
+					: undefined;
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
 		const filterQuery = buildFilterQuery(filters, ordering);
@@ -444,12 +457,53 @@ export class JobRoleController {
 	}
 
 	async update(req: Request, res: Response): Promise<void> {
+		const id = Number(req.params.id);
+		const formValues = getCreateFormValues(req.body, true);
+		const errors = validateCreateForm(formValues, true);
+
+		if (!Number.isInteger(id) || id <= 0) {
+			res.status(400).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 400,
+				message: "Invalid job role ID",
+			});
+			return;
+		}
+
+		if (Object.keys(errors).length > 0) {
+			const options = await getCreateJobRoleOptions(this.getJwtToken(req));
+			res.status(400).render("pages/job-role-create.njk", {
+				pageTitle: "Kainos Careers - Edit Job Role",
+				options,
+				formValues,
+				errors,
+				isEdit: true,
+				formActionId: id,
+			});
+			return;
+		}
+
 		try {
 			await updateJobRole(
-				Number(req.params.id),
-				req.body,
+				id,
+				{
+					roleName: formValues.roleName.trim(),
+					description: formValues.description.trim(),
+					sharepointUrl: formValues.sharepointUrl.trim(),
+					responsibilities: formValues.responsibilities
+						.split("\n")
+						.map((responsibility) => responsibility.trim())
+						.filter(Boolean),
+					numberOfOpenPositions: Number(formValues.numberOfOpenPositions),
+					location: formValues.location.trim(),
+					closingDate: formValues.closingDate,
+					capabilityId: Number(formValues.capabilityId),
+					bandId: Number(formValues.bandId),
+					statusId: Number(formValues.statusId),
+				},
 				this.getJwtToken(req),
 			);
+			res.redirect("/job-roles?updated=1");
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unable to update job role";
@@ -458,6 +512,12 @@ export class JobRoleController {
 				this.handleForbiddenError(res);
 			} else if (message === "Unauthorized") {
 				this.handleUnauthorizedError(res);
+			} else if (message === "Job role not found.") {
+				res.status(404).render("pages/error.njk", {
+					pageTitle: "Kainos Careers - Error",
+					status: 404,
+					message: "Job role not found",
+				});
 			} else {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
@@ -465,6 +525,61 @@ export class JobRoleController {
 					message: message,
 				});
 			}
+		}
+	}
+
+	async showEditForm(req: Request, res: Response): Promise<void> {
+		const id = Number(req.params.id);
+		if (!Number.isInteger(id) || id <= 0) {
+			res.status(400).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 400,
+				message: "Invalid job role ID",
+			});
+			return;
+		}
+
+		try {
+			const [jobRole, options] = await Promise.all([
+				getJobRoleById(id, this.getJwtToken(req)),
+				getCreateJobRoleOptions(this.getJwtToken(req)),
+			]);
+			if (!jobRole) {
+				res.status(404).render("pages/error.njk", {
+					pageTitle: "Kainos Careers - Error",
+					status: 404,
+					message: "Job role not found",
+				});
+				return;
+			}
+
+			res.render("pages/job-role-create.njk", {
+				pageTitle: "Kainos Careers - Edit Job Role",
+				options,
+				isEdit: true,
+				formActionId: id,
+				formValues: {
+					roleName: jobRole.roleName,
+					description: jobRole.description,
+					sharepointUrl: jobRole.sharepointUrl,
+					responsibilities: jobRole.responsibilities.join("\n"),
+					numberOfOpenPositions: String(jobRole.numberOfOpenPositions),
+					location: jobRole.location,
+					closingDate: jobRole.closingDate
+						? new Date(jobRole.closingDate).toISOString().slice(0, 10)
+						: "",
+					capabilityId: String(jobRole.capabilityId ?? ""),
+					bandId: String(jobRole.bandId ?? ""),
+					statusId: String(jobRole.statusId ?? ""),
+				},
+				errors: {},
+			});
+		} catch (_error) {
+			res.status(500).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 500,
+				message: "Unable to load job role",
+			});
 		}
 	}
 
