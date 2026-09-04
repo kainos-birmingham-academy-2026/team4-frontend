@@ -6,6 +6,7 @@ import nunjucks from "nunjucks";
 import authRouter from "./routes/authRouter";
 import chatRouter from "./routes/chatRouter";
 import jobRoleRouter from "./routes/jobRoleRouter";
+import { getRoleFromToken, isApplicantRole } from "./utils/jwt";
 
 const isDev = process.env.NODE_ENV !== "production";
 const useSecureSessionCookie =
@@ -78,6 +79,8 @@ app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
 	res.locals.isAdmin = hasAdminRole(req.session.jwtToken);
 	res.locals.currentPath = req.path;
+	res.locals.userRole = getRoleFromToken(req.session.jwtToken);
+	res.locals.isApplicant = isApplicantRole(res.locals.userRole);
 	next();
 });
 

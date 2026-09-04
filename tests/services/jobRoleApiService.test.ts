@@ -93,11 +93,11 @@ describe("jobRoleApiService - getJobRoleById", () => {
 		const mockJobRole = mockJobRoles[0];
 		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({ data: mockJobRole });
 
-		const result = await getJobRoleById(mockJobRole.id, mockToken);
+		const result = await getJobRoleById(mockJobRole.jobRoleId, mockToken);
 
 		expect(result).toEqual(mockJobRole);
 		expect(apiClient.get).toHaveBeenCalledWith(
-			`/api/job-roles/${mockJobRole.id}`,
+			`/api/job-roles/${mockJobRole.jobRoleId}`,
 			{
 				headers: { Authorization: `Bearer ${mockToken}` },
 			},

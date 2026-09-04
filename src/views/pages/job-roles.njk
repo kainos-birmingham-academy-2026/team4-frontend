@@ -180,8 +180,9 @@
                   <h3 class="job-card-title">{{ job.roleName }}</h3>
                 </a>
               </div>
-              {% if job.status == "Open" %} <span class="job-status-badge open">{{ job.status }}</span> 
-              {% else %} <span class="job-status-badge closed">{{ job.status }}</span> 
+              {% if job.displayStatus == "Open" %} <span class="job-status-badge open">{{ job.displayStatus }}</span> 
+              {% elif job.displayStatus == "In Progress" %} <span class="job-status-badge in-progress">{{ job.displayStatus }}</span> 
+              {% else %} <span class="job-status-badge closed">{{ job.displayStatus }}</span> 
               {% endif %}
 
             </div>

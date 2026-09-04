@@ -10,5 +10,5 @@
 		"allowImportingTsExtensions": true,
 		"noEmit": true
 	},
-	"include": ["bdd/**/*.ts", "api/**/*.ts"]
+	"include": ["**/*.ts", "../src/types/**/*.d.ts"]
 }

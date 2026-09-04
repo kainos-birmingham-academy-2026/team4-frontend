@@ -1,6 +1,7 @@
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
+import { submitApplication } from "../../src/services/applicationApiService";
 import {
 	getCreateJobRoleOptions,
 	getJobRoleById,
@@ -12,6 +13,12 @@ vi.mock("../../src/services/jobRoleApiService", () => ({
 	getCreateJobRoleOptions: vi.fn(),
 	getPaginatedJobRoles: vi.fn(),
 	getJobRoleById: vi.fn(),
+}));
+
+vi.mock("../../src/services/applicationApiService", () => ({
+	submitApplication: vi.fn(),
+	getMyApplications: vi.fn().mockResolvedValue([]),
+	ApplicationServiceError: class ApplicationServiceError extends Error {},
 }));
 
 vi.mock("../../src/middlewares/authMiddleware", () => ({
@@ -188,5 +195,50 @@ describe("GET /job-roles/:id", () => {
 		expect(response.status).toBe(400);
 		expect(response.text).toContain("<title>Kainos Careers - Error</title>");
 		expect(response.text).toContain("Invalid job role ID");
+	});
+});
+
+describe("GET /job-roles/:id/apply", () => {
+	it("should render the apply page when the job role is open with positions", async () => {
+		vi.mocked(getJobRoleById).mockResolvedValue(mockJobRoles[0]);
+
+		const response = await request(app).get("/job-roles/1/apply");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain(
+			`<title>Kainos Careers - Apply for ${mockJobRoles[0].roleName}</title>`,
+		);
+	});
+
+	it("should redirect to the job detail page when the role is not open", async () => {
+		vi.mocked(getJobRoleById).mockResolvedValue({
+			...mockJobRoles[0],
+			status: "Closed",
+		});
+
+		const response = await request(app).get("/job-roles/1/apply");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/job-roles/1");
+	});
+});
+
+describe("POST /job-roles/:id/apply", () => {
+	it("should submit the application and redirect to the job detail page", async () => {
+		vi.mocked(getJobRoleById).mockResolvedValue(mockJobRoles[0]);
+		vi.mocked(submitApplication).mockResolvedValue({
+			applicationId: 1,
+			jobRoleId: 1,
+			userId: 1,
+			status: "In Progress",
+			createdAt: "2026-01-01T00:00:00.000Z",
+		});
+
+		const response = await request(app)
+			.post("/job-roles/1/apply")
+			.send({ message: "I am interested in this role." });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/job-roles/1");
 	});
 });

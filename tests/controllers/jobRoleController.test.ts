@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import type { SessionData } from "express-session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { JobRoleController } from "../../src/controllers/jobRoleController";
+import { getMyApplications } from "../../src/services/applicationApiService";
 import {
 	createJobRole,
 	deleteJobRole,
@@ -54,6 +55,7 @@ const mockResponse = {
 } as unknown as Response;
 
 vi.mock("../../src/services/jobRoleApiService");
+vi.mock("../../src/services/applicationApiService");
 
 const jobRoleController = new JobRoleController();
 
@@ -62,6 +64,7 @@ describe("JobRoleController - getJobRoles", () => {
 		vi.clearAllMocks();
 		mockRequest.session.jwtToken = "mock-jwt-token"; // Reset JWT token for each test
 		vi.mocked(getFilterOptions).mockResolvedValue(mockFilterOptions);
+		vi.mocked(getMyApplications).mockResolvedValue([]);
 	});
 
 	it("should render the job roles page with paginated jobs and default page 1", async () => {
@@ -88,7 +91,7 @@ describe("JobRoleController - getJobRoles", () => {
 		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
-			jobs: mockJobRoles,
+			jobs: mockJobRoles.map((job) => ({ ...job, displayStatus: job.status })),
 			pagination: mockPaginatedResponse.pagination,
 			filters: emptyFilters,
 			filterOptions: mockFilterOptions,
@@ -129,7 +132,43 @@ describe("JobRoleController - getJobRoles", () => {
 		);
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
-			jobs: [mockJobRoles[0]],
+			jobs: [{ ...mockJobRoles[0], displayStatus: mockJobRoles[0].status }],
+			pagination: mockPaginatedResponse.pagination,
+			filters: emptyFilters,
+			filterOptions: mockFilterOptions,
+			filterQuery: "",
+			hasActiveFilters: false,
+			ordering: { sortBy: undefined, sortOrder: undefined },
+			sortLinks: expect.any(Object),
+			sortQuery: expect.any(Function),
+		});
+	});
+
+	it("should show an In Progress display status for jobs the user has applied to", async () => {
+		const mockPaginatedResponse = {
+			jobs: mockJobRoles,
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 2,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+		]);
+
+		await jobRoleController.getJobRoles(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
+			pageTitle: "Kainos Careers - Job Roles",
+			jobs: [
+				{ ...mockJobRoles[0], displayStatus: "In Progress" },
+				{ ...mockJobRoles[1], displayStatus: mockJobRoles[1].status },
+			],
 			pagination: mockPaginatedResponse.pagination,
 			filters: emptyFilters,
 			filterOptions: mockFilterOptions,
@@ -260,7 +299,7 @@ describe("JobRoleController - getJobRoles", () => {
 
 		expect(mockRender).toHaveBeenCalledWith("pages/job-roles", {
 			pageTitle: "Kainos Careers - Job Roles",
-			jobs: mockJobRoles,
+			jobs: mockJobRoles.map((job) => ({ ...job, displayStatus: job.status })),
 			pagination: {
 				currentPage: 1,
 				totalPages: 1,
@@ -273,6 +312,9 @@ describe("JobRoleController - getJobRoles", () => {
 			filterOptions: emptyFilterOptions,
 			filterQuery: "",
 			hasActiveFilters: false,
+			ordering: { sortBy: undefined, sortOrder: undefined },
+			sortLinks: {},
+			sortQuery: expect.any(Function),
 		});
 
 		expect(getAllJobRoles).toHaveBeenCalledWith("mock-jwt-token");
@@ -295,11 +337,12 @@ describe("JobRoleController - getJobRoles", () => {
 describe("JobRoleController - getJobRoleDetails", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.mocked(getMyApplications).mockResolvedValue([]);
 	});
 
 	it("should render the job role detail page with the correct title and job", async () => {
 		const mockJobRole = mockJobRoles[0];
-		mockRequest.params.id = String(mockJobRole.id);
+		mockRequest.params.id = String(mockJobRole.jobRoleId);
 		vi.mocked(getJobRoleById).mockResolvedValue(mockJobRoles[0]);
 
 		await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
@@ -308,6 +351,26 @@ describe("JobRoleController - getJobRoleDetails", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${mockJobRole.roleName}`,
 			job: mockJobRole,
+			displayStatus: mockJobRole.status,
+			applied: false,
+		});
+	});
+
+	it("should mark the page as applied and show the application status when the user has applied", async () => {
+		const mockJobRole = mockJobRoles[0];
+		mockRequest.params.id = String(mockJobRole.jobRoleId);
+		vi.mocked(getJobRoleById).mockResolvedValue(mockJobRole);
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{ jobRoleId: mockJobRole.jobRoleId, status: "In Progress" },
+		]);
+
+		await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith("pages/job-detail.njk", {
+			pageTitle: `Kainos Careers - ${mockJobRole.roleName}`,
+			job: mockJobRole,
+			displayStatus: "In Progress",
+			applied: true,
 		});
 	});
 

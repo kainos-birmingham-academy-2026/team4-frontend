@@ -1,10 +1,11 @@
 import axios from "axios";
 import apiClient from "../config/apiClient";
-import type { JobRole, JobRoleDetail } from "../models/jobRole";
 import type {
 	CreateJobRoleInput,
 	CreateJobRoleOptions,
 	FilterOptions,
+	JobRole,
+	JobRoleDetail,
 	JobRoleFilters,
 	JobRoleOrdering,
 	PaginatedResponse,

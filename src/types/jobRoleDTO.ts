@@ -1,4 +1,19 @@
-import type { JobRole } from "../models/jobRole";
+export interface JobRole {
+	jobRoleId: number;
+	roleName: string;
+	location: string;
+	capability: string;
+	band: string;
+	closingDate: string | Date | null;
+	status: string;
+}
+
+export interface JobRoleDetail extends JobRole {
+	description: string;
+	responsibilities: string[];
+	sharepointUrl: string;
+	numberOfOpenPositions: number;
+}
 
 export interface PaginationMetadata {
 	currentPage: number;
