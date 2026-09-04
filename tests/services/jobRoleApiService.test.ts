@@ -5,6 +5,7 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getCreateJobRoleOptions,
 	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
@@ -463,6 +464,38 @@ describe("jobRoleApiService - createJobRole", () => {
 
 		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
 			"Unexpected error: Conflict",
+		);
+	});
+});
+
+describe("jobRoleApiService - getCreateJobRoleOptions", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should return capability and band options", async () => {
+		const options = {
+			capabilities: [{ id: 1, name: "Engineering" }],
+			bands: [{ id: 2, name: "Trainee" }],
+		};
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({ data: options });
+
+		expect(await getCreateJobRoleOptions(mockToken)).toEqual(options);
+		expect(apiClient.get).toHaveBeenCalledWith(
+			"/api/job-roles/create-options",
+			{ headers: { Authorization: `Bearer ${mockToken}` } },
+		);
+	});
+
+	it("should wrap options API errors", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Server error",
+			response: { status: 500 },
+		});
+
+		await expect(getCreateJobRoleOptions(mockToken)).rejects.toThrow(
+			"Error fetching role options: Server error",
 		);
 	});
 });

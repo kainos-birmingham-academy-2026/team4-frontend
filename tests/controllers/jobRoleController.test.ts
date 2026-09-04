@@ -6,6 +6,7 @@ import {
 	createJobRole,
 	deleteJobRole,
 	getAllJobRoles,
+	getCreateJobRoleOptions,
 	getFilterOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
@@ -49,6 +50,7 @@ const mockResponse = {
 	status: vi.fn().mockReturnThis(),
 	json: vi.fn(),
 	render: mockRender,
+	redirect: vi.fn(),
 } as unknown as Response;
 
 vi.mock("../../src/services/jobRoleApiService");
@@ -339,24 +341,47 @@ describe("JobRoleController - getJobRoleDetails", () => {
 });
 
 describe("JobRoleController - create", () => {
+	const validCreateForm = {
+		roleName: "New Role",
+		description: "Description",
+		sharepointUrl: "https://sharepoint.example.com/job-role",
+		responsibilities: "Write code\nReview code",
+		numberOfOpenPositions: "2",
+		location: "Belfast",
+		closingDate: "2026-12-31",
+		capabilityId: "1",
+		bandId: "2",
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockRequest.body = validCreateForm;
+		vi.mocked(getCreateJobRoleOptions).mockResolvedValue({
+			capabilities: [{ id: 1, name: "Engineering" }],
+			bands: [{ id: 2, name: "Trainee" }],
+		});
 	});
 
 	it("should call createJobRole and handle success", async () => {
-		const mockJobRoleData = {
-			roleName: "New Role",
-			description: "Description",
-		};
-		mockRequest.body = mockJobRoleData;
 		vi.mocked(createJobRole).mockResolvedValue(mockJobRole1);
 
 		await jobRoleController.create(mockRequest, mockResponse);
 
 		expect(createJobRole).toHaveBeenCalledWith(
-			mockJobRoleData,
+			{
+				roleName: "New Role",
+				description: "Description",
+				sharepointUrl: "https://sharepoint.example.com/job-role",
+				responsibilities: ["Write code", "Review code"],
+				numberOfOpenPositions: 2,
+				location: "Belfast",
+				closingDate: "2026-12-31",
+				capabilityId: 1,
+				bandId: 2,
+			},
 			"mock-jwt-token",
 		);
+		expect(mockResponse.redirect).toHaveBeenCalledWith("/job-roles?created=1");
 	});
 
 	it("should redirect to the login page if the user is not authorized", async () => {
@@ -385,30 +410,80 @@ describe("JobRoleController - create", () => {
 		});
 	});
 
-	it("should render the error page if an unexpected error occurs", async () => {
+	it("should render the form when creation fails", async () => {
 		vi.mocked(createJobRole).mockRejectedValue(new Error("Unexpected error"));
 
 		await jobRoleController.create(mockRequest, mockResponse);
 
-		expect(mockResponse.status).toHaveBeenCalledWith(500);
-		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
-			pageTitle: "Kainos Careers - Error",
-			status: 500,
-			message: "Unexpected error",
+		expect(mockResponse.status).toHaveBeenCalledWith(400);
+		expect(mockRender).toHaveBeenCalledWith("pages/job-role-create.njk", {
+			pageTitle: "Kainos Careers - Add Job Role",
+			options: {
+				capabilities: [{ id: 1, name: "Engineering" }],
+				bands: [{ id: 2, name: "Trainee" }],
+			},
+			formValues: validCreateForm,
+			errors: { general: "Unexpected error" },
 		});
 	});
 
-	it("should create its own error message if none are provided", async () => {
+	it("should use a default error message when creation fails without an Error", async () => {
 		vi.mocked(createJobRole).mockRejectedValue({});
 
 		await jobRoleController.create(mockRequest, mockResponse);
 
-		expect(mockResponse.status).toHaveBeenCalledWith(500);
-		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
-			pageTitle: "Kainos Careers - Error",
-			status: 500,
-			message: "Unable to create job role",
+		expect(mockResponse.status).toHaveBeenCalledWith(400);
+		expect(mockRender).toHaveBeenCalledWith("pages/job-role-create.njk", {
+			pageTitle: "Kainos Careers - Add Job Role",
+			options: {
+				capabilities: [{ id: 1, name: "Engineering" }],
+				bands: [{ id: 2, name: "Trainee" }],
+			},
+			formValues: validCreateForm,
+			errors: { general: "Unable to create job role" },
 		});
+	});
+
+	it("should render the create form with database options", async () => {
+		await jobRoleController.showCreateForm(mockRequest, mockResponse);
+
+		expect(getCreateJobRoleOptions).toHaveBeenCalledWith("mock-jwt-token");
+		expect(mockRender).toHaveBeenCalledWith("pages/job-role-create.njk", {
+			pageTitle: "Kainos Careers - Add Job Role",
+			options: {
+				capabilities: [{ id: 1, name: "Engineering" }],
+				bands: [{ id: 2, name: "Trainee" }],
+			},
+			formValues: {
+				roleName: "",
+				description: "",
+				sharepointUrl: "",
+				responsibilities: "",
+				numberOfOpenPositions: "",
+				location: "",
+				closingDate: "",
+				capabilityId: "",
+				bandId: "",
+			},
+			errors: {},
+		});
+	});
+
+	it("should render validation errors without creating a role", async () => {
+		mockRequest.body = { roleName: "" };
+
+		await jobRoleController.create(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(400);
+		expect(createJobRole).not.toHaveBeenCalled();
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-role-create.njk",
+			expect.objectContaining({
+				errors: expect.objectContaining({
+					roleName: "Enter a job role name.",
+				}),
+			}),
+		);
 	});
 });
 

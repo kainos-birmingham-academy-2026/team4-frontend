@@ -13,6 +13,24 @@ const useSecureSessionCookie =
 	(process.env.NODE_ENV === "production" &&
 		process.env.SESSION_COOKIE_SECURE !== "false");
 const app = express();
+
+function hasAdminRole(token: string | undefined): boolean {
+	if (!token) return false;
+
+	try {
+		const payload = token.split(".")[1];
+		if (!payload) return false;
+
+		const claims = JSON.parse(Buffer.from(payload, "base64url").toString()) as {
+			role?: unknown;
+		};
+
+		return claims.role === "ADMIN";
+	} catch {
+		return false;
+	}
+}
+
 const env = nunjucks.configure(path.join(__dirname, "views"), {
 	autoescape: true,
 	express: app,
@@ -58,6 +76,7 @@ app.use("/api/chat", chatRouter);
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
+	res.locals.isAdmin = hasAdminRole(req.session.jwtToken);
 	res.locals.currentPath = req.path;
 	next();
 });

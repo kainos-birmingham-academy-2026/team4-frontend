@@ -2,6 +2,8 @@ import axios from "axios";
 import apiClient from "../config/apiClient";
 import type { JobRole } from "../models/jobRole";
 import type {
+	CreateJobRoleInput,
+	CreateJobRoleOptions,
 	FilterOptions,
 	JobRoleFilters,
 	JobRoleOrdering,
@@ -115,7 +117,7 @@ export async function getPaginatedJobRoles(
 }
 
 export async function createJobRole(
-	jobRoleData: Omit<JobRole, "id">,
+	jobRoleData: CreateJobRoleInput,
 	token: string,
 ): Promise<JobRole | undefined> {
 	try {
@@ -124,24 +126,41 @@ export async function createJobRole(
 			jobRoleData,
 			{ headers: authHeaders(token) },
 		);
+
 		return data;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			const { status } = error.response || {};
-			if (!status) throw error;
 
-			if (status === 400) {
-				throw new Error("Invalid job role data.");
-			} else if (status === 401) {
-				throw new Error("Unauthorized");
-			} else if (status === 403) {
-				throw new Error("Forbidden");
-			} else if (status >= 500) {
+			if (status === 400) throw new Error("Invalid job role data.");
+			if (status === 401) throw new Error("Unauthorized");
+			if (status === 403) throw new Error("Forbidden");
+			if (status && status >= 500) {
 				throw new Error(`Error creating job role: ${error.message}`);
-			} else {
-				throw new Error(`Unexpected error: ${error.message}`);
 			}
+
+			throw new Error(`Unexpected error: ${error.message}`);
 		}
+
+		throw error;
+	}
+}
+
+export async function getCreateJobRoleOptions(
+	token: string,
+): Promise<CreateJobRoleOptions | undefined> {
+	try {
+		const { data } = await apiClient.get<CreateJobRoleOptions>(
+			"/api/job-roles/create-options",
+			{ headers: authHeaders(token) },
+		);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			throw new Error(`Error fetching role options: ${error.message}`);
+		}
+
+		throw error;
 	}
 }
 

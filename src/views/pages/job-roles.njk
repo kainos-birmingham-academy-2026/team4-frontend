@@ -6,7 +6,19 @@
       <div class="page-header">
         <h1>Explore Job Roles</h1>
         <p>Discover exciting career opportunities across all departments and locations at Kainos</p>
+      
+        {% if isAdmin %}
+          <p>
+            <a href="/job-roles/new" class="btn">Add new role</a>
+          </p>
+        {% endif %}
       </div>
+
+      {% if successMessage %}
+        <div class="form-success-summary" role="status" aria-live="polite">
+          <p>{{ successMessage }}</p>
+        </div>
+      {% endif %}
 
       <div style="margin-bottom: 2rem;">
         <form class="search-card" action="/job-roles" method="get" aria-label="Filter job roles">

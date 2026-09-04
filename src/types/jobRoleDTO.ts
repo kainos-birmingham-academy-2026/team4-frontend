@@ -44,3 +44,25 @@ export interface JobRoleOrdering {
 	sortBy?: JobRoleSortBy;
 	sortOrder?: JobRoleSortOrder;
 }
+
+export interface JobRoleOption {
+	id: number;
+	name: string;
+}
+
+export interface CreateJobRoleOptions {
+	capabilities: JobRoleOption[];
+	bands: JobRoleOption[];
+}
+
+export interface CreateJobRoleInput {
+	roleName: string;
+	description: string;
+	sharepointUrl: string;
+	responsibilities: string[];
+	numberOfOpenPositions: number;
+	location: string;
+	closingDate: string;
+	capabilityId: number;
+	bandId: number;
+}

@@ -1,5 +1,6 @@
 import express from "express";
 import {
+	adminUser,
 	jobRoleListContent,
 	mockJobRoles,
 	testUser,
@@ -11,15 +12,18 @@ const app = express();
 app.use(express.json());
 
 app.post("/auth/login", (req, res) => {
-	if (
-		req.body.email !== testUser.email ||
-		req.body.password !== testUser.password
-	) {
+	const user = [testUser, adminUser].find(
+		(candidate) =>
+			candidate.email === req.body.email &&
+			candidate.password === req.body.password,
+	);
+
+	if (!user) {
 		res.status(401).json({ error: "Invalid email or password" });
 		return;
 	}
 
-	res.json({ token: testUser.token });
+	res.json({ token: user.token });
 });
 
 app.post("/auth/register", (req, res) => {
@@ -38,6 +42,29 @@ app.get("/api/job-roles/filter-options", (_req, res) => {
 		capabilities: [...new Set(mockJobRoles.map((role) => role.capability))],
 		bands: [...new Set(mockJobRoles.map((role) => role.band))],
 		statuses: [...new Set(mockJobRoles.map((role) => role.status))],
+	});
+});
+
+app.get("/api/job-roles/create-options", (_req, res) => {
+	res.json({
+		capabilities: [
+			{ id: 1, name: "Engineering" },
+			{ id: 2, name: "Data" },
+		],
+		bands: [
+			{ id: 1, name: "Band 2" },
+			{ id: 2, name: "Band 3" },
+		],
+	});
+});
+
+app.post("/api/job-roles", (req, res) => {
+	res.status(201).json({
+		jobRoleId: mockJobRoles.length + 1,
+		...req.body,
+		capability: "Engineering",
+		band: "Band 2",
+		status: "Open",
 	});
 });
 
