@@ -571,6 +571,17 @@ export class JobRoleController {
 				return;
 			}
 
+			// API only returns capability/band/status names, so map back to option IDs for the form.
+			const capabilityId = options?.capabilities.find(
+				(capability) => capability.name === jobRole.capability,
+			)?.id;
+			const bandId = options?.bands.find(
+				(band) => band.name === jobRole.band,
+			)?.id;
+			const statusId = options?.statuses?.find(
+				(status) => status.name === jobRole.status,
+			)?.id;
+
 			res.render("pages/job-role-create.njk", {
 				pageTitle: "Kainos Careers - Edit Job Role",
 				options,
@@ -586,9 +597,9 @@ export class JobRoleController {
 					closingDate: jobRole.closingDate
 						? new Date(jobRole.closingDate).toISOString().slice(0, 10)
 						: "",
-					capabilityId: String(jobRole.capabilityId ?? ""),
-					bandId: String(jobRole.bandId ?? ""),
-					statusId: String(jobRole.statusId ?? ""),
+					capabilityId: String(capabilityId ?? ""),
+					bandId: String(bandId ?? ""),
+					statusId: String(statusId ?? ""),
 				},
 				errors: {},
 			});
