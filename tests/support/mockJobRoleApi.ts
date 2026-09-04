@@ -8,6 +8,7 @@ import {
 
 const PORT = Number(process.env.PORT) || 4001;
 let lastUpdate: { id: number; body: Record<string, unknown> } | null = null;
+const initialMockJobRoles = [...mockJobRoles];
 
 const app = express();
 app.use(express.json());
@@ -168,6 +169,23 @@ app.put("/api/job-roles/:id", (req, res) => {
 		band: req.body.bandId === 2 ? "Band 3" : role.band,
 		status: req.body.statusId === 2 ? "Closed" : role.status,
 	});
+});
+app.delete("/api/job-roles/:id", (req, res) => {
+	const roleIndex = mockJobRoles.findIndex(
+		(candidate) => candidate.jobRoleId === Number(req.params.id),
+	);
+	if (roleIndex === -1) {
+		res.status(404).json({ error: "Job role not found" });
+		return;
+	}
+
+	mockJobRoles.splice(roleIndex, 1);
+	res.status(204).send();
+});
+
+app.post("/__test__/reset", (_req, res) => {
+	mockJobRoles.splice(0, mockJobRoles.length, ...initialMockJobRoles);
+	res.sendStatus(204);
 });
 
 app.get("/__test__/last-update", (_req, res) => {

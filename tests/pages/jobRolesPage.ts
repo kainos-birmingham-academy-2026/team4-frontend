@@ -62,6 +62,7 @@ export class JobRolesPage extends BasePage {
 	readonly jobCardTitles: Locator;
 	readonly firstJobRole: Locator;
 	readonly firstJobRoleTitle: Locator;
+	readonly deleteButtons: Locator;
 	readonly jobRoleTitles: Locator;
 	readonly roleNameInput: Locator;
 	readonly locationInput: Locator;
@@ -89,6 +90,7 @@ export class JobRolesPage extends BasePage {
 			.locator(".job-card")
 			.first()
 			.locator(".job-card-title");
+		this.deleteButtons = page.getByRole("button", { name: "Delete" });
 		this.jobRoleTitles = page.locator(".job-card-title");
 		this.roleNameInput = page.locator("#filter-role-name");
 		this.locationInput = page.locator("#filter-location");
