@@ -100,7 +100,7 @@ describe("GET /job-roles", () => {
 		expect(response.text).not.toContain(
 			'<h3 class="job-card-title">Software Engineer</h3>',
 		);
-		expect(response.text).toContain("📊 Band 1");
+		expect(response.text).toContain("⏱️ Band 1");
 	});
 
 	it("should forward ordering query params to the API", async () => {
