@@ -18,6 +18,12 @@ import type {
 	JobRoleSortOrder,
 } from "../types/jobRoleDTO";
 
+export enum JobRoleMessage {
+	Created = "Job role successfully created.",
+	Updated = "Job role successfully updated.",
+	Deleted = "Job role successfully deleted.",
+}
+
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
 	capabilities: [],
 	bands: [],
@@ -208,11 +214,11 @@ export class JobRoleController {
 		const page = parseInt(req.query.page as string, 10) || 1;
 		const successMessage =
 			req.query.created === "1"
-				? "Job role successfully created."
+				? JobRoleMessage.Created
 				: req.query.updated === "1"
-					? "Job role successfully updated."
+					? JobRoleMessage.Updated
 					: req.query.deleted === "1"
-						? "Job role successfully deleted."
+						? JobRoleMessage.Deleted
 						: undefined;
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
