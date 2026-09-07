@@ -434,13 +434,36 @@ button:disabled,
 }
 
 .form-success-summary {
-	background: #ecf8f0;
-	border: 1px solid #7bc596;
+	background: rgba(92, 192, 137, 0.15);
+	border: 1px solid rgba(92, 192, 137, 0.5);
 	border-left: 5px solid #2c8252;
 	border-radius: 10px;
 	box-shadow: 0 2px 8px rgba(29, 111, 68, 0.08);
 	padding: 1rem 1.1rem;
 	margin-bottom: 1rem;
+	max-height: 100px;
+	overflow: hidden;
+	animation: fade-out-success 0.5s ease 4s forwards;
+}
+
+@keyframes fade-out-success {
+	to {
+		opacity: 0;
+		max-height: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-bottom: 0;
+		border-top-width: 0;
+		border-bottom-width: 0;
+		border-left-width: 0;
+		border-right-width: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.form-success-summary {
+		animation: none;
+	}
 }
 
 .form-success-summary p {
