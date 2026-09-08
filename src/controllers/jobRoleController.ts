@@ -18,6 +18,12 @@ import type {
 	JobRoleSortOrder,
 } from "../types/jobRoleDTO";
 
+export enum JobRoleMessage {
+	Created = "Job role successfully created.",
+	Updated = "Job role successfully updated.",
+	Deleted = "Job role successfully deleted.",
+}
+
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
 	capabilities: [],
 	bands: [],
@@ -208,10 +214,12 @@ export class JobRoleController {
 		const page = parseInt(req.query.page as string, 10) || 1;
 		const successMessage =
 			req.query.created === "1"
-				? "Job role successfully created."
+				? JobRoleMessage.Created
 				: req.query.updated === "1"
-					? "Job role successfully updated."
-					: undefined;
+					? JobRoleMessage.Updated
+					: req.query.deleted === "1"
+						? JobRoleMessage.Deleted
+						: undefined;
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
 		const filterQuery = buildFilterQuery(filters, ordering);
@@ -363,6 +371,7 @@ export class JobRoleController {
 		res.render("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${jobRole.roleName}`,
 			job: jobRole,
+			isAdmin: res.locals.isAdmin,
 		});
 	}
 
@@ -594,6 +603,12 @@ export class JobRoleController {
 				this.handleForbiddenError(res);
 			} else if (message === "Unauthorized") {
 				this.handleUnauthorizedError(res);
+			} else if (message === "Job role not found.") {
+				res.status(404).render("pages/error.njk", {
+					pageTitle: "Kainos Careers - Error",
+					status: 404,
+					message: "Job role not found",
+				});
 			} else {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
@@ -601,6 +616,9 @@ export class JobRoleController {
 					message: message,
 				});
 			}
+			return;
 		}
+
+		res.redirect("/job-roles?deleted=1");
 	}
 }

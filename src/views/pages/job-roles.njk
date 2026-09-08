@@ -188,14 +188,19 @@
 
             <div class="job-card-meta">
               <span class="job-badge location">📍 {{ job.location }}</span>
-              <span class="job-badge">💪{{ job.capability }}</span>
-              <span class="job-badge">📊 {{ job.band }}</span>
+              <span class="job-badge">💪 {{ job.capability }}</span>
+              <span class="job-badge">⏱️ {{ job.band }}</span>
               {% if job.status == "Open" %} <span class="job-badge">Closes on {{ job.closingDate | formatDate }}</span> {% endif %}
             </div>
 
             <div style="margin-top: 1rem;">
               <a href="/job-roles/{{ job.jobRoleId }}" class="btn">View Details</a>
-              {% if isAdmin %}<a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn btn-secondary">Edit</a>{% endif %}
+              {% if isAdmin %}
+                <a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn btn-secondary">Edit</a>
+                <form method="post" action="/job-roles/{{ job.jobRoleId }}/delete" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this job role?');">
+                  <button type="submit" class="btn btn-secondary">Delete</button>
+                </form>
+              {% endif %}
             </div>
           </div>
         {% else %}

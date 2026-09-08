@@ -65,6 +65,7 @@ Before(async function (this: CareersWorld) {
 	this.apiRequest = await playwrightRequest.newContext({
 		baseURL: `http://127.0.0.1:${apiPort}`,
 	});
+	await this.apiRequest.post("/__test__/reset");
 });
 
 After(async function (this: CareersWorld) {

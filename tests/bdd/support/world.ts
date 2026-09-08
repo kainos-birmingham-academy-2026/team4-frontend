@@ -4,6 +4,7 @@ import type {
 	APIResponse,
 	Browser,
 	BrowserContext,
+	Locator,
 	Page,
 } from "@playwright/test";
 
@@ -12,6 +13,7 @@ export class CareersWorld extends World {
 	context?: BrowserContext;
 	page?: Page;
 	notedJobRoleTitle?: string;
+	pendingDelete?: Locator;
 	apiRequest?: APIRequestContext;
 	apiResponse?: APIResponse;
 
