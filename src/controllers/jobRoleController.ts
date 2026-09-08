@@ -85,9 +85,15 @@ export function buildFilterQuery(
 
 	if (filters.roleName) params.append("roleName", filters.roleName);
 	if (filters.location) params.append("location", filters.location);
-	for (const value of filters.capability) params.append("capability", value);
-	for (const value of filters.band) params.append("band", value);
-	for (const value of filters.status) params.append("status", value);
+	filters.capability.forEach((value) => {
+		params.append("capability", value);
+	});
+	filters.band.forEach((value) => {
+		params.append("band", value);
+	});
+	filters.status.forEach((value) => {
+		params.append("status", value);
+	});
 	if (filters.closingDate) params.append("closingDate", filters.closingDate);
 	if (ordering.sortBy && ordering.sortOrder) {
 		params.append("sortBy", ordering.sortBy);
@@ -571,6 +577,17 @@ export class JobRoleController {
 				return;
 			}
 
+			// API only returns capability/band/status names, so map back to option IDs for the form.
+			const capabilityId = options?.capabilities.find(
+				(capability) => capability.name === jobRole.capability,
+			)?.id;
+			const bandId = options?.bands.find(
+				(band) => band.name === jobRole.band,
+			)?.id;
+			const statusId = options?.statuses?.find(
+				(status) => status.name === jobRole.status,
+			)?.id;
+
 			res.render("pages/job-role-create.njk", {
 				pageTitle: "Kainos Careers - Edit Job Role",
 				options,
@@ -586,9 +603,9 @@ export class JobRoleController {
 					closingDate: jobRole.closingDate
 						? new Date(jobRole.closingDate).toISOString().slice(0, 10)
 						: "",
-					capabilityId: String(jobRole.capabilityId ?? ""),
-					bandId: String(jobRole.bandId ?? ""),
-					statusId: String(jobRole.statusId ?? ""),
+					capabilityId: String(capabilityId ?? ""),
+					bandId: String(bandId ?? ""),
+					statusId: String(statusId ?? ""),
 				},
 				errors: {},
 			});
@@ -607,14 +624,17 @@ export class JobRoleController {
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unable to delete job role";
-			if (message === "Forbidden") this.handleForbiddenError(res);
-			else if (message === "Unauthorized") this.handleUnauthorizedError(res);
-			else
+			if (message === "Forbidden") {
+				this.handleForbiddenError(res);
+			} else if (message === "Unauthorized") {
+				this.handleUnauthorizedError(res);
+			} else {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
 					status: 500,
 					message,
 				});
+			}
 		}
 	}
 }
