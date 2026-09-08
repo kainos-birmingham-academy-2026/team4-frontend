@@ -443,12 +443,20 @@ button:disabled,
 	margin-bottom: 1rem;
 	max-height: 100px;
 	overflow: hidden;
-	animation: fade-out-success 0.5s ease 4s forwards;
+	animation:
+		fade-out-success 0.35s ease-out 4s forwards,
+		collapse-success 0.4s cubic-bezier(0.4, 0, 0.2, 1) 4.35s forwards;
 }
 
 @keyframes fade-out-success {
 	to {
 		opacity: 0;
+		transform: translateY(-0.25rem);
+	}
+}
+
+@keyframes collapse-success {
+	to {
 		max-height: 0;
 		padding-top: 0;
 		padding-bottom: 0;
