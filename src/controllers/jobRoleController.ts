@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { JobRole } from "../models/jobRole";
+import { getMyApplications } from "../services/applicationApiService";
 import {
 	createJobRole,
 	deleteJobRole,
@@ -10,8 +10,10 @@ import {
 	getPaginatedJobRoles,
 	updateJobRole,
 } from "../services/jobRoleApiService";
+import type { ApplicationSummary } from "../types/applicationDTO";
 import type {
 	FilterOptions,
+	JobRole,
 	JobRoleFilters,
 	JobRoleOrdering,
 	JobRoleSortBy,
@@ -36,12 +38,9 @@ function toText(value: unknown): string {
 
 function toStringArray(value: unknown): string[] {
 	if (Array.isArray(value)) {
-		return value.filter((v) => typeof v === "string");
+		return value.filter((item) => typeof item === "string");
 	}
-	if (typeof value === "string" && value.length > 0) {
-		return [value];
-	}
-	return [];
+	return typeof value === "string" && value.length > 0 ? [value] : [];
 }
 
 function extractOrdering(query: Request["query"]): JobRoleOrdering {
@@ -54,7 +53,6 @@ function extractOrdering(query: Request["query"]): JobRoleOrdering {
 		"closingDate",
 		"status",
 	];
-
 	const sortBy = query.sortBy as JobRoleSortBy;
 	const sortOrder = query.sortOrder as JobRoleSortOrder;
 
@@ -71,8 +69,7 @@ function getNextSortOrder(
 	column: JobRoleSortBy,
 ): JobRoleSortOrder | undefined {
 	if (currentSortBy !== column) return "asc";
-	if (currentSortOrder === "asc") return "desc";
-	return undefined;
+	return currentSortOrder === "asc" ? "desc" : undefined;
 }
 
 export function extractFilters(query: Request["query"]): JobRoleFilters {
@@ -92,24 +89,18 @@ export function buildFilterQuery(
 ): string {
 	const params = new URLSearchParams();
 
-	if (filters.roleName) {
-		params.append("roleName", filters.roleName);
-	}
-	if (filters.location) {
-		params.append("location", filters.location);
-	}
-	for (const value of filters.capability) {
+	if (filters.roleName) params.append("roleName", filters.roleName);
+	if (filters.location) params.append("location", filters.location);
+	filters.capability.forEach((value) => {
 		params.append("capability", value);
-	}
-	for (const value of filters.band) {
+	});
+	filters.band.forEach((value) => {
 		params.append("band", value);
-	}
-	for (const value of filters.status) {
+	});
+	filters.status.forEach((value) => {
 		params.append("status", value);
-	}
-	if (filters.closingDate) {
-		params.append("closingDate", filters.closingDate);
-	}
+	});
+	if (filters.closingDate) params.append("closingDate", filters.closingDate);
 	if (ordering.sortBy && ordering.sortOrder) {
 		params.append("sortBy", ordering.sortBy);
 		params.append("sortOrder", ordering.sortOrder);
@@ -194,6 +185,32 @@ export class JobRoleController {
 		return req.session.jwtToken ?? "";
 	}
 
+	private async getUserApplications(
+		token: string,
+	): Promise<ApplicationSummary[]> {
+		try {
+			return await getMyApplications(token);
+		} catch {
+			return [];
+		}
+	}
+
+	private withDisplayStatus<T extends JobRole>(
+		jobs: T[],
+		applications: ApplicationSummary[],
+	): (T & { displayStatus: string })[] {
+		const statusByJobRoleId = new Map(
+			applications.map((application) => [
+				application.jobRoleId,
+				application.status,
+			]),
+		);
+		return jobs.map((job) => ({
+			...job,
+			displayStatus: statusByJobRoleId.get(job.jobRoleId) ?? job.status,
+		}));
+	}
+
 	private handleForbiddenError(res: Response): void {
 		res.status(403).render("pages/login.njk", {
 			pageTitle: "Kainos Careers - Login",
@@ -220,10 +237,10 @@ export class JobRoleController {
 					: req.query.deleted === "1"
 						? JobRoleMessage.Deleted
 						: undefined;
+		const token = this.getJwtToken(req);
 		const filters = extractFilters(req.query);
 		const ordering = extractOrdering(req.query);
 		const filterQuery = buildFilterQuery(filters, ordering);
-
 		const sortLinks = {
 			roleName: getNextSortOrder(
 				ordering.sortBy,
@@ -248,14 +265,12 @@ export class JobRoleController {
 			),
 			status: getNextSortOrder(ordering.sortBy, ordering.sortOrder, "status"),
 		};
-
 		const sortQuery = (column: JobRoleSortBy): string => {
 			const nextSortOrder = getNextSortOrder(
 				ordering.sortBy,
 				ordering.sortOrder,
 				column,
 			);
-
 			return buildFilterQuery(filters, {
 				sortBy: nextSortOrder ? column : undefined,
 				sortOrder: nextSortOrder,
@@ -264,25 +279,21 @@ export class JobRoleController {
 
 		let filterOptions = EMPTY_FILTER_OPTIONS;
 		try {
-			filterOptions =
-				(await getFilterOptions(this.getJwtToken(req))) ?? EMPTY_FILTER_OPTIONS;
-		} catch (_error) {
-			// A missing options list shouldn't stop the listing rendering
+			filterOptions = (await getFilterOptions(token)) ?? EMPTY_FILTER_OPTIONS;
+		} catch {
+			// Filtering remains usable when options cannot be loaded.
 		}
 
 		try {
-			const data = await getPaginatedJobRoles(
-				page,
-				this.getJwtToken(req),
-				filters,
-				ordering,
-			);
-
+			const [data, applications] = await Promise.all([
+				getPaginatedJobRoles(page, token, filters, ordering),
+				this.getUserApplications(token),
+			]);
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
 				...(successMessage ? { successMessage } : {}),
-				jobs: data?.jobs || [],
-				pagination: data?.pagination || {
+				jobs: this.withDisplayStatus(data?.jobs ?? [], applications),
+				pagination: data?.pagination ?? {
 					currentPage: 1,
 					totalPages: 1,
 					totalCount: 0,
@@ -298,20 +309,23 @@ export class JobRoleController {
 				sortLinks,
 				sortQuery,
 			});
-		} catch (_error) {
-			// If fetching paginated job roles fails, fallback to fetching all job roles
+		} catch {
 			await this.getNonPaginatedJobRoles(req, res);
 		}
 	}
 
 	async getNonPaginatedJobRoles(req: Request, res: Response): Promise<void> {
+		const token = this.getJwtToken(req);
 		try {
-			const jobs = await getAllJobRoles(this.getJwtToken(req));
-			const safeJobs = jobs || [];
-
+			const [jobs, applications] = await Promise.all([
+				getAllJobRoles(token),
+				this.getUserApplications(token),
+			]);
+			const safeJobs = jobs ?? [];
+			const ordering = extractOrdering({});
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
-				jobs: safeJobs,
+				jobs: this.withDisplayStatus(safeJobs, applications),
 				pagination: {
 					currentPage: 1,
 					totalPages: 1,
@@ -324,8 +338,11 @@ export class JobRoleController {
 				filterOptions: EMPTY_FILTER_OPTIONS,
 				filterQuery: "",
 				hasActiveFilters: false,
+				ordering,
+				sortLinks: {},
+				sortQuery: () => "",
 			});
-		} catch (_error) {
+		} catch {
 			res.render("pages/error.njk", {
 				pageTitle: "Kainos Careers - Error",
 				status: 500,
@@ -345,9 +362,10 @@ export class JobRoleController {
 			return;
 		}
 
+		const token = this.getJwtToken(req);
 		let jobRole: JobRole | undefined;
 		try {
-			jobRole = await getJobRoleById(id, this.getJwtToken(req));
+			jobRole = await getJobRoleById(id, token);
 		} catch (error) {
 			if (error instanceof Error && error.message === "Job role not found.") {
 				res.status(404).render("pages/error.njk", {
@@ -368,9 +386,15 @@ export class JobRoleController {
 			return;
 		}
 
+		const applications = await this.getUserApplications(token);
+		const application = applications.find(
+			(userApplication) => userApplication.jobRoleId === jobRole.jobRoleId,
+		);
 		res.render("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${jobRole.roleName}`,
 			job: jobRole,
+			displayStatus: application?.status ?? jobRole.status,
+			applied: Boolean(application),
 			isAdmin: res.locals.isAdmin,
 		});
 	}
@@ -531,7 +555,7 @@ export class JobRoleController {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
 					status: 500,
-					message: message,
+					message,
 				});
 			}
 		}
@@ -562,6 +586,17 @@ export class JobRoleController {
 				return;
 			}
 
+			// API only returns capability/band/status names, so map back to option IDs for the form.
+			const capabilityId = options?.capabilities.find(
+				(capability) => capability.name === jobRole.capability,
+			)?.id;
+			const bandId = options?.bands.find(
+				(band) => band.name === jobRole.band,
+			)?.id;
+			const statusId = options?.statuses?.find(
+				(status) => status.name === jobRole.status,
+			)?.id;
+
 			res.render("pages/job-role-create.njk", {
 				pageTitle: "Kainos Careers - Edit Job Role",
 				options,
@@ -577,9 +612,9 @@ export class JobRoleController {
 					closingDate: jobRole.closingDate
 						? new Date(jobRole.closingDate).toISOString().slice(0, 10)
 						: "",
-					capabilityId: String(jobRole.capabilityId ?? ""),
-					bandId: String(jobRole.bandId ?? ""),
-					statusId: String(jobRole.statusId ?? ""),
+					capabilityId: String(capabilityId ?? ""),
+					bandId: String(bandId ?? ""),
+					statusId: String(statusId ?? ""),
 				},
 				errors: {},
 			});
@@ -598,7 +633,6 @@ export class JobRoleController {
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unable to delete job role";
-
 			if (message === "Forbidden") {
 				this.handleForbiddenError(res);
 			} else if (message === "Unauthorized") {
@@ -613,7 +647,7 @@ export class JobRoleController {
 				res.status(500).render("pages/error.njk", {
 					pageTitle: "Kainos Careers - Error",
 					status: 500,
-					message: message,
+					message,
 				});
 			}
 			return;
