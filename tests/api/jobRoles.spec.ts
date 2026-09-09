@@ -124,7 +124,7 @@ test.describe("Job roles API", () => {
 		});
 
 		expect(response.status()).toBe(302);
-		expect(response.headers()["location"]).toBe("/login");
+		expect(response.headers().location).toBe("/login");
 	});
 
 	test("returns not found for an unknown job role", async ({ request }) => {
