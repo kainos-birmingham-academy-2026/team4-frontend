@@ -171,14 +171,15 @@ app.put("/api/job-roles/:id", (req, res) => {
 	});
 });
 app.delete("/api/job-roles/:id", (req, res) => {
-	const role = mockJobRoles.find(
+	const roleIndex = mockJobRoles.findIndex(
 		(candidate) => candidate.jobRoleId === Number(req.params.id),
 	);
-	if (!role) {
+	if (roleIndex === -1) {
 		res.status(404).json({ error: "Job role not found" });
 		return;
 	}
 
+	mockJobRoles.splice(roleIndex, 1);
 	res.status(204).send();
 });
 

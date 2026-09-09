@@ -6,6 +6,7 @@ const localFrontendUrl = "http://127.0.0.1:3001";
 export default defineConfig({
 	testDir: "./tests",
 	testMatch: ["**/*.spec.ts"],
+	workers: 1,
 	globalSetup: "./tests/global-setup.ts",
 	globalTeardown: "./tests/global-teardown.ts",
 	use: {
