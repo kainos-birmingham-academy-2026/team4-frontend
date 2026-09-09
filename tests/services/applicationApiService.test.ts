@@ -3,11 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import apiClient from "../../src/config/apiClient";
 import {
 	ApplicationServiceError,
+	getMyApplications,
 	submitApplication,
 } from "../../src/services/applicationApiService";
 
 vi.mock("../../src/config/apiClient", () => ({
-	default: { post: vi.fn() },
+	default: { get: vi.fn(), post: vi.fn() },
 }));
 
 const token = "test-token";
@@ -55,5 +56,63 @@ describe("submitApplication", () => {
 		await expect(
 			submitApplication(2, "I am interested.", token),
 		).rejects.toBeInstanceOf(ApplicationServiceError);
+	});
+
+	it("maps backend server failures to a useful service error", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			response: { status: 500, data: {} },
+		});
+
+		await expect(
+			submitApplication(2, "I am interested.", token),
+		).rejects.toEqual(
+			expect.objectContaining({
+				message: "Backend server error while submitting your application",
+				statusCode: 500,
+			}),
+		);
+	});
+});
+
+describe("getMyApplications", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("returns the current user's applications", async () => {
+		const applications = [{ jobRoleId: 2, status: "In Progress" }];
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({
+			data: { applications },
+		});
+
+		await expect(getMyApplications(token)).resolves.toEqual(applications);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/applications", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+	});
+
+	it("preserves the response status for Axios failures", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			response: { status: 401 },
+		});
+
+		await expect(getMyApplications(token)).rejects.toEqual(
+			expect.objectContaining({
+				message: "Unable to fetch your applications",
+				statusCode: 401,
+			}),
+		);
+	});
+
+	it("returns a service error for non-Axios failures", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(new Error("failure"));
+
+		await expect(getMyApplications(token)).rejects.toEqual(
+			expect.objectContaining({
+				message: "Unable to fetch your applications",
+				statusCode: undefined,
+			}),
+		);
 	});
 });
