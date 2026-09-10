@@ -211,6 +211,23 @@ export class JobRoleController {
 		}));
 	}
 
+	private filterJobsBySelectedStatus<
+		T extends JobRole & { displayStatus: string },
+	>(jobs: T[], selectedStatuses: string[]): T[] {
+		if (!selectedStatuses.length) {
+			return jobs;
+		}
+
+		const selected = new Set(selectedStatuses);
+		return jobs.filter((job) => selected.has(job.displayStatus ?? job.status));
+	}
+
+	private paginateJobs<T>(jobs: T[], page: number, pageSize: number): T[] {
+		const totalPages = Math.max(1, Math.ceil(jobs.length / pageSize));
+		const currentPage = Math.min(Math.max(page, 1), totalPages);
+		return jobs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+	}
+
 	private handleForbiddenError(res: Response): void {
 		res.status(403).render("pages/login.njk", {
 			pageTitle: "Kainos Careers - Login",
@@ -285,21 +302,75 @@ export class JobRoleController {
 		}
 
 		try {
+			const hasDisplayStatusFilter = filters.status.includes("In Progress");
+			const hasStatusFilter = filters.status.length > 0;
+			const backendStatusFilters = hasDisplayStatusFilter ? [] : filters.status;
 			const [data, applications] = await Promise.all([
-				getPaginatedJobRoles(page, token, filters, ordering),
+				getPaginatedJobRoles(
+					hasStatusFilter ? 1 : page,
+					token,
+					{ ...filters, status: backendStatusFilters },
+					ordering,
+				),
 				this.getUserApplications(token),
 			]);
+			const remainingPages = hasStatusFilter
+				? await Promise.all(
+						Array.from(
+							{ length: Math.max(0, (data?.pagination.totalPages ?? 1) - 1) },
+							(_, index) =>
+								getPaginatedJobRoles(
+									index + 2,
+									token,
+									{ ...filters, status: backendStatusFilters },
+									ordering,
+								),
+						),
+					)
+				: [];
+			const jobs = [
+				...(data?.jobs ?? []),
+				...remainingPages.flatMap((response) => response?.jobs ?? []),
+			];
+			const jobsWithDisplayStatus = this.withDisplayStatus(jobs, applications);
+			const jobsForView = hasStatusFilter
+				? this.filterJobsBySelectedStatus(jobsWithDisplayStatus, filters.status)
+				: jobsWithDisplayStatus;
+			const pagination = data?.pagination ?? {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 0,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			};
+			const pageSize = pagination.pageSize || 10;
+			const currentPage = hasStatusFilter
+				? Math.min(
+						Math.max(page, 1),
+						Math.max(1, Math.ceil(jobsForView.length / pageSize)),
+					)
+				: pagination.currentPage;
+			const totalCount = hasStatusFilter
+				? jobsForView.length
+				: pagination.totalCount;
+			const totalPages = hasStatusFilter
+				? Math.max(1, Math.ceil(totalCount / pageSize))
+				: pagination.totalPages;
+			const paginatedJobs = hasStatusFilter
+				? this.paginateJobs(jobsForView, currentPage, pageSize)
+				: jobsForView;
 			res.render("pages/job-roles", {
 				pageTitle: "Kainos Careers - Job Roles",
 				...(successMessage ? { successMessage } : {}),
-				jobs: this.withDisplayStatus(data?.jobs ?? [], applications),
-				pagination: data?.pagination ?? {
-					currentPage: 1,
-					totalPages: 1,
-					totalCount: 0,
-					pageSize: 10,
-					hasNext: false,
-					hasPrev: false,
+				jobs: paginatedJobs,
+				pagination: {
+					currentPage,
+					totalPages,
+					totalCount,
+					pageSize,
+					hasNext: currentPage < totalPages,
+					hasPrev: currentPage > 1,
 				},
 				filters,
 				filterOptions,

@@ -181,6 +181,124 @@ describe("JobRoleController - getJobRoles", () => {
 		});
 	});
 
+	it("should include jobs in the In Progress display status when filtering by status", async () => {
+		const mockRequestWithStatusFilter = {
+			...mockRequest,
+			query: { status: "In Progress" },
+			session: { jwtToken: "mock-jwt-token" },
+		} as unknown as Request;
+		const mockPaginatedResponse = {
+			jobs: [mockJobRoles[0], mockJobRoles[1]],
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 2,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		};
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+		]);
+
+		await jobRoleController.getJobRoles(
+			mockRequestWithStatusFilter,
+			mockResponse,
+		);
+
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			"mock-jwt-token",
+			expect.objectContaining({ status: [] }),
+			{ sortBy: undefined, sortOrder: undefined },
+		);
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-roles",
+			expect.objectContaining({
+				jobs: [{ ...mockJobRoles[0], displayStatus: "In Progress" }],
+				pagination: expect.objectContaining({ totalCount: 1 }),
+				filters: expect.objectContaining({ status: ["In Progress"] }),
+			}),
+		);
+	});
+
+	it("should exclude applied roles when filtering by Open and Closed", async () => {
+		const closedJob = { ...mockJobRoles[1], status: "Closed" };
+		const request = {
+			...mockRequest,
+			query: { status: ["Open", "Closed"] },
+			session: { jwtToken: "mock-jwt-token" },
+		} as unknown as Request;
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: [mockJobRoles[0], closedJob],
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 2,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+		]);
+
+		await jobRoleController.getJobRoles(request, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-roles",
+			expect.objectContaining({
+				jobs: [{ ...closedJob, displayStatus: "Closed" }],
+				pagination: expect.objectContaining({ totalCount: 1 }),
+			}),
+		);
+	});
+
+	it("should include Closed and In Progress display statuses together", async () => {
+		const closedJob = { ...mockJobRoles[1], status: "Closed" };
+		const request = {
+			...mockRequest,
+			query: { status: ["Closed", "In Progress"] },
+			session: { jwtToken: "mock-jwt-token" },
+		} as unknown as Request;
+		vi.mocked(getPaginatedJobRoles).mockResolvedValue({
+			jobs: [mockJobRoles[0], closedJob],
+			pagination: {
+				currentPage: 1,
+				totalPages: 1,
+				totalCount: 2,
+				pageSize: 10,
+				hasNext: false,
+				hasPrev: false,
+			},
+		});
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+		]);
+
+		await jobRoleController.getJobRoles(request, mockResponse);
+
+		expect(getPaginatedJobRoles).toHaveBeenCalledWith(
+			1,
+			"mock-jwt-token",
+			expect.objectContaining({ status: [] }),
+			{ sortBy: undefined, sortOrder: undefined },
+		);
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-roles",
+			expect.objectContaining({
+				jobs: [
+					{ ...mockJobRoles[0], displayStatus: "In Progress" },
+					{ ...closedJob, displayStatus: "Closed" },
+				],
+				pagination: expect.objectContaining({ totalCount: 2 }),
+			}),
+		);
+	});
+
 	it("should forward the requested filters and preserve them in the pagination query", async () => {
 		const mockRequest3 = {
 			...mockRequest,
