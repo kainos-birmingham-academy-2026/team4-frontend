@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import {
 	ApplicationServiceError,
+	assessApplication,
 	submitApplication,
 } from "../services/applicationApiService";
 import { getJobRoleById } from "../services/jobRoleApiService";
@@ -90,6 +91,54 @@ export class ApplicationController {
 				errorMessage,
 				formValues: { message },
 			});
+		}
+	}
+
+	async assessApplication(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		const applicationId = Number(req.params.applicationId);
+		const action = req.params.action;
+
+		if (
+			!Number.isInteger(jobRoleId) ||
+			jobRoleId <= 0 ||
+			!Number.isInteger(applicationId) ||
+			applicationId <= 0 ||
+			(action !== "hire" && action !== "reject")
+		) {
+			res.status(400).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 400,
+				message: "Invalid application assessment request",
+			});
+			return;
+		}
+
+		try {
+			await assessApplication(applicationId, action, this.getJwtToken(req));
+			res.redirect(`/job-roles/${jobRoleId}?assessed=${action}`);
+		} catch (error) {
+			if (error instanceof ApplicationServiceError) {
+				if (error.statusCode === 401 || error.statusCode === 403) {
+					res.status(error.statusCode).render("pages/login.njk", {
+						pageTitle: "Kainos Careers - Login",
+						status: error.statusCode,
+						message: error.message,
+					});
+					return;
+				}
+
+				res.redirect(
+					`/job-roles/${jobRoleId}?assessmentError=${encodeURIComponent(error.message)}`,
+				);
+				return;
+			}
+
+			res.redirect(
+				`/job-roles/${jobRoleId}?assessmentError=${encodeURIComponent(
+					"Unable to assess application",
+				)}`,
+			);
 		}
 	}
 }

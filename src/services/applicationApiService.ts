@@ -1,6 +1,7 @@
 import axios from "axios";
 import apiClient from "../config/apiClient";
 import type {
+	ApplicationAssessment,
 	ApplicationResponse,
 	ApplicationSummary,
 } from "../types/applicationDTO";
@@ -65,5 +66,56 @@ export async function getMyApplications(
 		}
 
 		throw new ApplicationServiceError("Unable to fetch your applications");
+	}
+}
+
+export async function getApplicationsByJobRole(
+	jobRoleId: number,
+	token: string,
+): Promise<ApplicationAssessment[]> {
+	try {
+		const { data } = await apiClient.get<{
+			applications: ApplicationAssessment[];
+		}>(`/api/applications/job-role/${jobRoleId}`, {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+		return data.applications;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			throw new ApplicationServiceError(
+				"Unable to fetch role applications",
+				error.response?.status,
+			);
+		}
+
+		throw new ApplicationServiceError("Unable to fetch role applications");
+	}
+}
+
+export async function assessApplication(
+	applicationId: number,
+	action: "hire" | "reject",
+	token: string,
+): Promise<ApplicationAssessment> {
+	try {
+		const { data } = await apiClient.post<ApplicationAssessment>(
+			`/api/applications/${applicationId}/${action}`,
+			undefined,
+			{ headers: { Authorization: `Bearer ${token}` } },
+		);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const apiMessage = error.response?.data?.error;
+			if (typeof apiMessage === "string") {
+				throw new ApplicationServiceError(apiMessage, error.response?.status);
+			}
+			throw new ApplicationServiceError(
+				"Unable to assess application",
+				error.response?.status,
+			);
+		}
+
+		throw new ApplicationServiceError("Unable to assess application");
 	}
 }

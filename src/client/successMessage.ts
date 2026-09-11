@@ -1,6 +1,6 @@
 (() => {
 	const successMessages = document.querySelectorAll<HTMLElement>(
-		".form-success-summary",
+		".form-success-summary, .applied-banner",
 	);
 
 	successMessages.forEach((successMessage) => {

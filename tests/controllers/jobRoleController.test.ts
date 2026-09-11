@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import type { SessionData } from "express-session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JobRoleController } from "../../src/controllers/jobRoleController";
+import {
+	buildFilterQuery,
+	extractFilters,
+	JobRoleController,
+} from "../../src/controllers/jobRoleController";
 import { getMyApplications } from "../../src/services/applicationApiService";
 import {
 	createJobRole,
@@ -59,6 +63,55 @@ vi.mock("../../src/services/jobRoleApiService");
 vi.mock("../../src/services/applicationApiService");
 
 const jobRoleController = new JobRoleController();
+
+describe("job role filter helpers", () => {
+	it("extracts and trims scalar and array filters", () => {
+		expect(
+			extractFilters({
+				roleName: " engineer ",
+				location: " Birmingham ",
+				capability: ["Engineering", 42, "Data"],
+				band: "Consultant",
+				status: ["Open"],
+				closingDate: "2026-10-22",
+			} as never),
+		).toEqual({
+			roleName: "engineer",
+			location: "Birmingham",
+			capability: ["Engineering", "Data"],
+			band: ["Consultant"],
+			status: ["Open"],
+			closingDate: "2026-10-22",
+		});
+	});
+
+	it("builds a complete filter and ordering query", () => {
+		expect(
+			buildFilterQuery(
+				{
+					roleName: "software engineer",
+					location: "Birmingham",
+					capability: ["Engineering", "Data"],
+					band: ["Trainee"],
+					status: ["Open"],
+					closingDate: "2026-10-22",
+				},
+				{ sortBy: "roleName", sortOrder: "desc" },
+			),
+		).toBe(
+			"&roleName=software+engineer&location=Birmingham&capability=Engineering&capability=Data&band=Trainee&status=Open&closingDate=2026-10-22&sortBy=roleName&sortOrder=desc",
+		);
+	});
+
+	it("returns an empty query when no filters or ordering are selected", () => {
+		expect(
+			buildFilterQuery(emptyFilters, {
+				sortBy: undefined,
+				sortOrder: undefined,
+			}),
+		).toBe("");
+	});
+});
 
 describe("JobRoleController - getJobRoles", () => {
 	beforeEach(() => {
@@ -471,8 +524,12 @@ describe("JobRoleController - getJobRoleDetails", () => {
 			pageTitle: `Kainos Careers - ${mockJobRole.roleName}`,
 			job: mockJobRole,
 			displayStatus: mockJobRole.status,
+			applicationStatus: undefined,
 			applied: false,
 			isAdmin: true,
+			applications: [],
+			assessmentSuccess: undefined,
+			assessmentError: undefined,
 		});
 	});
 
@@ -489,11 +546,39 @@ describe("JobRoleController - getJobRoleDetails", () => {
 		expect(mockRender).toHaveBeenCalledWith("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${mockJobRole.roleName}`,
 			job: mockJobRole,
-			displayStatus: "In Progress",
+			displayStatus: mockJobRole.status,
+			applicationStatus: "In Progress",
 			applied: true,
 			isAdmin: true,
+			applications: [],
+			assessmentSuccess: undefined,
+			assessmentError: undefined,
 		});
 	});
+
+	it.each(["In Progress", "Hired", "Rejected"])(
+		"should show the applicant's %s status in the role badge",
+		async (status) => {
+			const mockJobRole = mockJobRoles[0];
+			mockRequest.params.id = String(mockJobRole.jobRoleId);
+			mockResponse.locals = { isAdmin: false };
+			vi.mocked(getJobRoleById).mockResolvedValue(mockJobRole);
+			vi.mocked(getMyApplications).mockResolvedValue([
+				{ jobRoleId: mockJobRole.jobRoleId, status },
+			]);
+
+			await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
+
+			expect(mockRender).toHaveBeenCalledWith(
+				"pages/job-detail.njk",
+				expect.objectContaining({
+					displayStatus: status,
+					applicationStatus: status,
+					applied: true,
+				}),
+			);
+		},
+	);
 
 	it("should return 400 and render error page for an invalid job role ID", async () => {
 		mockRequest.params.id = "invalid-id";

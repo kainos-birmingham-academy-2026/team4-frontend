@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
-import { getMyApplications } from "../services/applicationApiService";
+import {
+	getApplicationsByJobRole,
+	getMyApplications,
+} from "../services/applicationApiService";
 import {
 	createJobRole,
 	deleteJobRole,
@@ -10,7 +13,10 @@ import {
 	getPaginatedJobRoles,
 	updateJobRole,
 } from "../services/jobRoleApiService";
-import type { ApplicationSummary } from "../types/applicationDTO";
+import type {
+	ApplicationAssessment,
+	ApplicationSummary,
+} from "../types/applicationDTO";
 import type {
 	FilterOptions,
 	JobRole,
@@ -24,6 +30,11 @@ export enum JobRoleMessage {
 	Created = "Job role successfully created.",
 	Updated = "Job role successfully updated.",
 	Deleted = "Job role successfully deleted.",
+}
+
+export enum ApplicationAssessmentMessage {
+	Hired = "Application marked as hired.",
+	Rejected = "Application marked as rejected.",
 }
 
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
@@ -457,16 +468,40 @@ export class JobRoleController {
 			return;
 		}
 
-		const applications = await this.getUserApplications(token);
-		const application = applications.find(
+		const userApplications = await this.getUserApplications(token);
+		const application = userApplications.find(
 			(userApplication) => userApplication.jobRoleId === jobRole.jobRoleId,
 		);
+		let applications: ApplicationAssessment[] = [];
+		if (res.locals.isAdmin) {
+			try {
+				applications = (await getApplicationsByJobRole(id, token)) ?? [];
+			} catch {
+				applications = [];
+			}
+		}
+
 		res.render("pages/job-detail.njk", {
 			pageTitle: `Kainos Careers - ${jobRole.roleName}`,
 			job: jobRole,
-			displayStatus: application?.status ?? jobRole.status,
+			displayStatus:
+				!res.locals.isAdmin && application?.status
+					? application.status
+					: jobRole.status,
+			applicationStatus: application?.status,
 			applied: Boolean(application),
 			isAdmin: res.locals.isAdmin,
+			applications,
+			assessmentSuccess:
+				req.query.assessed === "hire"
+					? ApplicationAssessmentMessage.Hired
+					: req.query.assessed === "reject"
+						? ApplicationAssessmentMessage.Rejected
+						: undefined,
+			assessmentError:
+				typeof req.query.assessmentError === "string"
+					? req.query.assessmentError
+					: undefined,
 		});
 	}
 

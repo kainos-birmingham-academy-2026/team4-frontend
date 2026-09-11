@@ -168,10 +168,32 @@ npm run prepare
 - `GET /login`
 	- Displays login page
 	- Shows success message when redirected from registration (`registered=1`)
+- `POST /login`
+	- Validates login credentials against the backend auth API and starts a session
+- `GET /logout`
+	- Ends the current session and redirects to the login page
 - `GET /job-roles`
-	- Displays a page listing all open job roles
+	- Displays a page listing job roles, with support for filtering, sorting, and pagination
+- `POST /job-roles`
+	- Creates a new job role. Admin only
+- `GET /job-roles/new`
+	- Displays the form to add a new job role. Admin only
 - `GET /job-roles/:id`
-	- Displays a page listing the details of a job role
+	- Displays a page listing the details of a job role, including the applications list for Admins
+- `POST /job-roles/:id`
+	- Updates an existing job role. Admin only
+- `GET /job-roles/:id/edit`
+	- Displays the form to edit an existing job role. Admin only
+- `POST /job-roles/:id/delete`
+	- Deletes a job role. Admin only
+- `GET /job-roles/:id/apply`
+	- Displays the application form for a job role
+- `POST /job-roles/:id/apply`
+	- Submits an application for a job role
+- `POST /job-roles/:id/applications/:applicationId/:action`
+	- Hires or rejects an application for a job role, where `:action` is `hire` or `reject`. Admin only
+- `POST /api/chat`
+	- Sends a message to the careers chat assistant and returns a response
 - `GET /health`
 	- Displays this JSON object:
 ```json
