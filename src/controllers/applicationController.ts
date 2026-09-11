@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {
 	ApplicationServiceError,
 	assessApplication,
+	getMyApplications,
 	submitApplication,
 } from "../services/applicationApiService";
 import { getJobRoleById } from "../services/jobRoleApiService";
@@ -9,6 +10,31 @@ import { getJobRoleById } from "../services/jobRoleApiService";
 export class ApplicationController {
 	private getJwtToken(req: Request): string {
 		return req.session.jwtToken ?? "";
+	}
+
+	async showMyApplications(req: Request, res: Response): Promise<void> {
+		try {
+			const applications = await getMyApplications(this.getJwtToken(req));
+			res.render("pages/my-applications.njk", {
+				pageTitle: "Kainos Careers - My Applications",
+				applications,
+			});
+		} catch (error) {
+			const status =
+				error instanceof ApplicationServiceError && error.statusCode
+					? error.statusCode
+					: 500;
+			const message =
+				error instanceof ApplicationServiceError
+					? error.message
+					: "Unable to load your applications";
+
+			res.status(status).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status,
+				message,
+			});
+		}
 	}
 
 	async showApplicationForm(req: Request, res: Response): Promise<void> {

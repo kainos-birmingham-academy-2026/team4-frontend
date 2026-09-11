@@ -13,6 +13,9 @@
       </p>
 
       <a class="btn" href="/job-roles">Browse open roles</a>
+      {% if isAuthenticated %}
+        <a class="btn btn-secondary" href="/applications">View my applications</a>
+      {% endif %}
     </div>
   </section>
 

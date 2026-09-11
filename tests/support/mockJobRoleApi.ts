@@ -25,6 +25,7 @@ type MockApplication = {
 	userId: number;
 	applicantEmail: string;
 	jobRoleId: number;
+	roleName: string;
 	message: string;
 	status: "In Progress" | "Hired" | "Rejected";
 	createdAt: string;
@@ -36,6 +37,7 @@ const initialMockApplications: MockApplication[] = [
 		userId: 10,
 		applicantEmail: "applicant@example.com",
 		jobRoleId: 1,
+		roleName: "Software Engineer",
 		message: "I am excited to contribute to the engineering team.",
 		status: "In Progress",
 		createdAt: "2026-09-03T12:00:00.000Z",
@@ -45,6 +47,7 @@ const initialMockApplications: MockApplication[] = [
 		userId: 11,
 		applicantEmail: "another-applicant@example.com",
 		jobRoleId: 2,
+		roleName: "Data Analyst",
 		message: "I enjoy turning data into useful insight.",
 		status: "In Progress",
 		createdAt: "2026-09-04T12:00:00.000Z",
@@ -82,7 +85,27 @@ app.post("/auth/register", (req, res) => {
 });
 
 app.get("/api/applications", (_req, res) => {
-	res.json({ applications: [] });
+	res.json({
+		applications: mockApplications
+			.filter((application) => application.userId === 10)
+			.map(
+				({
+					applicationId,
+					userId,
+					jobRoleId,
+					roleName,
+					status,
+					createdAt,
+				}) => ({
+					applicationId,
+					userId,
+					jobRoleId,
+					roleName,
+					status,
+					createdAt,
+				}),
+			),
+	});
 });
 
 app.get("/api/applications/job-role/:jobRoleId", (req, res) => {
