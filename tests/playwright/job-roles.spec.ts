@@ -88,6 +88,85 @@ test.describe("add new job role", () => {
 });
 
 test.describe("job role details", () => {
+	test("allows an Admin to review applications and see their messages", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
+
+		await expect(
+			page.getByRole("heading", { name: "Applications" }),
+		).toBeVisible();
+		await expect(page.getByText("applicant@example.com")).toBeVisible();
+		await page.getByText("applicant@example.com").click();
+		await expect(
+			page.getByText("I am excited to contribute to the engineering team."),
+		).toBeVisible();
+		await expect(page.getByText("In Progress").last()).toBeVisible();
+	});
+
+	test("does not assess an application when Admin cancels Hire", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
+
+		await page.getByRole("button", { name: "Hire" }).click();
+		const dialog = page.getByRole("dialog");
+		await expect(dialog).toContainText("Hire this applicant?");
+		await dialog.getByRole("button", { name: "Cancel" }).click();
+
+		await expect(page.getByText("In Progress").last()).toBeVisible();
+		await expect(page.getByText("Hired")).not.toBeVisible();
+	});
+
+	test("allows an Admin to Hire an application", async ({ page, request }) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
+
+		await page.getByRole("button", { name: "Hire" }).click();
+		await page
+			.getByRole("dialog")
+			.getByRole("button", { name: "Confirm" })
+			.click();
+
+		await expect(page).toHaveURL(/assessed=hire/);
+		await expect(page.getByText("Application marked as hired.")).toBeVisible();
+		await expect(page.getByText("Hired").last()).toBeVisible();
+		await expect(
+			page.getByText("We have 2 open positions for this role."),
+		).toBeVisible();
+	});
+
+	test("allows an Admin to Reject an application", async ({
+		page,
+		request,
+	}) => {
+		await request.post("http://127.0.0.1:4001/__test__/reset");
+		await signInAsAdmin(page);
+		await page.goto("/job-roles/2");
+
+		await page.getByRole("button", { name: "Reject" }).click();
+		await expect(page.getByRole("dialog")).toContainText(
+			"Reject this applicant?",
+		);
+		await page
+			.getByRole("dialog")
+			.getByRole("button", { name: "Confirm" })
+			.click();
+
+		await expect(page).toHaveURL(/assessed=reject/);
+		await expect(
+			page.getByText("Application marked as rejected."),
+		).toBeVisible();
+		await expect(page.getByText("Rejected").last()).toBeVisible();
+	});
+
 	test("shows a confirmation before deleting from the specification page", async ({
 		page,
 		request,
@@ -96,14 +175,11 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto(`/job-roles/${deletableJobRole.jobRoleId}`);
 
-		page.once("dialog", async (dialog) => {
-			expect(dialog.type()).toBe("confirm");
-			expect(dialog.message()).toContain("delete this job role");
-			await dialog.dismiss();
-		});
-
 		const detailPage = new JobRoleDetailPage(page);
 		await detailPage.deleteButton.click();
+		const confirmationDialog = page.getByRole("dialog");
+		await expect(confirmationDialog).toContainText("delete this job role");
+		await confirmationDialog.getByRole("button", { name: "Cancel" }).click();
 		await expect(page).toHaveURL(`/job-roles/${deletableJobRole.jobRoleId}`);
 		await expect(detailPage.heading).toHaveText(deletableJobRole.roleName);
 	});
@@ -116,8 +192,11 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto(`/job-roles/${deletableJobRole.jobRoleId}`);
 
-		page.once("dialog", (dialog) => dialog.accept());
 		await page.getByRole("button", { name: "Delete this role" }).click();
+		await page
+			.getByRole("dialog")
+			.getByRole("button", { name: "Confirm" })
+			.click();
 
 		await expect(page).toHaveURL(/\/job-roles\?deleted=1/);
 		await expect(page.getByRole("status")).toContainText(
@@ -308,8 +387,11 @@ test.describe("job role listing", () => {
 		const jobRolesPage = new JobRolesPage(page);
 		await jobRolesPage.applyRoleNameFilter(deletableJobRole.roleName);
 
-		page.once("dialog", (dialog) => dialog.accept());
 		await jobRolesPage.deleteButtons.click();
+		await page
+			.getByRole("dialog")
+			.getByRole("button", { name: "Confirm" })
+			.click();
 
 		await expect(page).toHaveURL(/\/job-roles\?deleted=1/);
 		await expect(page.getByRole("status")).toContainText(

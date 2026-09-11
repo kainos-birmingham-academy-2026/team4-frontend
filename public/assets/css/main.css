@@ -433,6 +433,41 @@ button:disabled,
 	font-weight: 600;
 }
 
+.confirmation-dialog {
+	width: min(28rem, calc(100% - 2rem));
+	padding: 0;
+	border: 0;
+	border-radius: var(--radius);
+	color: var(--kainos-navy);
+	box-shadow: 0 1rem 3rem rgba(37, 45, 79, 0.25);
+}
+
+.confirmation-dialog::backdrop {
+	background: rgba(20, 29, 58, 0.5);
+}
+
+.confirmation-dialog-content {
+	padding: 1.5rem;
+}
+
+.confirmation-dialog h2 {
+	margin: 0 0 0.65rem;
+	font-size: 1.35rem;
+}
+
+.confirmation-dialog p {
+	margin: 0;
+	color: var(--kainos-muted);
+	line-height: 1.5;
+}
+
+.confirmation-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.65rem;
+	margin-top: 1.5rem;
+}
+
 .form-success-summary {
 	background: rgba(92, 192, 137, 0.15);
 	border: 1px solid rgba(92, 192, 137, 0.5);
@@ -682,6 +717,18 @@ tbody tr:hover {
 	border: 1px solid rgba(0, 115, 230, 0.5);
 }
 
+.job-status-badge.hired {
+	background: rgba(92, 192, 137, 0.2);
+	color: #1d6f44;
+	border: 1px solid rgba(92, 192, 137, 0.5);
+}
+
+.job-status-badge.rejected {
+	background: rgba(255, 77, 77, 0.2);
+	color: #9d1f19;
+	border: 1px solid rgba(255, 77, 77, 0.5);
+}
+
 .applied-banner {
 	background: rgba(92, 192, 137, 0.15);
 	border: 1px solid rgba(92, 192, 137, 0.5);
@@ -690,7 +737,11 @@ tbody tr:hover {
 	border-radius: 8px;
 	margin-bottom: 1.5rem;
 	font-weight: 600;
-	animation: applied-banner-fade-out 4s ease-in-out forwards;
+	max-height: 100px;
+	overflow: hidden;
+	animation:
+		applied-banner-fade-out 4s ease-in-out forwards,
+		collapse-success 0.4s cubic-bezier(0.4, 0, 0.2, 1) 4s forwards;
 }
 
 @keyframes applied-banner-fade-out {
@@ -702,7 +753,6 @@ tbody tr:hover {
 	}
 	100% {
 		opacity: 0;
-		visibility: hidden;
 	}
 }
 
@@ -845,6 +895,132 @@ tbody tr:hover {
 
 .job-detail-actions form {
 	margin: 0;
+}
+
+.applications-section {
+	margin-bottom: 3rem;
+	padding: 1.5rem;
+	background: var(--kainos-light);
+	border-radius: var(--radius);
+}
+
+.section-heading-row {
+	display: flex;
+	align-items: start;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.25rem;
+}
+
+.section-heading-row h2 {
+	margin: 0;
+	color: var(--kainos-navy);
+}
+
+.section-intro {
+	margin: 0.35rem 0 0;
+	color: var(--kainos-muted);
+}
+
+.application-count {
+	color: var(--kainos-muted);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.applications-list {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.application-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem;
+	background: #fff;
+	border: 1px solid var(--kainos-border);
+	border-radius: var(--radius);
+}
+
+.application-main {
+	min-width: 0;
+}
+
+.application-main details {
+	margin: 0;
+}
+
+.application-applicant {
+	color: var(--kainos-blue);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.application-main time {
+	display: block;
+	margin-top: 0.35rem;
+	color: var(--kainos-muted);
+	font-size: 0.85rem;
+}
+
+.application-message {
+	margin-top: 0.75rem;
+	padding: 0.75rem;
+	background: var(--kainos-light);
+	border-left: 3px solid var(--kainos-green);
+}
+
+.application-message-label {
+	color: var(--kainos-muted);
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.application-message p {
+	margin: 0.35rem 0 0;
+	white-space: pre-wrap;
+}
+
+.application-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.application-actions form {
+	margin: 0;
+}
+
+.application-status {
+	padding: 0.35rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.application-status.in-progress {
+	background: rgba(0, 115, 230, 0.12);
+	color: var(--kainos-blue);
+}
+
+.application-status.hired {
+	background: rgba(92, 192, 137, 0.18);
+	color: #1d6f44;
+}
+
+.application-status.rejected {
+	background: rgba(255, 77, 77, 0.14);
+	color: #9d1f19;
+}
+
+.empty-applications {
+	margin: 0;
+	color: var(--kainos-muted);
 }
 
 .job-detail-meta {

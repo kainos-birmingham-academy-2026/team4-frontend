@@ -58,4 +58,17 @@ export class BaseApiClient {
 	deleteJobRole(id: number): Promise<APIResponse> {
 		return this.request.delete(`${this.baseUrl}/api/job-roles/${id}`);
 	}
+
+	getApplicationsByJobRole(id: number): Promise<APIResponse> {
+		return this.request.get(`${this.baseUrl}/api/applications/job-role/${id}`);
+	}
+
+	assessApplication(
+		id: number,
+		action: "hire" | "reject",
+	): Promise<APIResponse> {
+		return this.request.post(
+			`${this.baseUrl}/api/applications/${id}/${action}`,
+		);
+	}
 }

@@ -35,14 +35,20 @@ When(
 
 When("I cancel the deletion confirmation", async function (this: CareersWorld) {
 	if (!this.pendingDelete) throw new Error("No delete action selected");
-	this.getPage().once("dialog", (dialog) => dialog.dismiss());
 	await this.pendingDelete.click();
+	await this.getPage()
+		.getByRole("dialog")
+		.getByRole("button", { name: "Cancel" })
+		.click();
 });
 
 When("I confirm the deletion", async function (this: CareersWorld) {
 	if (!this.pendingDelete) throw new Error("No delete action selected");
-	this.getPage().once("dialog", (dialog) => dialog.accept());
 	await this.pendingDelete.click();
+	await this.getPage()
+		.getByRole("dialog")
+		.getByRole("button", { name: "Confirm" })
+		.click();
 });
 
 Then(

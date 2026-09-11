@@ -5,7 +5,11 @@
     <div class="container">
       {% if applied %}
       <div class="applied-banner" role="status">
+        {% if applicationStatus == "In Progress" %}
         ✅ Your application has been submitted and is now in progress.
+        {% else %}
+        ✅ Your application status is {{ applicationStatus }}.
+        {% endif %}
       </div>
       {% endif %}
       <a href="/job-roles" class="breadcrumb-link">← Back to Job Roles</a>
@@ -18,6 +22,10 @@
         <span class="job-status-badge open">{{ displayStatus }}</span>
         {% elif displayStatus == "In Progress" %}
         <span class="job-status-badge in-progress">{{ displayStatus }}</span>
+        {% elif displayStatus == "Hired" %}
+        <span class="job-status-badge hired">{{ displayStatus }}</span>
+        {% elif displayStatus == "Rejected" %}
+        <span class="job-status-badge rejected">{{ displayStatus }}</span>
         {% else %}
         <span class="job-status-badge closed">{{ displayStatus }}</span>
         {% endif %}
@@ -26,10 +34,72 @@
       {% if isAdmin %}
       <div class="job-detail-actions">
         <a href="/job-roles/{{ job.jobRoleId }}/edit" class="btn">Edit this role</a>
-        <form method="post" action="/job-roles/{{ job.jobRoleId }}/delete" onsubmit="return confirm('Are you sure you want to delete this job role?');">
+        <form method="post" action="/job-roles/{{ job.jobRoleId }}/delete" data-confirmation-message="Are you sure you want to delete this job role?">
           <button type="submit" class="btn btn-secondary">Delete this role</button>
         </form>
       </div>
+      {% endif %}
+
+      {% if isAdmin %}
+      <section class="applications-section" aria-labelledby="applications-heading">
+        <div class="section-heading-row">
+          <div>
+            <h2 id="applications-heading">Applications</h2>
+            <p class="section-intro">Review applicants and update their application status.</p>
+          </div>
+          {% if applications.length %}
+            <span class="application-count">{{ applications.length }} applicant{% if applications.length != 1 %}s{% endif %}</span>
+          {% endif %}
+        </div>
+
+        {% if assessmentSuccess %}
+          <div class="form-success-summary" role="status" aria-live="polite">
+            <p>{{ assessmentSuccess }}</p>
+          </div>
+        {% endif %}
+        {% if assessmentError %}
+          <div class="form-error-summary" role="alert" aria-live="polite">
+            <p>{{ assessmentError }}</p>
+          </div>
+        {% endif %}
+
+        {% if applications.length %}
+          <div class="applications-list">
+            {% for application in applications %}
+              <article class="application-item">
+                <div class="application-main">
+                  <details>
+                    <summary class="application-applicant">{{ application.applicantEmail }}</summary>
+                    <div class="application-message" id="application-message-{{ application.applicationId }}">
+                      <span class="application-message-label">Application message</span>
+                      <p>{{ application.message }}</p>
+                    </div>
+                  </details>
+                  <time datetime="{{ application.createdAt }}">Applied {{ application.createdAt | formatDate }}</time>
+                </div>
+
+                <div class="application-actions">
+                  {% if application.status == "In Progress" %}
+                    <span class="application-status in-progress">{{ application.status }}</span>
+                    <form method="post" action="/job-roles/{{ job.jobRoleId }}/applications/{{ application.applicationId }}/hire" data-confirmation-message="Hire this applicant?">
+                      <button type="submit" class="btn btn-small">Hire</button>
+                    </form>
+                    <form method="post" action="/job-roles/{{ job.jobRoleId }}/applications/{{ application.applicationId }}/reject" data-confirmation-message="Reject this applicant?">
+                      <button type="submit" class="btn btn-small btn-secondary">Reject</button>
+                    </form>
+                  {% elif application.status == "Hired" %}
+                    <span class="application-status hired">Hired</span>
+                  {% else %}
+                    <span class="application-status rejected">Rejected</span>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-applications">No applications have been submitted for this role.</p>
+        {% endif %}
+      </section>
       {% endif %}
 
       <div class="job-detail-meta">

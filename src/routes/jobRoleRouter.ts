@@ -25,5 +25,9 @@ router.post(
 	"/job-roles/:id/apply",
 	applicationController.submitApplication.bind(applicationController),
 );
+router.post(
+	"/job-roles/:id/applications/:applicationId/:action",
+	applicationController.assessApplication.bind(applicationController),
+);
 
 export default router;

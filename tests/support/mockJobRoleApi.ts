@@ -1,14 +1,56 @@
 import express from "express";
 import {
 	adminUser,
+	mockJobRoles as fixtureJobRoles,
 	jobRoleListContent,
-	mockJobRoles,
 	testUser,
 } from "../fixtures/testData.ts";
 
 const PORT = Number(process.env.PORT) || 4001;
 let lastUpdate: { id: number; body: Record<string, unknown> } | null = null;
-const initialMockJobRoles = [...mockJobRoles];
+type MockJobRole = (typeof fixtureJobRoles)[number] & {
+	numberOfOpenPositions: number;
+	responsibilities: string[];
+};
+
+const cloneJobRole = (role: (typeof fixtureJobRoles)[number]): MockJobRole => ({
+	...role,
+	responsibilities: [...role.responsibilities],
+});
+
+const initialMockJobRoles: MockJobRole[] = fixtureJobRoles.map(cloneJobRole);
+const mockJobRoles: MockJobRole[] = fixtureJobRoles.map(cloneJobRole);
+type MockApplication = {
+	applicationId: number;
+	userId: number;
+	applicantEmail: string;
+	jobRoleId: number;
+	message: string;
+	status: "In Progress" | "Hired" | "Rejected";
+	createdAt: string;
+};
+
+const initialMockApplications: MockApplication[] = [
+	{
+		applicationId: 101,
+		userId: 10,
+		applicantEmail: "applicant@example.com",
+		jobRoleId: 1,
+		message: "I am excited to contribute to the engineering team.",
+		status: "In Progress",
+		createdAt: "2026-09-03T12:00:00.000Z",
+	},
+	{
+		applicationId: 102,
+		userId: 11,
+		applicantEmail: "another-applicant@example.com",
+		jobRoleId: 2,
+		message: "I enjoy turning data into useful insight.",
+		status: "In Progress",
+		createdAt: "2026-09-04T12:00:00.000Z",
+	},
+];
+const mockApplications = [...initialMockApplications];
 
 const app = express();
 app.use(express.json());
@@ -37,6 +79,55 @@ app.post("/auth/register", (req, res) => {
 	}
 
 	res.json({ token: testUser.token });
+});
+
+app.get("/api/applications", (_req, res) => {
+	res.json({ applications: [] });
+});
+
+app.get("/api/applications/job-role/:jobRoleId", (req, res) => {
+	res.json({
+		applications: mockApplications.filter(
+			(application) => application.jobRoleId === Number(req.params.jobRoleId),
+		),
+	});
+});
+
+app.post("/api/applications/:applicationId/:action", (req, res) => {
+	const application = mockApplications.find(
+		(candidate) => candidate.applicationId === Number(req.params.applicationId),
+	);
+	if (!application) {
+		res.status(404).json({ error: "Application not found" });
+		return;
+	}
+	if (application.status !== "In Progress") {
+		res
+			.status(409)
+			.json({ error: "Only applications in progress can be assessed" });
+		return;
+	}
+
+	if (req.params.action === "hire") {
+		const role = mockJobRoles.find(
+			(candidate) => candidate.jobRoleId === application.jobRoleId,
+		);
+		if (!role || role.numberOfOpenPositions <= 0) {
+			res
+				.status(409)
+				.json({ error: "There are no open positions remaining for this role" });
+			return;
+		}
+		role.numberOfOpenPositions -= 1;
+		application.status = "Hired";
+	} else if (req.params.action === "reject") {
+		application.status = "Rejected";
+	} else {
+		res.status(400).json({ error: "Invalid assessment action" });
+		return;
+	}
+
+	res.json(application);
 });
 
 app.get("/api/job-roles/filter-options", (_req, res) => {
@@ -184,7 +275,19 @@ app.delete("/api/job-roles/:id", (req, res) => {
 });
 
 app.post("/__test__/reset", (_req, res) => {
-	mockJobRoles.splice(0, mockJobRoles.length, ...initialMockJobRoles);
+	mockJobRoles.splice(
+		0,
+		mockJobRoles.length,
+		...initialMockJobRoles.map((role) => ({
+			...role,
+			responsibilities: [...role.responsibilities],
+		})),
+	);
+	mockApplications.splice(
+		0,
+		mockApplications.length,
+		...initialMockApplications.map((application) => ({ ...application })),
+	);
 	res.sendStatus(204);
 });
 
