@@ -28,6 +28,28 @@ test.describe("Application assessment API", () => {
 		});
 	});
 
+	test("lists the applicant's applications with role and status", async ({
+		request,
+	}) => {
+		const response = await new BaseApiClient(
+			request,
+			mockApiBaseUrl,
+		).getMyApplications();
+
+		expect(response.status()).toBe(200);
+		expect(await response.json()).toEqual({
+			applications: [
+				expect.objectContaining({
+					applicationId: 101,
+					jobRoleId: 1,
+					roleName: "Software Engineer",
+					status: "In Progress",
+					createdAt: "2026-09-03T12:00:00.000Z",
+				}),
+			],
+		});
+	});
+
 	test("hiring an application changes status and reduces open positions", async ({
 		request,
 	}) => {

@@ -5,6 +5,49 @@ import { LoginPage } from "../pages/loginPage";
 import { RegisterPage } from "../pages/registerPage";
 
 test.describe("authentication", () => {
+	test("shows public navigation and redirects browse roles to sign in", async ({
+		page,
+	}) => {
+		await page.goto("/");
+
+		await expect(page.locator("header #primary-nav")).toContainText(
+			"Browse Roles",
+		);
+		await expect(page.locator('header a[href="/register"]')).toHaveText(
+			"Sign Up",
+		);
+		await expect(page.locator('header a[href="/login"]')).toHaveText("Log In");
+
+		await page.locator('header a[href="/job-roles"]').click();
+		await expect(page).toHaveURL("/login");
+	});
+
+	test("shows the logged-in user's applications and authenticated navigation", async ({
+		page,
+	}) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.open("/login");
+		await loginPage.login(testUser.email, testUser.password);
+
+		await expect(page.locator("header #primary-nav")).toContainText(
+			"Browse Roles",
+		);
+		await expect(page.locator('header a[href="/applications"]')).toHaveText(
+			"My Applications",
+		);
+		await expect(page.locator('header a[href="/logout"]')).toHaveText(
+			"Log Out",
+		);
+
+		await page.locator('header a[href="/applications"]').click();
+		await expect(page).toHaveURL("/applications");
+		await expect(page.locator("main h1")).toHaveText("My Applications");
+		await expect(page.locator('main a[href="/job-roles/1"]')).toHaveText(
+			"Software Engineer",
+		);
+		await expect(page.locator(".application-status")).toHaveText("In Progress");
+	});
+
 	test("redirects an unauthenticated visitor from job roles to sign in", async ({
 		page,
 	}) => {
