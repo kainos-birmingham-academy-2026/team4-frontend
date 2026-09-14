@@ -25,8 +25,8 @@
       {% set navLinks = [{ href: "/job-roles", label: "Browse Roles" }] %}
       {% if isApplicant %}
         {% set navLinks = navLinks.concat([{ href: "/applications", label: "My Applications" }, { href: "/logout", label: "Log Out" }]) %}
-		{% elif isAuthenticated %}
-		  {% set navLinks = navLinks.concat([{ href: "/logout", label: "Log Out" }]) %}
+      {% elif isAuthenticated %}
+        {% set navLinks = navLinks.concat([{ href: "/logout", label: "Log Out" }]) %}
       {% else %}
         {% set navLinks = navLinks.concat([{ href: "/register", label: "Sign Up" }, { href: "/login", label: "Log In" }]) %}
       {% endif %}
