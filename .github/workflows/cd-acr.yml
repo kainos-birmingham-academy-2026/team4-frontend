@@ -52,7 +52,7 @@ jobs:
             org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.revision=${{ github.sha }}
 
-      - name: Build and push image
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .

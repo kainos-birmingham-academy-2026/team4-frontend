@@ -12,7 +12,9 @@
 		"[data-confirmation-cancel]",
 	);
 
-	if (!dialog || !message || !confirmButton || !cancelButton) return;
+	if (!dialog || !message || !confirmButton || !cancelButton) {
+		return;
+	}
 
 	let pendingForm: HTMLFormElement | null = null;
 
@@ -22,10 +24,14 @@
 
 	document.addEventListener("submit", (event) => {
 		const form = event.target;
-		if (!(form instanceof HTMLFormElement)) return;
+		if (!(form instanceof HTMLFormElement)) {
+			return;
+		}
 
 		const confirmationMessage = form.dataset.confirmationMessage;
-		if (!confirmationMessage) return;
+		if (!confirmationMessage) {
+			return;
+		}
 
 		event.preventDefault();
 		pendingForm = form;

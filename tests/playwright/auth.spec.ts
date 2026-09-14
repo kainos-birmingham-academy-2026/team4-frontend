@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { testUser } from "../fixtures/testData";
+import { adminUser, testUser } from "../fixtures/testData";
 import { JobRolesPage } from "../pages/jobRolesPage";
 import { LoginPage } from "../pages/loginPage";
 import { RegisterPage } from "../pages/registerPage";
@@ -46,6 +46,22 @@ test.describe("authentication", () => {
 			"Software Engineer",
 		);
 		await expect(page.locator(".application-status")).toHaveText("In Progress");
+	});
+
+	test("does not show applicant-only navigation to an admin", async ({
+		page,
+	}) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.open("/login");
+		await loginPage.login(adminUser.email, adminUser.password);
+
+		await expect(page.locator("header #primary-nav")).toContainText(
+			"Browse Roles",
+		);
+		await expect(page.locator('header a[href="/applications"]')).toHaveCount(0);
+		await expect(page.locator('header a[href="/logout"]')).toHaveText(
+			"Log Out",
+		);
 	});
 
 	test("redirects an unauthenticated visitor from job roles to sign in", async ({

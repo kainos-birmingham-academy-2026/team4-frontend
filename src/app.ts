@@ -80,7 +80,8 @@ app.use((req, res, next) => {
 	res.locals.isAdmin = hasAdminRole(req.session.jwtToken);
 	res.locals.currentPath = req.path;
 	res.locals.userRole = getRoleFromToken(req.session.jwtToken);
-	res.locals.isApplicant = isApplicantRole(res.locals.userRole);
+	res.locals.isApplicant =
+		res.locals.isAuthenticated && isApplicantRole(res.locals.userRole);
 	next();
 });
 
