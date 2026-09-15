@@ -287,10 +287,9 @@ app.get("/api/job-roles/export", (_req, res) => {
 		role.sharepointUrl,
 		role.numberOfOpenPositions,
 	]);
-	const csv =
-		[headers, ...rows]
-			.map((row) => row.map(escapeCsvValue).join(","))
-			.join("\r\n") + "\r\n";
+	const csv = `${[headers, ...rows]
+		.map((row) => row.map(escapeCsvValue).join(","))
+		.join("\r\n")}\r\n`;
 
 	res
 		.type("text/csv")
