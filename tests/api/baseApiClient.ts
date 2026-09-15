@@ -63,6 +63,10 @@ export class BaseApiClient {
 		return this.request.get(`${this.baseUrl}/api/applications/job-role/${id}`);
 	}
 
+	getMyApplications(): Promise<APIResponse> {
+		return this.request.get(`${this.baseUrl}/api/applications`);
+	}
+
 	assessApplication(
 		id: number,
 		action: "hire" | "reject",

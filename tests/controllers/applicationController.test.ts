@@ -4,6 +4,7 @@ import { ApplicationController } from "../../src/controllers/applicationControll
 import {
 	ApplicationServiceError,
 	assessApplication,
+	getMyApplications,
 	submitApplication,
 } from "../../src/services/applicationApiService";
 import { getJobRoleById } from "../../src/services/jobRoleApiService";
@@ -16,6 +17,7 @@ vi.mock("../../src/services/applicationApiService", async () => {
 	>("../../src/services/applicationApiService");
 	return {
 		...actual,
+		getMyApplications: vi.fn(),
 		submitApplication: vi.fn(),
 		assessApplication: vi.fn(),
 	};
@@ -50,6 +52,27 @@ describe("ApplicationController", () => {
 			pageTitle: `Kainos Careers - Apply for ${mockJobRoles[0].roleName}`,
 			job: mockJobRoles[0],
 			formValues: { message: "" },
+		});
+	});
+
+	it("renders the current user's applications", async () => {
+		const applications = [
+			{
+				applicationId: 10,
+				jobRoleId: 1,
+				roleName: "Software Engineer",
+				status: "In Progress",
+				createdAt: "2026-09-03T00:00:00.000Z",
+			},
+		];
+		vi.mocked(getMyApplications).mockResolvedValue(applications);
+
+		await controller.showMyApplications(requestFor(), response);
+
+		expect(getMyApplications).toHaveBeenCalledWith("test-token");
+		expect(response.render).toHaveBeenCalledWith("pages/my-applications.njk", {
+			pageTitle: "Kainos Careers - My Applications",
+			applications,
 		});
 	});
 
@@ -133,6 +156,7 @@ describe("ApplicationController", () => {
 			applicationId: 1,
 			jobRoleId: 1,
 			userId: 1,
+			roleName: "Software Engineer",
 			status: "In Progress",
 			createdAt: "2026-09-03T00:00:00.000Z",
 		});

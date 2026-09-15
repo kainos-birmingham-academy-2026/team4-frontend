@@ -172,6 +172,8 @@ npm run prepare
 	- Validates login credentials against the backend auth API and starts a session
 - `GET /logout`
 	- Ends the current session and redirects to the login page
+- `GET /applications`
+	- Displays the authenticated user's job applications, including each role name as a link to the role details page and the application status
 - `GET /job-roles`
 	- Displays a page listing job roles, with support for filtering, sorting, and pagination
 - `POST /job-roles`
@@ -209,14 +211,14 @@ The frontend reads configuration from environment variables:
 
 - `PORT`
 	- Local server port (default: `3000`)
-- `BACKEND_API_BASE_URL`
+- `API_BASE_URL`
 	- Backend API base URL used by registration service (default: `http://localhost:4000`)
 
 Example:
 
 ```bash
 PORT=3000
-BACKEND_API_BASE_URL=http://localhost:4000
+API_BASE_URL=http://localhost:4000
 ```
 
 ## Registration Validation

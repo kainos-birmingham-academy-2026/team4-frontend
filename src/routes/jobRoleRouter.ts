@@ -8,6 +8,10 @@ const controller = new JobRoleController();
 const applicationController = new ApplicationController();
 
 router.use(requireAuth);
+router.get(
+	"/applications",
+	applicationController.showMyApplications.bind(applicationController),
+);
 router.get("/job-roles", controller.getJobRoles.bind(controller));
 
 router.post("/job-roles", controller.create.bind(controller));

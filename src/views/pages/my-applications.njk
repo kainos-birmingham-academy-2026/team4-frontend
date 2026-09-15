@@ -1,0 +1,42 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="page-section">
+    <div class="container">
+      <div class="page-header">
+        <h1>My Applications</h1>
+        <p>Track the progress of the roles you have applied for.</p>
+      </div>
+
+      {% if applications.length %}
+        <section class="applications-section" aria-labelledby="applications-heading">
+          <h2 id="applications-heading" class="visually-hidden">Your job applications</h2>
+          <div class="applications-list">
+            {% for application in applications %}
+              <article class="application-item">
+                <div class="application-main">
+                  <a class="job-card-title-link" href="/job-roles/{{ application.jobRoleId }}">
+                    <h3 class="job-card-title">{{ application.roleName }}</h3>
+                  </a>
+                  <time datetime="{{ application.createdAt }}">Applied {{ application.createdAt | formatDate }}</time>
+                </div>
+                {% if application.status == "In Progress" %}
+                  <span class="application-status in-progress">{{ application.status }}</span>
+                {% elif application.status == "Hired" %}
+                  <span class="application-status hired">{{ application.status }}</span>
+                {% elif application.status == "Rejected" %}
+                  <span class="application-status rejected">{{ application.status }}</span>
+                {% else %}
+                  <span class="application-status">{{ application.status }}</span>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% else %}
+        <p class="empty-applications">You have not submitted any job applications yet.</p>
+        <a class="btn" href="/job-roles">Browse open roles</a>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

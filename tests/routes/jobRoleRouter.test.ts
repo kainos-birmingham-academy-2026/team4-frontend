@@ -1,7 +1,10 @@
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
-import { submitApplication } from "../../src/services/applicationApiService";
+import {
+	getMyApplications,
+	submitApplication,
+} from "../../src/services/applicationApiService";
 import {
 	getCreateJobRoleOptions,
 	getJobRoleById,
@@ -157,6 +160,30 @@ describe("GET /job-roles", () => {
 	});
 });
 
+describe("GET /applications", () => {
+	it("renders the authenticated user's applications", async () => {
+		vi.mocked(getMyApplications).mockResolvedValue([
+			{
+				applicationId: 10,
+				jobRoleId: 1,
+				roleName: "Software Engineer",
+				status: "Hired",
+				createdAt: "2026-09-03T00:00:00.000Z",
+			},
+		]);
+
+		const response = await request(app).get("/applications");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain(
+			"<title>Kainos Careers - My Applications</title>",
+		);
+		expect(response.text).toContain('href="/job-roles/1"');
+		expect(response.text).toContain("Software Engineer");
+		expect(response.text).toContain("Hired");
+	});
+});
+
 describe("GET /job-roles/new", () => {
 	it("renders the add-role form instead of treating new as an ID", async () => {
 		vi.mocked(getCreateJobRoleOptions).mockResolvedValue({
@@ -230,6 +257,7 @@ describe("POST /job-roles/:id/apply", () => {
 			applicationId: 1,
 			jobRoleId: 1,
 			userId: 1,
+			roleName: "Software Engineer",
 			status: "In Progress",
 			createdAt: "2026-01-01T00:00:00.000Z",
 		});
