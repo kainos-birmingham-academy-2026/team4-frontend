@@ -5,6 +5,32 @@ const mockApiBaseUrl = "http://127.0.0.1:4001";
 const frontendBaseUrl = "http://127.0.0.1:3001";
 
 test.describe("Job roles API", () => {
+	test("exports all job roles as a CSV without internal relation IDs", async ({
+		request,
+	}) => {
+		const client = new BaseApiClient(request, mockApiBaseUrl);
+		await client.resetMockState();
+
+		const response = await client.getJobRoleExport();
+
+		expect(response.status()).toBe(200);
+		expect(response.headers()["content-type"]).toContain("text/csv");
+		expect(response.headers()["content-disposition"]).toBe(
+			'attachment; filename="job-roles.csv"',
+		);
+
+		const csv = await response.text();
+		const [header] = csv.split("\r\n");
+		expect(header).toBe(
+			"jobRoleId,roleName,location,capability,band,closingDate,status,description,responsibilities,sharepointUrl,numberOfOpenPositions",
+		);
+		expect(csv).toContain("Software Engineer");
+		expect(csv).toContain("Platform Specialist 60");
+		expect(header).not.toContain("capabilityId");
+		expect(header).not.toContain("bandId");
+		expect(header).not.toContain("statusId");
+	});
+
 	test("returns paginated job roles", async ({ request }) => {
 		const response = await new BaseApiClient(
 			request,

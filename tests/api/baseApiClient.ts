@@ -36,6 +36,10 @@ export class BaseApiClient {
 		});
 	}
 
+	getJobRoleExport(): Promise<APIResponse> {
+		return this.request.get(`${this.baseUrl}/api/job-roles/export`);
+	}
+
 	getJobRole(id: number): Promise<APIResponse> {
 		return this.request.get(`${this.baseUrl}/api/job-roles/${id}`);
 	}

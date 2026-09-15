@@ -254,6 +254,50 @@ app.get("/api/job-roles", (req, res) => {
 	});
 });
 
+app.get("/api/job-roles/export", (_req, res) => {
+	const headers = [
+		"jobRoleId",
+		"roleName",
+		"location",
+		"capability",
+		"band",
+		"closingDate",
+		"status",
+		"description",
+		"responsibilities",
+		"sharepointUrl",
+		"numberOfOpenPositions",
+	];
+	const escapeCsvValue = (value: unknown): string => {
+		const stringValue = String(value ?? "");
+		return /[",\r\n]/.test(stringValue)
+			? `"${stringValue.replace(/"/g, '""')}"`
+			: stringValue;
+	};
+	const rows = mockJobRoles.map((role) => [
+		role.jobRoleId,
+		role.roleName,
+		role.location,
+		role.capability,
+		role.band,
+		role.closingDate,
+		role.status,
+		role.description,
+		role.responsibilities.join("; "),
+		role.sharepointUrl,
+		role.numberOfOpenPositions,
+	]);
+	const csv =
+		[headers, ...rows]
+			.map((row) => row.map(escapeCsvValue).join(","))
+			.join("\r\n") + "\r\n";
+
+	res
+		.type("text/csv")
+		.set("Content-Disposition", 'attachment; filename="job-roles.csv"')
+		.send(csv);
+});
+
 app.get("/api/job-roles/:id", (req, res) => {
 	const role = mockJobRoles.find(
 		(candidate) => candidate.jobRoleId === Number(req.params.id),

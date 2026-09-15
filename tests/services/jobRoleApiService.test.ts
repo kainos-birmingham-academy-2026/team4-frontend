@@ -4,6 +4,7 @@ import apiClient from "../../src/config/apiClient";
 import {
 	createJobRole,
 	deleteJobRole,
+	exportJobRoles,
 	getAllJobRoles,
 	getCreateJobRoleOptions,
 	getFilterOptions,
@@ -11,6 +12,10 @@ import {
 	getPaginatedJobRoles,
 	updateJobRole,
 } from "../../src/services/jobRoleApiService";
+import type {
+	CreateJobRoleInput,
+	UpdateJobRoleInput,
+} from "../../src/types/jobRoleDTO";
 import { mockJobRole1, mockJobRoles } from "../mockJobRoles";
 
 vi.mock("../../src/config/apiClient", () => ({
@@ -20,6 +25,45 @@ vi.mock("../../src/config/apiClient", () => ({
 }));
 
 const mockToken = "mocked-jwt-token";
+const mockCreateInput = mockJobRole1 as unknown as CreateJobRoleInput;
+const mockUpdateInput = mockJobRole1 as unknown as UpdateJobRoleInput;
+
+describe("jobRoleApiService - exportJobRoles", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("returns the CSV response and forwards the download headers", async () => {
+		const report = new ArrayBuffer(8);
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({
+			data: report,
+			headers: {
+				"content-type": "text/csv; charset=utf-8",
+				"content-disposition": 'attachment; filename="job-roles.csv"',
+			},
+		});
+
+		await expect(exportJobRoles(mockToken)).resolves.toEqual({
+			data: report,
+			contentType: "text/csv; charset=utf-8",
+			contentDisposition: 'attachment; filename="job-roles.csv"',
+		});
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles/export", {
+			headers: { Authorization: `Bearer ${mockToken}` },
+			responseType: "arraybuffer",
+		});
+	});
+
+	it("maps forbidden responses to a Forbidden error", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Forbidden",
+			response: { status: 403 },
+		});
+
+		await expect(exportJobRoles(mockToken)).rejects.toThrow("Forbidden");
+	});
+});
 
 describe("jobRoleApiService - getAllJobRoles", () => {
 	beforeEach(() => {
@@ -397,7 +441,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			.fn()
 			.mockResolvedValue({ data: mockJobRole1 });
 
-		const result = await createJobRole(mockJobRole1, mockToken);
+		const result = await createJobRole(mockCreateInput, mockToken);
 
 		expect(result).toEqual(mockJobRole1);
 		expect(apiClient.post).toHaveBeenCalledWith(
@@ -414,7 +458,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			response: { status: 400 },
 		});
 
-		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+		await expect(createJobRole(mockCreateInput, mockToken)).rejects.toThrow(
 			"Invalid job role data.",
 		);
 	});
@@ -426,7 +470,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			response: { status: 401 },
 		});
 
-		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+		await expect(createJobRole(mockCreateInput, mockToken)).rejects.toThrow(
 			"Unauthorized",
 		);
 	});
@@ -438,7 +482,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			response: { status: 403 },
 		});
 
-		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+		await expect(createJobRole(mockCreateInput, mockToken)).rejects.toThrow(
 			"Forbidden",
 		);
 	});
@@ -450,7 +494,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			response: { status: 500 },
 		});
 
-		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+		await expect(createJobRole(mockCreateInput, mockToken)).rejects.toThrow(
 			"Error creating job role: Internal Server Error",
 		);
 	});
@@ -462,7 +506,7 @@ describe("jobRoleApiService - createJobRole", () => {
 			response: { status: 409 },
 		});
 
-		await expect(createJobRole(mockJobRole1, mockToken)).rejects.toThrow(
+		await expect(createJobRole(mockCreateInput, mockToken)).rejects.toThrow(
 			"Unexpected error: Conflict",
 		);
 	});
@@ -506,20 +550,23 @@ describe("jobRoleApiService - updateJobRole", () => {
 	});
 
 	it("should update a job role when the API call is successful", async () => {
-		const updatedJobRole = { ...mockJobRole1, roleName: "Updated Role" };
+		const updatedJobRole = {
+			...mockUpdateInput,
+			roleName: "Updated Role",
+		};
 		vi.mocked(apiClient).put = vi
 			.fn()
 			.mockResolvedValue({ data: updatedJobRole });
 
 		const result = await updateJobRole(
-			mockJobRole1.id,
+			mockJobRole1.jobRoleId,
 			updatedJobRole,
 			mockToken,
 		);
 
 		expect(result).toEqual(updatedJobRole);
 		expect(apiClient.put).toHaveBeenCalledWith(
-			`/api/job-roles/${mockJobRole1.id}`,
+			`/api/job-roles/${mockJobRole1.jobRoleId}`,
 			updatedJobRole,
 			{ headers: { Authorization: `Bearer ${mockToken}` } },
 		);
@@ -533,7 +580,7 @@ describe("jobRoleApiService - updateJobRole", () => {
 		});
 
 		await expect(
-			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+			updateJobRole(mockJobRole1.jobRoleId, mockUpdateInput, mockToken),
 		).rejects.toThrow("Invalid job role data.");
 	});
 
@@ -545,7 +592,7 @@ describe("jobRoleApiService - updateJobRole", () => {
 		});
 
 		await expect(
-			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+			updateJobRole(mockJobRole1.jobRoleId, mockUpdateInput, mockToken),
 		).rejects.toThrow("Unauthorized");
 	});
 
@@ -565,7 +612,7 @@ describe("jobRoleApiService - updateJobRole", () => {
 		});
 
 		await expect(
-			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+			updateJobRole(mockJobRole1.jobRoleId, mockUpdateInput, mockToken),
 		).rejects.toThrow("Error updating job role: Internal Server Error");
 	});
 
@@ -577,7 +624,7 @@ describe("jobRoleApiService - updateJobRole", () => {
 		});
 
 		await expect(
-			updateJobRole(mockJobRole1.id, mockJobRole1, mockToken),
+			updateJobRole(mockJobRole1.jobRoleId, mockUpdateInput, mockToken),
 		).rejects.toThrow("Unexpected error: Conflict");
 	});
 });
@@ -590,10 +637,10 @@ describe("jobRoleApiService - deleteJobRole", () => {
 	it("should delete a job role when the API call is successful", async () => {
 		vi.mocked(apiClient).delete = vi.fn().mockResolvedValue({});
 
-		await deleteJobRole(mockJobRole1.id, mockToken);
+		await deleteJobRole(mockJobRole1.jobRoleId, mockToken);
 
 		expect(apiClient.delete).toHaveBeenCalledWith(
-			`/api/job-roles/${mockJobRole1.id}`,
+			`/api/job-roles/${mockJobRole1.jobRoleId}`,
 			{ headers: { Authorization: `Bearer ${mockToken}` } },
 		);
 	});
@@ -605,9 +652,9 @@ describe("jobRoleApiService - deleteJobRole", () => {
 			response: { status: 401 },
 		});
 
-		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
-			"Unauthorized",
-		);
+		await expect(
+			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
+		).rejects.toThrow("Unauthorized");
 	});
 
 	it("should throw a forbidden error when the API returns a 403 status", async () => {
@@ -617,9 +664,9 @@ describe("jobRoleApiService - deleteJobRole", () => {
 			response: { status: 403 },
 		});
 
-		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
-			"Forbidden",
-		);
+		await expect(
+			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
+		).rejects.toThrow("Forbidden");
 	});
 
 	it("should throw an error when the API returns a 500 status", async () => {
@@ -629,9 +676,9 @@ describe("jobRoleApiService - deleteJobRole", () => {
 			response: { status: 500 },
 		});
 
-		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
-			"Error deleting job role: Internal Server Error",
-		);
+		await expect(
+			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
+		).rejects.toThrow("Error deleting job role: Internal Server Error");
 	});
 
 	it("should throw unexpected error for non-401/403/500 axios statuses", async () => {
@@ -641,8 +688,8 @@ describe("jobRoleApiService - deleteJobRole", () => {
 			response: { status: 409 },
 		});
 
-		await expect(deleteJobRole(mockJobRole1.id, mockToken)).rejects.toThrow(
-			"Unexpected error: Conflict",
-		);
+		await expect(
+			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
+		).rejects.toThrow("Unexpected error: Conflict");
 	});
 });

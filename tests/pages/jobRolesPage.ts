@@ -76,6 +76,7 @@ export class JobRolesPage extends BasePage {
 	readonly previousPageLink: Locator;
 	readonly lastPageLink: Locator;
 	readonly logoutLink: Locator;
+	readonly exportReportLink: Locator;
 
 	constructor(page: Page) {
 		super(page);
@@ -106,6 +107,9 @@ export class JobRolesPage extends BasePage {
 		this.previousPageLink = page.getByRole("link", { name: "Previous" });
 		this.lastPageLink = page.getByRole("link", { name: "Last" });
 		this.logoutLink = page.locator('header a[href="/logout"]');
+		this.exportReportLink = page
+			.locator(".page-header")
+			.getByRole("link", { name: "Generate report" });
 	}
 
 	async openFirstJobRole(): Promise<void> {

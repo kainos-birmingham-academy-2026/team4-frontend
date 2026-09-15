@@ -6,6 +6,7 @@ import {
 	submitApplication,
 } from "../../src/services/applicationApiService";
 import {
+	exportJobRoles,
 	getCreateJobRoleOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
@@ -14,6 +15,7 @@ import { mockJobRoles } from "../mockJobRoles";
 
 vi.mock("../../src/services/jobRoleApiService", () => ({
 	getCreateJobRoleOptions: vi.fn(),
+	exportJobRoles: vi.fn(),
 	getPaginatedJobRoles: vi.fn(),
 	getJobRoleById: vi.fn(),
 }));
@@ -157,6 +159,25 @@ describe("GET /job-roles", () => {
 		expect(response.status).toBe(200);
 		expect(response.text).toContain("Job role successfully created.");
 		expect(response.text).toContain('role="status"');
+	});
+});
+
+describe("GET /job-roles/export", () => {
+	it("returns the generated CSV download", async () => {
+		vi.mocked(exportJobRoles).mockResolvedValue({
+			data: new TextEncoder().encode("jobRoleId,roleName\r\n1,Engineer\r\n")
+				.buffer,
+			contentType: "text/csv; charset=utf-8",
+			contentDisposition: 'attachment; filename="job-roles.csv"',
+		});
+
+		const response = await request(app).get("/job-roles/export");
+
+		expect(response.status).toBe(200);
+		expect(response.headers["content-type"]).toContain("text/csv");
+		expect(response.headers["content-disposition"]).toBe(
+			'attachment; filename="job-roles.csv"',
+		);
 	});
 });
 

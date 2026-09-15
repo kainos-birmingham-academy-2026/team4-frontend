@@ -10,6 +10,7 @@ import { getMyApplications } from "../../src/services/applicationApiService";
 import {
 	createJobRole,
 	deleteJobRole,
+	exportJobRoles,
 	getAllJobRoles,
 	getCreateJobRoleOptions,
 	getFilterOptions,
@@ -53,9 +54,11 @@ const mockRequest = {
 
 const mockResponse = {
 	status: vi.fn().mockReturnThis(),
+	setHeader: vi.fn().mockReturnThis(),
 	json: vi.fn(),
 	render: mockRender,
 	redirect: vi.fn(),
+	send: vi.fn(),
 	locals: { isAdmin: true },
 } as unknown as Response;
 
@@ -116,7 +119,8 @@ describe("job role filter helpers", () => {
 describe("JobRoleController - getJobRoles", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockRequest.session.jwtToken = "mock-jwt-token"; // Reset JWT token for each test
+		(mockRequest.session as unknown as { jwtToken?: string }).jwtToken =
+			"mock-jwt-token"; // Reset JWT token for each test
 		vi.mocked(getFilterOptions).mockResolvedValue(mockFilterOptions);
 		vi.mocked(getMyApplications).mockResolvedValue([]);
 	});
@@ -212,7 +216,13 @@ describe("JobRoleController - getJobRoles", () => {
 		};
 		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
 		vi.mocked(getMyApplications).mockResolvedValue([
-			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+			{
+				applicationId: 1,
+				jobRoleId: mockJobRoles[0].jobRoleId,
+				roleName: mockJobRoles[0].roleName,
+				status: "In Progress",
+				createdAt: "2026-09-15T00:00:00.000Z",
+			},
 		]);
 
 		await jobRoleController.getJobRoles(mockRequest, mockResponse);
@@ -253,7 +263,13 @@ describe("JobRoleController - getJobRoles", () => {
 		};
 		vi.mocked(getPaginatedJobRoles).mockResolvedValue(mockPaginatedResponse);
 		vi.mocked(getMyApplications).mockResolvedValue([
-			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+			{
+				applicationId: 1,
+				jobRoleId: mockJobRoles[0].jobRoleId,
+				roleName: mockJobRoles[0].roleName,
+				status: "In Progress",
+				createdAt: "2026-09-15T00:00:00.000Z",
+			},
 		]);
 
 		await jobRoleController.getJobRoles(
@@ -296,7 +312,13 @@ describe("JobRoleController - getJobRoles", () => {
 			},
 		});
 		vi.mocked(getMyApplications).mockResolvedValue([
-			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+			{
+				applicationId: 1,
+				jobRoleId: mockJobRoles[0].jobRoleId,
+				roleName: mockJobRoles[0].roleName,
+				status: "In Progress",
+				createdAt: "2026-09-15T00:00:00.000Z",
+			},
 		]);
 
 		await jobRoleController.getJobRoles(request, mockResponse);
@@ -329,7 +351,13 @@ describe("JobRoleController - getJobRoles", () => {
 			},
 		});
 		vi.mocked(getMyApplications).mockResolvedValue([
-			{ jobRoleId: mockJobRoles[0].jobRoleId, status: "In Progress" },
+			{
+				applicationId: 1,
+				jobRoleId: mockJobRoles[0].jobRoleId,
+				roleName: mockJobRoles[0].roleName,
+				status: "In Progress",
+				createdAt: "2026-09-15T00:00:00.000Z",
+			},
 		]);
 
 		await jobRoleController.getJobRoles(request, mockResponse);
@@ -506,6 +534,45 @@ describe("JobRoleController - getJobRoles", () => {
 	});
 });
 
+describe("JobRoleController - exportJobRoles", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		(mockRequest.session as unknown as { jwtToken?: string }).jwtToken =
+			"mock-jwt-token";
+	});
+
+	it("sends the CSV response as a browser download", async () => {
+		const report = new ArrayBuffer(8);
+		vi.mocked(exportJobRoles).mockResolvedValue({
+			data: report,
+			contentType: "text/csv; charset=utf-8",
+			contentDisposition: 'attachment; filename="job-roles.csv"',
+		});
+
+		await jobRoleController.exportJobRoles(mockRequest, mockResponse);
+
+		expect(exportJobRoles).toHaveBeenCalledWith("mock-jwt-token");
+		expect(mockResponse.status).toHaveBeenCalledWith(200);
+		expect(mockResponse.setHeader).toHaveBeenCalledWith(
+			"Content-Disposition",
+			'attachment; filename="job-roles.csv"',
+		);
+		expect(mockResponse.send).toHaveBeenCalledWith(Buffer.from(report));
+	});
+
+	it("renders the forbidden page when the API rejects non-admin access", async () => {
+		vi.mocked(exportJobRoles).mockRejectedValue(new Error("Forbidden"));
+
+		await jobRoleController.exportJobRoles(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(403);
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/login.njk",
+			expect.objectContaining({ status: 403 }),
+		);
+	});
+});
+
 describe("JobRoleController - getJobRoleDetails", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -538,7 +605,13 @@ describe("JobRoleController - getJobRoleDetails", () => {
 		mockRequest.params.id = String(mockJobRole.jobRoleId);
 		vi.mocked(getJobRoleById).mockResolvedValue(mockJobRole);
 		vi.mocked(getMyApplications).mockResolvedValue([
-			{ jobRoleId: mockJobRole.jobRoleId, status: "In Progress" },
+			{
+				applicationId: 1,
+				jobRoleId: mockJobRole.jobRoleId,
+				roleName: mockJobRole.roleName,
+				status: "In Progress",
+				createdAt: "2026-09-15T00:00:00.000Z",
+			},
 		]);
 
 		await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
@@ -564,7 +637,13 @@ describe("JobRoleController - getJobRoleDetails", () => {
 			mockResponse.locals = { isAdmin: false };
 			vi.mocked(getJobRoleById).mockResolvedValue(mockJobRole);
 			vi.mocked(getMyApplications).mockResolvedValue([
-				{ jobRoleId: mockJobRole.jobRoleId, status },
+				{
+					applicationId: 1,
+					jobRoleId: mockJobRole.jobRoleId,
+					roleName: mockJobRole.roleName,
+					status,
+					createdAt: "2026-09-15T00:00:00.000Z",
+				},
 			]);
 
 			await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
@@ -753,6 +832,24 @@ describe("JobRoleController - create", () => {
 				}),
 			}),
 		);
+	});
+});
+
+describe("JobRoleController - showEditForm", () => {
+	it("renders an error page for an invalid job role ID", async () => {
+		const requestWithInvalidId = {
+			...mockRequest,
+			params: { id: "invalid" },
+		} as unknown as Request;
+
+		await jobRoleController.showEditForm(requestWithInvalidId, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(400);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 400,
+			message: "Invalid job role ID",
+		});
 	});
 });
 

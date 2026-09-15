@@ -586,6 +586,38 @@ test.describe("job role pagination", () => {
 		await expect(jobRolesPage.lastPageLink).toBeVisible();
 	});
 
+	test("allows an Admin to generate a CSV from the job roles page", async ({
+		page,
+	}) => {
+		await page.goto("/logout");
+		await signInAsAdmin(page);
+
+		const jobRolesPage = new JobRolesPage(page);
+		await jobRolesPage.goToLastPage();
+		await expect(jobRolesPage.paginationStatus).toHaveText(
+			`Page ${totalPages} of ${totalPages}`,
+		);
+		await expect(jobRolesPage.exportReportLink).toBeVisible();
+
+		const downloadPromise = page.waitForEvent("download");
+		await jobRolesPage.exportReportLink.click();
+		const download = await downloadPromise;
+
+		expect(download.suggestedFilename()).toBe("job-roles.csv");
+		await expect(download.failure()).resolves.toBeNull();
+		const stream = await download.createReadStream();
+		if (!stream) {
+			throw new Error("CSV download stream was not available");
+		}
+		let csv = "";
+		for await (const chunk of stream) {
+			csv += chunk.toString();
+		}
+		expect(csv).toContain("jobRoleId,roleName,location,capability,band");
+		expect(csv).toContain("Software Engineer");
+		expect(csv).toContain("Platform Specialist 60");
+	});
+
 	test("shows ten job roles on each page while paging forward", async ({
 		page,
 	}) => {
