@@ -1648,3 +1648,270 @@ tbody tr:hover {
 	font-weight: normal;
 	white-space: nowrap;
 }
+
+.job-roles-page .page-header {
+	margin-bottom: 1.5rem;
+}
+
+.job-search {
+	margin-bottom: 1.5rem;
+}
+
+.job-roles-page .job-filter-form {
+	display: block;
+	max-width: none;
+	padding: 0 0 1.5rem;
+	background: transparent;
+	border: 0;
+	border-bottom: 1px solid var(--kainos-border);
+	border-radius: 0;
+	box-shadow: none;
+}
+
+.job-filter-fields {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	align-items: end;
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.job-filter-fields .filter-fieldset legend {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+
+.job-filter-fields .filter-dropdown > summary {
+	display: flex;
+	justify-content: space-between;
+	min-height: 2.5rem;
+	border-radius: 6px;
+}
+
+.job-results-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1.25rem;
+}
+
+.job-sort-menu {
+	position: relative;
+	color: var(--kainos-navy);
+}
+
+.job-sort-menu > summary,
+.applications-summary {
+	cursor: pointer;
+	padding: 0.75rem 0;
+	font-weight: 600;
+}
+
+.job-sort-menu .job-role-ordering {
+	position: absolute;
+	right: 0;
+	z-index: 10;
+	display: grid;
+	width: 220px;
+	padding: 0.75rem;
+	margin: 0;
+	background: var(--kainos-white);
+	border: 1px solid var(--kainos-border);
+	border-radius: 6px;
+}
+
+.job-roles-page .job-card {
+	padding: 1rem 1.25rem;
+	box-shadow: none;
+	border-radius: 8px;
+}
+
+.job-roles-page .job-card:hover {
+	transform: none;
+}
+
+.job-roles-page .job-card-header {
+	margin-bottom: 0.5rem;
+}
+
+.job-roles-page .job-card-meta {
+	gap: 0.5rem 1.25rem;
+	margin-bottom: 0;
+}
+
+.job-roles-page .job-badge {
+	padding: 0;
+	background: transparent;
+	border: 0;
+	color: var(--kainos-muted);
+	font-weight: 400;
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+.job-card-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 0.75rem;
+}
+
+.job-card-detail-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: auto;
+	min-height: 2.5rem;
+	padding: 0.5rem 1rem;
+	border-radius: 8px;
+	background: linear-gradient(135deg, var(--kainos-blue), #0095ff);
+	color: var(--kainos-white);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.job-card-detail-link:hover {
+	filter: brightness(1.06);
+	text-decoration: none;
+}
+
+.job-detail-page .job-detail-header {
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+}
+
+.job-detail-page .job-detail-title {
+	font-size: 2.25rem;
+	line-height: 1.2;
+}
+
+.job-detail-page .job-detail-meta {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	padding: 0 0 1.5rem;
+	margin-bottom: 2rem;
+	background: transparent;
+	border-bottom: 1px solid var(--kainos-border);
+	border-radius: 0;
+}
+
+.job-detail-page .meta-label {
+	letter-spacing: 0;
+	text-transform: none;
+}
+
+.job-detail-page .job-detail-grid {
+	grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+}
+
+.job-detail-page .job-detail-sidebar {
+	gap: 1rem;
+}
+
+.job-detail-page .sidebar-card {
+	padding: 1.25rem;
+	background: var(--kainos-light);
+	border: 1px solid var(--kainos-border);
+	border-radius: 8px;
+	box-shadow: none;
+}
+
+.job-detail-page .sidebar-card p:last-child,
+.job-detail-page .sidebar-card .contact-link:last-child {
+	margin-bottom: 0;
+}
+
+.job-detail-page .applications-section {
+	margin-top: 2rem;
+	padding: 0;
+	background: transparent;
+	border-top: 1px solid var(--kainos-border);
+	border-radius: 0;
+}
+
+.applications-summary {
+	font-size: 1.25rem;
+	color: var(--kainos-navy);
+}
+
+.applications-summary .application-count {
+	margin-left: 0.75rem;
+	font-size: 0.9rem;
+}
+
+.job-detail-page .application-item {
+	border-radius: 8px;
+}
+
+.my-applications-page .applications-section {
+	border: 1px solid var(--kainos-border);
+}
+
+.job-detail-page .application-message,
+.job-detail-page .application-applicant,
+.job-detail-page .meta-value,
+.job-detail-page .job-detail-title,
+.job-roles-page .job-card-title {
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+	.job-filter-fields {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.job-detail-page .job-detail-meta {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.job-detail-page .job-detail-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.job-results-toolbar {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.job-sort-menu .job-role-ordering {
+		left: 0;
+		right: auto;
+	}
+
+	.job-filter-fields .filter-dropdown-panel {
+		position: static;
+		min-width: 0;
+		margin-top: 0.5rem;
+		padding: 0.5rem;
+	}
+
+	.job-filter-fields .filter-dropdown-panel label {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+
+	.job-detail-page .job-detail-header,
+	.job-detail-page .application-item {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.job-detail-page .job-status-badge {
+		align-self: flex-start;
+	}
+
+	.job-detail-page .job-detail-actions,
+	.job-roles-page .pagination {
+		flex-wrap: wrap;
+	}
+
+	.job-detail-page .job-detail-title {
+		font-size: 1.8rem;
+	}
+}

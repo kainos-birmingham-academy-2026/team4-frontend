@@ -1,7 +1,7 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-  <section class="page-section">
+  <section class="page-section job-detail-page">
     <div class="container">
       {% if applied %}
       <div class="applied-banner" role="status">
@@ -40,18 +40,10 @@
       </div>
       {% endif %}
 
+      {% set applicationsPanel %}
       {% if isAdmin %}
-      <section class="applications-section" aria-labelledby="applications-heading">
-        <div class="section-heading-row">
-          <div>
-            <h2 id="applications-heading">Applications</h2>
-            <p class="section-intro">Review applicants and update their application status.</p>
-          </div>
-          {% if applications.length %}
-            <span class="application-count">{{ applications.length }} applicant{% if applications.length != 1 %}s{% endif %}</span>
-          {% endif %}
-        </div>
-
+      <details class="applications-section" {% if assessmentSuccess or assessmentError %}open{% endif %}>
+        <summary class="applications-summary">Applications <span class="application-count">{{ applications.length }} applicant{% if applications.length != 1 %}s{% endif %}</span></summary>
         {% if assessmentSuccess %}
           <div class="form-success-summary" role="status" aria-live="polite">
             <p>{{ assessmentSuccess }}</p>
@@ -99,25 +91,26 @@
         {% else %}
           <p class="empty-applications">No applications have been submitted for this role.</p>
         {% endif %}
-      </section>
+      </details>
       {% endif %}
+      {% endset %}
 
       <div class="job-detail-meta">
         <div class="meta-item">
-          <span class="meta-label">📍 Location</span>
+          <span class="meta-label">Location</span>
           <span class="meta-value">{{ job.location }}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">⏱️ Band</span>
+          <span class="meta-label">Band</span>
           <span class="meta-value">{{ job.band }}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">💪 Capability</span>
+          <span class="meta-label">Capability</span>
           <span class="meta-value">{{ job.capability }}</span>
         </div>
         {% if job.status == "Open" %}
         <div class="meta-item">
-          <span class="meta-label">⌛ Closing Date</span>
+          <span class="meta-label">Closing Date</span>
           <span class="meta-value">{{ job.closingDate | formatDate}}</span>
         </div>
         {% endif %}
@@ -141,6 +134,7 @@
             </ul>
           </section>
 
+        </div>
         <aside class="job-detail-sidebar">
           {% if job.status == "Open" and job.numberOfOpenPositions > 0 %}
           <div class="sidebar-card">
@@ -159,6 +153,7 @@
           </div>
         </aside>
       </div>
+      {{ applicationsPanel | safe }}
     </div>
   </section>
 {% endblock %}

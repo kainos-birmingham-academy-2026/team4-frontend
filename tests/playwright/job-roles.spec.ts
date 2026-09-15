@@ -96,9 +96,11 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
 
-		await expect(
-			page.getByRole("heading", { name: "Applications" }),
-		).toBeVisible();
+		await expect(page.locator(".applications-section")).not.toHaveAttribute(
+			"open",
+		);
+		await page.locator(".applications-summary").click();
+		await expect(page.locator(".applications-section")).toHaveAttribute("open");
 		await expect(page.getByText("applicant@example.com")).toBeVisible();
 		await page.getByText("applicant@example.com").click();
 		await expect(
@@ -115,6 +117,7 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
 
+		await page.locator(".applications-summary").click();
 		await page.getByRole("button", { name: "Hire" }).click();
 		const dialog = page.getByRole("dialog");
 		await expect(dialog).toContainText("Hire this applicant?");
@@ -129,6 +132,7 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto(`/job-roles/${mockJobRole.jobRoleId}`);
 
+		await page.locator(".applications-summary").click();
 		await page.getByRole("button", { name: "Hire" }).click();
 		await page
 			.getByRole("dialog")
@@ -151,6 +155,7 @@ test.describe("job role details", () => {
 		await signInAsAdmin(page);
 		await page.goto("/job-roles/2");
 
+		await page.locator(".applications-summary").click();
 		await page.getByRole("button", { name: "Reject" }).click();
 		await expect(page.getByRole("dialog")).toContainText(
 			"Reject this applicant?",
@@ -447,6 +452,7 @@ test.describe("job role listing", () => {
 			"status",
 		] as const;
 
+		await page.locator(".job-sort-menu > summary").click();
 		for (const column of sortableColumns) {
 			await expect(jobRolesPage.sortLink(column)).toBeVisible();
 		}

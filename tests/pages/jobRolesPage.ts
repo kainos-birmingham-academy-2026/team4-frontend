@@ -220,6 +220,7 @@ export class JobRolesPage extends BasePage {
 	}
 
 	async sortBy(column: JobRoleSortColumn): Promise<void> {
+		await this.page.locator(".job-sort-menu > summary").click();
 		await this.sortLink(column).click();
 	}
 
