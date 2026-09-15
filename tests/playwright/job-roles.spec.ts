@@ -482,6 +482,34 @@ test.describe("job role listing", () => {
 		]);
 	});
 
+	for (const applicationStatus of [
+		"In Progress",
+		"Hired",
+		"Rejected",
+	] as const) {
+		test(`filters applied roles by ${applicationStatus} status`, async ({
+			page,
+			request,
+		}) => {
+			if (applicationStatus !== "In Progress") {
+				await request.post(
+					`http://127.0.0.1:4001/api/applications/101/${applicationStatus === "Hired" ? "hire" : "reject"}`,
+				);
+				await page.reload();
+			}
+
+			const jobRolesPage = new JobRolesPage(page);
+			await jobRolesPage.applyStatusFilter(applicationStatus);
+
+			await expect(jobRolesPage.jobRoleTitles).toHaveText([
+				"Software Engineer",
+			]);
+			await expect(
+				jobRolesPage.jobCards.getByText(applicationStatus, { exact: true }),
+			).toBeVisible();
+		});
+	}
+
 	test("filters roles by closing date", async ({ page }) => {
 		const jobRolesPage = new JobRolesPage(page);
 		await jobRolesPage.applyClosingDateFilter("2026-11-30");

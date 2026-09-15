@@ -157,7 +157,7 @@ app.get("/api/job-roles/filter-options", (_req, res) => {
 	res.json({
 		capabilities: [...new Set(mockJobRoles.map((role) => role.capability))],
 		bands: [...new Set(mockJobRoles.map((role) => role.band))],
-		statuses: [...new Set(mockJobRoles.map((role) => role.status))],
+		statuses: ["Open", "Closed", "In Progress", "Hired", "Rejected"],
 	});
 });
 

@@ -44,6 +44,8 @@ const EMPTY_FILTER_OPTIONS: FilterOptions = {
 	statuses: [],
 };
 
+const APPLICATION_STATUSES = new Set(["In Progress", "Hired", "Rejected"]);
+
 function toText(value: unknown): string {
 	return typeof value === "string" ? value.trim() : "";
 }
@@ -314,7 +316,9 @@ export class JobRoleController {
 		}
 
 		try {
-			const hasDisplayStatusFilter = filters.status.includes("In Progress");
+			const hasDisplayStatusFilter = filters.status.some((status) =>
+				APPLICATION_STATUSES.has(status),
+			);
 			const hasStatusFilter = filters.status.length > 0;
 			const backendStatusFilters = hasDisplayStatusFilter ? [] : filters.status;
 			const [data, applications] = await Promise.all([
