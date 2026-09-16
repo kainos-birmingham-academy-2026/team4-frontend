@@ -15,6 +15,17 @@ async function openRoleByIndex(
 	await roleLink.click();
 }
 
+async function openApplicationsPanel(world: CareersWorld): Promise<void> {
+	const page = world.getPage();
+	const applicationsSection = page.locator(".applications-section");
+
+	if ((await applicationsSection.getAttribute("open")) === null) {
+		await page.locator(".applications-summary").click();
+	}
+
+	await expect(applicationsSection).toHaveAttribute("open", "");
+}
+
 When(
 	"I open the job specification for the second available job role",
 	async function (this: CareersWorld) {
@@ -25,9 +36,8 @@ When(
 Then(
 	"I should see the applications for the role",
 	async function (this: CareersWorld) {
-		await expect(
-			this.getPage().getByRole("heading", { name: "Applications" }),
-		).toBeVisible();
+		await expect(this.getPage().locator(".applications-summary")).toBeVisible();
+		await openApplicationsPanel(this);
 		await expect(
 			this.getPage().getByText("applicant@example.com"),
 		).toBeVisible();
@@ -47,10 +57,12 @@ Then(
 );
 
 When("I choose to hire the applicant", async function (this: CareersWorld) {
+	await openApplicationsPanel(this);
 	await this.getPage().getByRole("button", { name: "Hire" }).click();
 });
 
 When("I choose to reject the applicant", async function (this: CareersWorld) {
+	await openApplicationsPanel(this);
 	await this.getPage().getByRole("button", { name: "Reject" }).click();
 });
 
