@@ -55,6 +55,7 @@ BeforeAll(async () => {
 		NODE_ENV: "test",
 		API_BASE_URL: `http://127.0.0.1:${apiPort}`,
 	});
+	await waitFor(`http://127.0.0.1:${apiPort}/api/job-roles/filter-options`);
 	await waitFor(`${frontendUrl}/health`);
 });
 
