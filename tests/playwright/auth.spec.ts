@@ -74,6 +74,54 @@ test.describe("authentication", () => {
 		await expect(loginPage.heading).toHaveText("Sign In");
 	});
 
+	test("shows distinct testimonial content for each auth page", async ({
+		page,
+	}) => {
+		await page.goto("/login");
+		await expect(page.locator(".auth-feature-kicker")).toHaveText(
+			"Careers at Kainos",
+		);
+		await expect(
+			page.getByRole("heading", {
+				name: "Build a career with room to grow.",
+			}),
+		).toBeVisible();
+		await expect(page.locator(".auth-quote figcaption")).toHaveText(
+			"Kainos Careers",
+		);
+		await expect(page.locator(".career-chat")).toBeHidden();
+
+		await page.goto("/register");
+		await expect(page.locator(".auth-register-quote-panel")).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: "Start somewhere that expects you to grow.",
+			}),
+		).toBeVisible();
+		await expect(
+			page.locator(
+				".auth-register-quote-panel input, .auth-register-quote-panel button, .auth-register-quote-panel select",
+			),
+		).toHaveCount(0);
+
+		await page.setViewportSize({ width: 1280, height: 900 });
+		const registerPanel = await page
+			.locator(".auth-layout-register")
+			.boundingBox();
+		expect(registerPanel).not.toBeNull();
+		expect(registerPanel?.y).toBeGreaterThanOrEqual(0);
+		expect(registerPanel?.y + registerPanel?.height).toBeLessThanOrEqual(900);
+
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto("/login");
+		await expect(page.locator(".auth-feature-panel")).toBeHidden();
+		await expect(page.locator(".auth-form-panel")).toBeVisible();
+
+		await page.goto("/register");
+		await expect(page.locator(".auth-feature-panel")).toBeHidden();
+		await expect(page.locator(".auth-form-panel")).toBeVisible();
+	});
+
 	test("signs in with valid credentials and exposes sign out", async ({
 		page,
 	}) => {

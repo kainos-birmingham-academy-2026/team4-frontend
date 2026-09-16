@@ -1078,6 +1078,179 @@ tbody tr:hover {
 	font-size: 0.95rem;
 }
 
+/* Authentication pages */
+.auth-page {
+	padding: 3rem 0 4.5rem;
+	background:
+		linear-gradient(115deg, rgba(92, 192, 137, 0.12), transparent 42%),
+		var(--kainos-light);
+}
+
+.auth-page-container {
+	max-width: 1200px;
+}
+
+.site-main:has(.auth-page) + .career-chat {
+	display: none;
+}
+
+.auth-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.95fr) minmax(20rem, 1.05fr);
+	min-height: 39rem;
+	background: var(--kainos-white);
+	border: 1px solid var(--kainos-border);
+	box-shadow: var(--kainos-shadow);
+	overflow: hidden;
+}
+
+.auth-form-panel {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.auth-page-header {
+	max-width: 31rem;
+	margin-bottom: 1.5rem;
+}
+
+.auth-eyebrow,
+.auth-feature-kicker {
+	margin: 0 0 0.75rem;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.auth-eyebrow {
+	color: var(--kainos-blue);
+}
+
+.auth-page-header h1,
+.auth-feature-panel h2 {
+	margin: 0;
+	line-height: 1.08;
+	letter-spacing: 0;
+}
+
+.auth-page-header h1 {
+	font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.auth-page-header > p:last-child {
+	margin: 0.85rem 0 0;
+	color: var(--kainos-muted);
+}
+
+.auth-form-panel form {
+	max-width: 31rem;
+	margin: 0;
+}
+
+.auth-form-panel .form-actions,
+.auth-form-panel .form-card .form-actions {
+	margin-top: 0.5rem;
+}
+
+.auth-form-panel .btn {
+	width: 100%;
+	background: var(--kainos-navy);
+}
+
+.auth-feature-panel {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 3rem;
+	padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.auth-quote-panel {
+	background: var(--kainos-navy);
+	color: var(--kainos-white);
+}
+
+.auth-feature-kicker {
+	color: var(--kainos-green);
+}
+
+.auth-feature-panel h2 {
+	max-width: 14ch;
+	font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+.auth-quote {
+	max-width: 32rem;
+	margin: 0;
+}
+
+.auth-quote blockquote {
+	margin: 0;
+	font-size: clamp(1.15rem, 2vw, 1.45rem);
+	line-height: 1.55;
+}
+
+.auth-quote figcaption {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+	font-size: 0.9rem;
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.auth-quote-rule {
+	width: 2.5rem;
+	height: 1px;
+	background: var(--kainos-green);
+}
+
+.auth-layout-register {
+	grid-template-columns: minmax(20rem, 1.05fr) minmax(0, 0.95fr);
+}
+
+.auth-page-register .auth-form-panel,
+.auth-page-register .auth-feature-panel {
+	padding-block: 2rem;
+}
+
+.auth-register-quote-panel {
+	background: var(--kainos-blue);
+	color: var(--kainos-white);
+}
+
+.auth-register-quote-panel .auth-feature-kicker,
+.auth-register-quote-panel .auth-quote figcaption {
+	color: rgba(255, 255, 255, 0.82);
+}
+
+.auth-register-quote-panel .auth-quote-rule {
+	background: var(--kainos-green);
+}
+
+@media (max-width: 760px) {
+	.auth-page {
+		padding: 1.5rem 0 3rem;
+	}
+
+	.auth-layout,
+	.auth-layout-register {
+		grid-template-columns: 1fr;
+		min-height: 0;
+	}
+
+	.auth-form-panel {
+		padding: 2rem;
+	}
+
+	.auth-feature-panel {
+		display: none;
+	}
+}
+
 /* Job Detail Page Styles */
 .breadcrumb-link {
 	display: inline-block;
