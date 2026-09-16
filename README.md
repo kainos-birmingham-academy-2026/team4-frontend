@@ -193,9 +193,11 @@ npm run prepare
 - `POST /job-roles/:id/delete`
 	- Deletes a job role. Admin only
 - `GET /job-roles/:id/apply`
-	- Displays the application form for a job role
+	- Displays the application form for an open job role with available positions
+	- Redirects to the role details page with an unavailable message when the role is closed or has no positions
 - `POST /job-roles/:id/apply`
-	- Submits an application for a job role
+	- Submits an application for an open job role with available positions
+	- Rejects applications when the role is closed or has no positions
 - `POST /job-roles/:id/applications/:applicationId/:action`
 	- Hires or rejects an application for a job role, where `:action` is `hire` or `reject`. Admin only
 - `POST /api/chat`
