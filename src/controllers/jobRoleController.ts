@@ -6,6 +6,7 @@ import {
 import {
 	createJobRole,
 	deleteJobRole,
+	exportJobRoles,
 	getAllJobRoles,
 	getCreateJobRoleOptions,
 	getFilterOptions,
@@ -42,6 +43,8 @@ const EMPTY_FILTER_OPTIONS: FilterOptions = {
 	bands: [],
 	statuses: [],
 };
+
+const APPLICATION_STATUSES = new Set(["In Progress", "Hired", "Rejected"]);
 
 function toText(value: unknown): string {
 	return typeof value === "string" ? value.trim() : "";
@@ -313,7 +316,9 @@ export class JobRoleController {
 		}
 
 		try {
-			const hasDisplayStatusFilter = filters.status.includes("In Progress");
+			const hasDisplayStatusFilter = filters.status.some((status) =>
+				APPLICATION_STATUSES.has(status),
+			);
 			const hasStatusFilter = filters.status.length > 0;
 			const backendStatusFilters = hasDisplayStatusFilter ? [] : filters.status;
 			const [data, applications] = await Promise.all([
@@ -429,6 +434,39 @@ export class JobRoleController {
 				pageTitle: "Kainos Careers - Error",
 				status: 500,
 				message: "Error fetching job roles",
+			});
+		}
+	}
+
+	async exportJobRoles(req: Request, res: Response): Promise<void> {
+		try {
+			const report = await exportJobRoles(this.getJwtToken(req));
+			res
+				.status(200)
+				.setHeader(
+					"Content-Type",
+					report.contentType ?? "text/csv; charset=utf-8",
+				)
+				.setHeader(
+					"Content-Disposition",
+					report.contentDisposition ?? 'attachment; filename="job-roles.csv"',
+				)
+				.send(Buffer.from(report.data));
+		} catch (error) {
+			if (error instanceof Error && error.message === "Forbidden") {
+				this.handleForbiddenError(res);
+				return;
+			}
+
+			if (error instanceof Error && error.message === "Unauthorized") {
+				this.handleUnauthorizedError(res);
+				return;
+			}
+
+			res.status(500).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 500,
+				message: "Error exporting job roles",
 			});
 		}
 	}

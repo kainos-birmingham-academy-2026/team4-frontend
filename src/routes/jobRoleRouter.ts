@@ -13,6 +13,7 @@ router.get(
 	applicationController.showMyApplications.bind(applicationController),
 );
 router.get("/job-roles", controller.getJobRoles.bind(controller));
+router.get("/job-roles/export", controller.exportJobRoles.bind(controller));
 
 router.post("/job-roles", controller.create.bind(controller));
 router.post("/job-roles/:id", controller.update.bind(controller));

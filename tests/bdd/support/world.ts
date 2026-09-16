@@ -13,6 +13,8 @@ export class CareersWorld extends World {
 	context?: BrowserContext;
 	page?: Page;
 	notedJobRoleTitle?: string;
+	downloadFilename?: string;
+	downloadContent?: string;
 	pendingDelete?: Locator;
 	apiRequest?: APIRequestContext;
 	apiResponse?: APIResponse;

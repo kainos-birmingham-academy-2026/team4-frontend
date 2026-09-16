@@ -16,6 +16,12 @@ function authHeaders(token: string): { Authorization: string } {
 	return { Authorization: `Bearer ${token}` };
 }
 
+export interface JobRoleExportResponse {
+	data: ArrayBuffer;
+	contentType?: string;
+	contentDisposition?: string;
+}
+
 function toRequestParams(
 	page: number,
 	filters?: JobRoleFilters,
@@ -118,6 +124,45 @@ export async function getPaginatedJobRoles(
 				throw new Error(`Unexpected error: ${error.message}`);
 			}
 		}
+	}
+}
+
+export async function exportJobRoles(
+	token: string,
+): Promise<JobRoleExportResponse> {
+	try {
+		const response = await apiClient.get<ArrayBuffer>("/api/job-roles/export", {
+			headers: authHeaders(token),
+			responseType: "arraybuffer",
+		});
+
+		return {
+			data: response.data,
+			contentType:
+				typeof response.headers["content-type"] === "string"
+					? response.headers["content-type"]
+					: undefined,
+			contentDisposition:
+				typeof response.headers["content-disposition"] === "string"
+					? response.headers["content-disposition"]
+					: undefined,
+		};
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const { status } = error.response || {};
+			if (status === 401) {
+				throw new Error("Unauthorized");
+			}
+			if (status === 403) {
+				throw new Error("Forbidden");
+			}
+			if (status && status >= 500) {
+				throw new Error(`Error exporting job roles: ${error.message}`);
+			}
+			throw new Error(`Unexpected error: ${error.message}`);
+		}
+
+		throw error;
 	}
 }
 

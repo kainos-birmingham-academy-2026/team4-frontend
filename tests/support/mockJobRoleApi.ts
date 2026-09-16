@@ -157,7 +157,7 @@ app.get("/api/job-roles/filter-options", (_req, res) => {
 	res.json({
 		capabilities: [...new Set(mockJobRoles.map((role) => role.capability))],
 		bands: [...new Set(mockJobRoles.map((role) => role.band))],
-		statuses: [...new Set(mockJobRoles.map((role) => role.status))],
+		statuses: ["Open", "Closed", "In Progress", "Hired", "Rejected"],
 	});
 });
 
@@ -252,6 +252,49 @@ app.get("/api/job-roles", (req, res) => {
 			hasPrev: page > 1,
 		},
 	});
+});
+
+app.get("/api/job-roles/export", (_req, res) => {
+	const headers = [
+		"jobRoleId",
+		"roleName",
+		"location",
+		"capability",
+		"band",
+		"closingDate",
+		"description",
+		"responsibilities",
+		"sharepointUrl",
+		"numberOfOpenPositions",
+		"status",
+	];
+	const escapeCsvValue = (value: unknown): string => {
+		const stringValue = String(value ?? "");
+		return /[",\r\n]/.test(stringValue)
+			? `"${stringValue.replace(/"/g, '""')}"`
+			: stringValue;
+	};
+	const rows = mockJobRoles.map((role) => [
+		role.jobRoleId,
+		role.roleName,
+		role.location,
+		role.capability,
+		role.band,
+		role.closingDate,
+		role.description,
+		role.responsibilities.join("; "),
+		role.sharepointUrl,
+		role.numberOfOpenPositions,
+		role.status,
+	]);
+	const csv = `${[headers, ...rows]
+		.map((row) => row.map(escapeCsvValue).join(","))
+		.join("\r\n")}\r\n`;
+
+	res
+		.type("text/csv")
+		.set("Content-Disposition", 'attachment; filename="job-roles.csv"')
+		.send(csv);
 });
 
 app.get("/api/job-roles/:id", (req, res) => {

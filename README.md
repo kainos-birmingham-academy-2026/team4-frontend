@@ -176,6 +176,8 @@ npm run prepare
 	- Displays the authenticated user's job applications, including each role name as a link to the role details page and the application status
 - `GET /job-roles`
 	- Displays a page listing job roles, with support for filtering, sorting, and pagination
+- `GET /job-roles/export`
+	- Downloads a CSV report containing all job role information. Admin only
 - `POST /job-roles`
 	- Creates a new job role. Admin only
 - `GET /job-roles/new`
