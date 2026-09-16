@@ -4,6 +4,7 @@ import type {
 	ApplicationAssessment,
 	ApplicationResponse,
 	ApplicationSummary,
+	BulkFitAssessmentResponse,
 } from "../types/applicationDTO";
 
 export class ApplicationServiceError extends Error {
@@ -117,5 +118,32 @@ export async function assessApplication(
 		}
 
 		throw new ApplicationServiceError("Unable to assess application");
+	}
+}
+
+export async function assessApplicationsForJobRole(
+	jobRoleId: number,
+	token: string,
+): Promise<BulkFitAssessmentResponse> {
+	try {
+		const { data } = await apiClient.post<BulkFitAssessmentResponse>(
+			`/api/applications/job-role/${jobRoleId}/fit-assessments`,
+			undefined,
+			{ headers: { Authorization: `Bearer ${token}` } },
+		);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const apiMessage = error.response?.data?.error;
+			if (typeof apiMessage === "string") {
+				throw new ApplicationServiceError(apiMessage, error.response?.status);
+			}
+			throw new ApplicationServiceError(
+				"Unable to assess role applications",
+				error.response?.status,
+			);
+		}
+
+		throw new ApplicationServiceError("Unable to assess role applications");
 	}
 }

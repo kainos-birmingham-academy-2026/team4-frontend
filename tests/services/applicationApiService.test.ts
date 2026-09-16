@@ -4,6 +4,7 @@ import apiClient from "../../src/config/apiClient";
 import {
 	ApplicationServiceError,
 	assessApplication,
+	assessApplicationsForJobRole,
 	getApplicationsByJobRole,
 	getMyApplications,
 	submitApplication,
@@ -230,6 +231,70 @@ describe("assessApplication", () => {
 		await expect(assessApplication(10, "reject", token)).rejects.toEqual(
 			expect.objectContaining({
 				message: "Unable to assess application",
+				statusCode: undefined,
+			}),
+		);
+	});
+});
+
+describe("assessApplicationsForJobRole", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("returns the bulk assessment result", async () => {
+		const result = {
+			processed: 2,
+			completed: 1,
+			unavailable: 1,
+			failed: 0,
+			skippedComplete: 3,
+		};
+		vi.mocked(apiClient).post = vi.fn().mockResolvedValue({ data: result });
+
+		await expect(assessApplicationsForJobRole(2, token)).resolves.toEqual(
+			result,
+		);
+		expect(apiClient.post).toHaveBeenCalledWith(
+			"/api/applications/job-role/2/fit-assessments",
+			undefined,
+			{ headers: { Authorization: `Bearer ${token}` } },
+		);
+	});
+
+	it("uses a bulk assessment API error message", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			response: { status: 409, data: { error: "No applications to assess" } },
+		});
+
+		await expect(assessApplicationsForJobRole(2, token)).rejects.toEqual(
+			expect.objectContaining({
+				message: "No applications to assess",
+				statusCode: 409,
+			}),
+		);
+	});
+
+	it("handles a bulk assessment Axios error without an API message", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
+			response: { status: 500, data: {} },
+		});
+
+		await expect(assessApplicationsForJobRole(2, token)).rejects.toEqual(
+			expect.objectContaining({
+				message: "Unable to assess role applications",
+				statusCode: 500,
+			}),
+		);
+	});
+
+	it("handles non-Axios bulk assessment failures", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
+		vi.mocked(apiClient).post = vi.fn().mockRejectedValue(new Error("failure"));
+
+		await expect(assessApplicationsForJobRole(2, token)).rejects.toEqual(
+			expect.objectContaining({
+				message: "Unable to assess role applications",
 				statusCode: undefined,
 			}),
 		);

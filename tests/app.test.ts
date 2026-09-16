@@ -1,6 +1,10 @@
 import request from "supertest";
 import { describe, expect, it } from "vitest";
-import app from "../src/app";
+import app, { hasAdminRole } from "../src/app";
+
+function tokenWithPayload(payload: string): string {
+	return `header.${Buffer.from(payload).toString("base64url")}.signature`;
+}
 
 describe("app routes", () => {
 	it("GET / returns the index page", async () => {
@@ -24,5 +28,18 @@ describe("app routes", () => {
 
 		expect(response.status).toBe(400);
 		expect(Array.isArray(response.body)).toBe(true);
+	});
+});
+
+describe("hasAdminRole", () => {
+	it("recognizes admin tokens", () => {
+		expect(hasAdminRole(tokenWithPayload('{"role":"ADMIN"}'))).toBe(true);
+	});
+
+	it("rejects missing, incomplete, non-admin, and malformed tokens", () => {
+		expect(hasAdminRole(undefined)).toBe(false);
+		expect(hasAdminRole("token-without-payload")).toBe(false);
+		expect(hasAdminRole(tokenWithPayload('{"role":"USER"}'))).toBe(false);
+		expect(hasAdminRole(tokenWithPayload("not-json"))).toBe(false);
 	});
 });

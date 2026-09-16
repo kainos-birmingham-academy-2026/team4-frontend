@@ -4,6 +4,7 @@ import { ApplicationController } from "../../src/controllers/applicationControll
 import {
 	ApplicationServiceError,
 	assessApplication,
+	assessApplicationsForJobRole,
 	getMyApplications,
 	submitApplication,
 } from "../../src/services/applicationApiService";
@@ -20,6 +21,7 @@ vi.mock("../../src/services/applicationApiService", async () => {
 		getMyApplications: vi.fn(),
 		submitApplication: vi.fn(),
 		assessApplication: vi.fn(),
+		assessApplicationsForJobRole: vi.fn(),
 	};
 });
 
@@ -41,6 +43,7 @@ const controller = new ApplicationController();
 describe("ApplicationController", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		(response as unknown as { locals: Record<string, unknown> }).locals = {};
 	});
 
 	it("renders an empty application message form for an eligible role", async () => {
@@ -73,6 +76,36 @@ describe("ApplicationController", () => {
 		expect(response.render).toHaveBeenCalledWith("pages/my-applications.njk", {
 			pageTitle: "Kainos Careers - My Applications",
 			applications,
+		});
+	});
+
+	it("renders a service error when applications cannot be loaded", async () => {
+		vi.mocked(getMyApplications).mockRejectedValue(
+			new ApplicationServiceError("Applications unavailable", 503),
+		);
+
+		await controller.showMyApplications(requestFor(), response);
+
+		expect(response.status).toHaveBeenCalledWith(503);
+		expect(response.render).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 503,
+			message: "Applications unavailable",
+		});
+	});
+
+	it("renders a generic error for unexpected application failures", async () => {
+		vi.mocked(getMyApplications).mockRejectedValue(
+			new Error("network failure"),
+		);
+
+		await controller.showMyApplications(requestFor(), response);
+
+		expect(response.status).toHaveBeenCalledWith(500);
+		expect(response.render).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Unable to load your applications",
 		});
 	});
 
@@ -285,6 +318,74 @@ describe("ApplicationController", () => {
 
 			expect(response.redirect).toHaveBeenCalledWith(
 				"/job-roles/1?assessmentError=Unable%20to%20assess%20application",
+			);
+		});
+	});
+
+	describe("assessApplicationsForJobRole", () => {
+		it("rejects an invalid job role ID", async () => {
+			const request = requestFor();
+			request.params.id = "invalid";
+
+			await controller.assessApplicationsForJobRole(request, response);
+
+			expect(response.status).toHaveBeenCalledWith(400);
+			expect(assessApplicationsForJobRole).not.toHaveBeenCalled();
+		});
+
+		it("assesses incomplete applications for an admin role", async () => {
+			(response.locals as Record<string, unknown>).isAdmin = true;
+			vi.mocked(assessApplicationsForJobRole).mockResolvedValue({
+				processed: 2,
+				completed: 1,
+				unavailable: 1,
+				failed: 0,
+				skippedComplete: 3,
+			});
+
+			await controller.assessApplicationsForJobRole(requestFor(), response);
+
+			expect(assessApplicationsForJobRole).toHaveBeenCalledWith(
+				1,
+				"test-token",
+			);
+			expect(response.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?fitAssessed=1&fitUnavailable=1&fitFailed=0&fitSkipped=3",
+			);
+		});
+
+		it("denies non-admin assessment requests", async () => {
+			(response.locals as Record<string, unknown>).isAdmin = false;
+
+			await controller.assessApplicationsForJobRole(requestFor(), response);
+
+			expect(assessApplicationsForJobRole).not.toHaveBeenCalled();
+			expect(response.status).toHaveBeenCalledWith(403);
+		});
+
+		it("redirects with a bulk assessment service error", async () => {
+			(response.locals as Record<string, unknown>).isAdmin = true;
+			vi.mocked(assessApplicationsForJobRole).mockRejectedValue(
+				new ApplicationServiceError("Assessment unavailable"),
+			);
+
+			await controller.assessApplicationsForJobRole(requestFor(), response);
+
+			expect(response.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?assessmentError=Assessment%20unavailable",
+			);
+		});
+
+		it("redirects with a generic bulk assessment error", async () => {
+			(response.locals as Record<string, unknown>).isAdmin = true;
+			vi.mocked(assessApplicationsForJobRole).mockRejectedValue(
+				new Error("network failure"),
+			);
+
+			await controller.assessApplicationsForJobRole(requestFor(), response);
+
+			expect(response.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?assessmentError=Unable%20to%20assess%20role%20applications",
 			);
 		});
 	});

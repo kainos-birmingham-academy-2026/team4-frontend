@@ -933,6 +933,29 @@ tbody tr:hover {
 	gap: 0.75rem;
 }
 
+.applications-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin: 1rem 0 0.5rem;
+}
+
+.applications-toolbar form {
+	margin: 0;
+}
+
+.fit-sort-link {
+	color: var(--kainos-blue);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.fit-disclaimer {
+	margin: 0.5rem 0 1rem;
+	color: var(--kainos-muted);
+	font-size: 0.9rem;
+}
+
 .application-item {
 	display: flex;
 	align-items: center;
@@ -948,14 +971,9 @@ tbody tr:hover {
 	min-width: 0;
 }
 
-.application-main details {
-	margin: 0;
-}
-
 .application-applicant {
-	color: var(--kainos-blue);
+	color: var(--kainos-navy);
 	font-weight: 700;
-	cursor: pointer;
 }
 
 .application-main time {
@@ -963,25 +981,6 @@ tbody tr:hover {
 	margin-top: 0.35rem;
 	color: var(--kainos-muted);
 	font-size: 0.85rem;
-}
-
-.application-message {
-	margin-top: 0.75rem;
-	padding: 0.75rem;
-	background: var(--kainos-light);
-	border-left: 3px solid var(--kainos-green);
-}
-
-.application-message-label {
-	color: var(--kainos-muted);
-	font-size: 0.8rem;
-	font-weight: 700;
-	text-transform: uppercase;
-}
-
-.application-message p {
-	margin: 0.35rem 0 0;
-	white-space: pre-wrap;
 }
 
 .application-actions {
@@ -994,6 +993,138 @@ tbody tr:hover {
 
 .application-actions form {
 	margin: 0;
+}
+
+.fit-result {
+	display: grid;
+	gap: 0.35rem;
+	width: 100%;
+}
+
+.fit-score,
+.fit-status {
+	padding: 0.35rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.fit-score {
+	background: rgba(92, 192, 137, 0.18);
+	color: #1d6f44;
+}
+
+.fit-status {
+	background: rgba(0, 115, 230, 0.12);
+	color: var(--kainos-blue);
+}
+
+.review-button {
+	min-height: auto;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	color: var(--kainos-blue);
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 700;
+	text-align: left;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.review-button:hover {
+	filter: none;
+	transform: none;
+	text-decoration-thickness: 2px;
+}
+
+.application-review-dialog {
+	width: min(46rem, calc(100% - 2rem));
+	max-height: min(46rem, calc(100vh - 2rem));
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	color: var(--kainos-navy);
+	box-shadow: 0 1rem 3rem rgba(37, 45, 79, 0.25);
+}
+
+.application-review-dialog::backdrop {
+	background: rgba(20, 29, 58, 0.5);
+}
+
+.application-review-dialog-content {
+	padding: 1.75rem 1.75rem 1rem;
+	overflow-y: auto;
+}
+
+.review-dialog-heading {
+	margin-bottom: 1.5rem;
+}
+
+.review-dialog-eyebrow {
+	margin: 0 0 0.25rem;
+	color: var(--kainos-muted);
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.review-dialog-heading h2 {
+	margin: 0;
+	font-size: 1.5rem;
+	overflow-wrap: anywhere;
+}
+
+.review-dialog-heading .fit-score {
+	display: inline-block;
+	margin-top: 0.65rem;
+}
+
+.review-dialog-section {
+	padding: 1rem 0;
+	border-top: 1px solid var(--kainos-border);
+}
+
+.review-dialog-section h3 {
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+}
+
+.review-dialog-section p,
+.review-dialog-section ul {
+	margin: 0;
+	color: var(--kainos-muted);
+}
+
+.review-dialog-section li + li {
+	margin-top: 0.4rem;
+}
+
+.review-dialog-message {
+	white-space: pre-wrap;
+}
+
+.review-dialog-columns {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.5rem;
+}
+
+.review-dialog-metadata {
+	margin: 0;
+	color: var(--kainos-muted);
+	font-size: 0.85rem;
+}
+
+.application-review-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin: 0;
+	padding: 1rem 1.75rem 1.5rem;
+	border-top: 1px solid var(--kainos-border);
 }
 
 .application-status {
@@ -1851,7 +1982,6 @@ tbody tr:hover {
 	border: 1px solid var(--kainos-border);
 }
 
-.job-detail-page .application-message,
 .job-detail-page .application-applicant,
 .job-detail-page .meta-value,
 .job-detail-page .job-detail-title,
@@ -1913,5 +2043,18 @@ tbody tr:hover {
 
 	.job-detail-page .job-detail-title {
 		font-size: 1.8rem;
+	}
+
+	.review-dialog-columns {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+	}
+
+	.application-review-dialog-content {
+		padding: 1.25rem 1.25rem 0.75rem;
+	}
+
+	.application-review-dialog-actions {
+		padding: 0.75rem 1.25rem 1.25rem;
 	}
 }
