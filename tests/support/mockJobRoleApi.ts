@@ -262,11 +262,11 @@ app.get("/api/job-roles/export", (_req, res) => {
 		"capability",
 		"band",
 		"closingDate",
-		"status",
 		"description",
 		"responsibilities",
 		"sharepointUrl",
 		"numberOfOpenPositions",
+		"status",
 	];
 	const escapeCsvValue = (value: unknown): string => {
 		const stringValue = String(value ?? "");
@@ -281,11 +281,11 @@ app.get("/api/job-roles/export", (_req, res) => {
 		role.capability,
 		role.band,
 		role.closingDate,
-		role.status,
 		role.description,
 		role.responsibilities.join("; "),
 		role.sharepointUrl,
 		role.numberOfOpenPositions,
+		role.status,
 	]);
 	const csv = `${[headers, ...rows]
 		.map((row) => row.map(escapeCsvValue).join(","))

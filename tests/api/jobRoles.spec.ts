@@ -22,7 +22,7 @@ test.describe("Job roles API", () => {
 		const csv = await response.text();
 		const [header] = csv.split("\r\n");
 		expect(header).toBe(
-			"jobRoleId,roleName,location,capability,band,closingDate,status,description,responsibilities,sharepointUrl,numberOfOpenPositions",
+			"jobRoleId,roleName,location,capability,band,closingDate,description,responsibilities,sharepointUrl,numberOfOpenPositions,status",
 		);
 		expect(csv).toContain("Software Engineer");
 		expect(csv).toContain("Platform Specialist 60");
