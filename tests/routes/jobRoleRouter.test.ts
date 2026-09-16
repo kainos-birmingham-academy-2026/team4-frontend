@@ -267,7 +267,9 @@ describe("GET /job-roles/:id/apply", () => {
 		const response = await request(app).get("/job-roles/1/apply");
 
 		expect(response.status).toBe(302);
-		expect(response.headers.location).toBe("/job-roles/1");
+		expect(response.headers.location).toBe(
+			"/job-roles/1?applicationUnavailable=true",
+		);
 	});
 });
 

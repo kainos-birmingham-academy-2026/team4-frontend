@@ -131,7 +131,9 @@ describe("ApplicationController", () => {
 
 		await controller.showApplicationForm(requestFor(), response);
 
-		expect(response.redirect).toHaveBeenCalledWith("/job-roles/1");
+		expect(response.redirect).toHaveBeenCalledWith(
+			"/job-roles/1?applicationUnavailable=true",
+		);
 	});
 
 	it("renders not found when the role cannot be loaded", async () => {

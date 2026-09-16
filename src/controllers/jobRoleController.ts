@@ -538,6 +538,9 @@ export class JobRoleController {
 			applied: Boolean(application),
 			isAdmin: res.locals.isAdmin,
 			applications,
+			...(req.query.applicationUnavailable === "true"
+				? { applicationUnavailable: true }
+				: {}),
 			assessmentSuccess:
 				req.query.assessed === "hire"
 					? ApplicationAssessmentMessage.Hired

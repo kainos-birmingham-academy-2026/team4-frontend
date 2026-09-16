@@ -71,6 +71,12 @@ export class BaseApiClient {
 		return this.request.get(`${this.baseUrl}/api/applications`);
 	}
 
+	submitApplication(jobRoleId: number, message: string): Promise<APIResponse> {
+		return this.request.post(`${this.baseUrl}/api/applications`, {
+			data: { jobRoleId, message },
+		});
+	}
+
 	assessApplication(
 		id: number,
 		action: "hire" | "reject",
