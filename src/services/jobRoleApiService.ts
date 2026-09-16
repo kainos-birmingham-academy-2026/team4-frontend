@@ -1,10 +1,12 @@
 import axios from "axios";
 import apiClient from "../config/apiClient";
 import type {
+	CareerMatrix,
 	CreateJobRoleInput,
 	CreateJobRoleOptions,
 	FilterOptions,
 	JobRole,
+	JobRoleComparison,
 	JobRoleDetail,
 	JobRoleFilters,
 	JobRoleOrdering,
@@ -95,6 +97,46 @@ export async function getJobRoleById(
 				throw new Error(`Unexpected error: ${error.message}`);
 			}
 		}
+	}
+}
+
+export async function getCareerMatrix(token: string): Promise<CareerMatrix> {
+	try {
+		const { data } = await apiClient.get<CareerMatrix>(
+			"/api/job-roles/career-matrix",
+			{ headers: authHeaders(token) },
+		);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			throw new Error(`Error fetching career matrix: ${error.message}`);
+		}
+		throw error;
+	}
+}
+
+export async function compareJobRoles(
+	roleA: number,
+	roleB: number,
+	token: string,
+): Promise<JobRoleComparison> {
+	try {
+		const { data } = await apiClient.get<JobRoleComparison>(
+			"/api/job-roles/compare",
+			{
+				params: { roleA, roleB },
+				headers: authHeaders(token),
+			},
+		);
+		return data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			if (error.response?.status === 404) {
+				throw new Error("Job role not found.");
+			}
+			throw new Error(`Error comparing job roles: ${error.message}`);
+		}
+		throw error;
 	}
 }
 

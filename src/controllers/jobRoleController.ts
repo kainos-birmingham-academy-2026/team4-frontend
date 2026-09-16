@@ -4,10 +4,12 @@ import {
 	getMyApplications,
 } from "../services/applicationApiService";
 import {
+	compareJobRoles,
 	createJobRole,
 	deleteJobRole,
 	exportJobRoles,
 	getAllJobRoles,
+	getCareerMatrix,
 	getCreateJobRoleOptions,
 	getFilterOptions,
 	getJobRoleById,
@@ -256,6 +258,61 @@ export class JobRoleController {
 			status: 401,
 			message: "Unauthorized access",
 		});
+	}
+
+	async showCareerMatrix(req: Request, res: Response): Promise<void> {
+		try {
+			const careerMatrix = await getCareerMatrix(this.getJwtToken(req));
+			res.render("pages/career-matrix.njk", {
+				pageTitle: "Kainos Careers - Career Paths",
+				careerMatrix,
+			});
+		} catch {
+			res.status(500).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 500,
+				message: "Error fetching career paths",
+			});
+		}
+	}
+
+	async showRoleComparison(req: Request, res: Response): Promise<void> {
+		const roleA = Number(req.query.roleA);
+		const roleB = Number(req.query.roleB);
+		if (
+			!Number.isInteger(roleA) ||
+			roleA <= 0 ||
+			!Number.isInteger(roleB) ||
+			roleB <= 0 ||
+			roleA === roleB
+		) {
+			res.status(400).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: 400,
+				message: "Select two different job roles to compare",
+			});
+			return;
+		}
+
+		try {
+			const comparison = await compareJobRoles(
+				roleA,
+				roleB,
+				this.getJwtToken(req),
+			);
+			res.render("pages/role-compare.njk", {
+				pageTitle: "Kainos Careers - Compare Roles",
+				comparison,
+			});
+		} catch (error) {
+			const notFound =
+				error instanceof Error && error.message === "Job role not found.";
+			res.status(notFound ? 404 : 500).render("pages/error.njk", {
+				pageTitle: "Kainos Careers - Error",
+				status: notFound ? 404 : 500,
+				message: notFound ? "Job role not found" : "Error comparing job roles",
+			});
+		}
 	}
 
 	async getJobRoles(req: Request, res: Response): Promise<void> {

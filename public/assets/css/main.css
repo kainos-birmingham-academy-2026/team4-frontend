@@ -826,6 +826,237 @@ tbody tr:hover {
 	max-width: 60ch;
 }
 
+.career-paths-header {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.65fr);
+	column-gap: 3rem;
+	align-items: end;
+}
+
+.career-paths-header .eyebrow {
+	grid-column: 1 / -1;
+}
+
+.career-paths-header p:last-child {
+	margin-bottom: 0.4rem;
+}
+
+.career-picker {
+	margin: 0;
+}
+
+.career-picker-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1.25rem;
+}
+
+.career-picker-panel {
+	min-width: 0;
+	margin: 0;
+	padding: 1.75rem;
+	border: 1px solid var(--kainos-border);
+	border-top: 5px solid var(--kainos-green);
+	border-radius: 8px;
+	background: var(--kainos-white);
+	box-shadow: var(--kainos-shadow);
+}
+
+.career-picker-panel:last-child {
+	border-top-color: var(--kainos-blue);
+}
+
+.career-picker-panel legend {
+	padding: 0 0.4rem;
+	font-size: 1.2rem;
+	font-weight: 700;
+}
+
+.career-picker-panel legend span {
+	margin-right: 0.6rem;
+	color: var(--kainos-muted);
+	font-size: 0.8rem;
+}
+
+.career-picker-panel label:not(:first-of-type) {
+	margin-top: 1.25rem;
+}
+
+.career-picker-panel select {
+	width: 100%;
+	min-height: 3.25rem;
+	padding: 0.7rem 2.5rem 0.7rem 0.8rem;
+	border: 1px solid var(--kainos-border);
+	border-radius: 6px;
+	background: var(--kainos-white);
+	color: var(--kainos-navy);
+	font: inherit;
+}
+
+.career-picker-panel select:focus-visible {
+	outline: 3px solid rgba(0, 115, 230, 0.3);
+	outline-offset: 2px;
+}
+
+.career-picker-panel select:disabled {
+	background: var(--kainos-light);
+	color: var(--kainos-muted);
+	cursor: not-allowed;
+}
+
+.career-picker-help {
+	margin: 0.75rem 0 0;
+	color: var(--kainos-muted);
+	font-size: 0.82rem;
+}
+
+.comparison-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 1.25rem;
+	padding: 1rem 1.25rem;
+	border: 1px solid #e0b84f;
+	border-left: 5px solid #c58b00;
+	background: #fff9e8;
+}
+
+.comparison-actions button {
+	margin: 0;
+}
+
+.comparison-actions[data-comparison-status="ready"] {
+	border-color: var(--kainos-green);
+	background: #effaf4;
+}
+
+.comparison-status {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.comparison-status strong {
+	color: var(--kainos-navy);
+}
+
+.comparison-status span {
+	color: var(--kainos-muted);
+}
+
+.comparison-actions button:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.comparison-columns,
+.delta-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1px;
+	background: var(--kainos-border);
+	border: 1px solid var(--kainos-border);
+}
+
+.comparison-role,
+.delta-group {
+	background: var(--kainos-white);
+	padding: 1.75rem;
+}
+
+.comparison-kicker {
+	margin: 0;
+	color: var(--kainos-blue);
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.comparison-role h2 {
+	margin: 0.35rem 0 1.25rem;
+}
+
+.comparison-meta {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.comparison-meta dt {
+	color: var(--kainos-muted);
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.comparison-meta dd {
+	margin: 0.25rem 0 0;
+}
+
+.responsibility-delta {
+	margin-top: 3rem;
+}
+
+.delta-grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.delta-group {
+	border-top: 5px solid var(--kainos-border);
+}
+
+.delta-group.shared {
+	border-color: var(--kainos-green);
+}
+
+.delta-group.target {
+	border-color: var(--kainos-blue);
+}
+
+.delta-group h3 {
+	margin-top: 0;
+	font-size: 1.05rem;
+}
+
+.delta-group ul {
+	padding-left: 1.2rem;
+}
+
+.delta-group li + li {
+	margin-top: 0.65rem;
+}
+
+.comparison-cta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 2rem;
+	padding: 1.25rem 1.5rem;
+	background: var(--kainos-navy);
+	color: var(--kainos-white);
+}
+
+.comparison-cta span {
+	display: block;
+	color: #dce4ff;
+}
+
+@media (max-width: 760px) {
+	.career-paths-header,
+	.career-picker-grid,
+	.comparison-columns,
+	.delta-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.comparison-actions,
+	.comparison-cta {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}
+
 .form-card {
 	background: var(--kainos-white);
 	border: 1px solid var(--kainos-border);

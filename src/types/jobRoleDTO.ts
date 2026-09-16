@@ -15,6 +15,25 @@ export interface JobRoleDetail extends JobRole {
 	numberOfOpenPositions: number;
 }
 
+export interface CareerMatrixOption {
+	id: number;
+	name: string;
+}
+
+export interface CareerMatrix {
+	capabilities: CareerMatrixOption[];
+	bands: CareerMatrixOption[];
+	matrix: Record<string, JobRoleDetail[]>;
+}
+
+export interface JobRoleComparison {
+	roleA: JobRoleDetail;
+	roleB: JobRoleDetail;
+	sharedResponsibilities: string[];
+	roleAResponsibilities: string[];
+	roleBResponsibilities: string[];
+}
+
 export interface PaginationMetadata {
 	currentPage: number;
 	totalPages: number;
