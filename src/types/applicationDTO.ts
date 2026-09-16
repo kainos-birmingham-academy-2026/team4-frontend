@@ -23,4 +23,20 @@ export interface ApplicationAssessment {
 	message: string;
 	status: string;
 	createdAt: string;
+	fitScore: number | null;
+	fitSummary: string | null;
+	fitStrengths: string[];
+	fitGaps: string[];
+	fitStatus: "Complete" | "Unavailable" | "Failed" | null;
+	fitAssessedAt: string | null;
+	fitModel: string | null;
+	fitPromptVersion: string | null;
+}
+
+export interface BulkFitAssessmentResponse {
+	processed: number;
+	completed: number;
+	unavailable: number;
+	failed: number;
+	skippedComplete: number;
 }

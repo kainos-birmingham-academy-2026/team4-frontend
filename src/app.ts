@@ -15,7 +15,7 @@ const useSecureSessionCookie =
 		process.env.SESSION_COOKIE_SECURE !== "false");
 const app = express();
 
-function hasAdminRole(token: string | undefined): boolean {
+export function hasAdminRole(token: string | undefined): boolean {
 	if (!token) return false;
 
 	try {

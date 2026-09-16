@@ -42,11 +42,23 @@
 
       {% set applicationsPanel %}
       {% if isAdmin %}
-      <details class="applications-section" {% if assessmentSuccess or assessmentError %}open{% endif %}>
+      <details class="applications-section" {% if assessmentSuccess or assessmentError or fitAssessmentSuccess %}open{% endif %}>
         <summary class="applications-summary">Applications <span class="application-count">{{ applications.length }} applicant{% if applications.length != 1 %}s{% endif %}</span></summary>
+        <div class="applications-toolbar">
+          <form method="post" action="/job-roles/{{ job.jobRoleId }}/applications/fit-assessments">
+            <button type="submit" class="btn btn-small" data-confirmation-message="Assess all applicants without a completed AI fit result?">Assess applicants</button>
+          </form>
+          <a class="fit-sort-link" href="/job-roles/{{ job.jobRoleId }}{% if fitSort == 'asc' %}?fitSort=desc{% else %}?fitSort=asc{% endif %}">Sort fit {% if fitSort == 'asc' %}descending{% elif fitSort == 'desc' %}ascending{% else %}ascending{% endif %}</a>
+        </div>
+        <p class="fit-disclaimer">AI-generated decision support only. Recruiters remain responsible for every employment decision.</p>
         {% if assessmentSuccess %}
           <div class="form-success-summary" role="status" aria-live="polite">
             <p>{{ assessmentSuccess }}</p>
+          </div>
+        {% endif %}
+        {% if fitAssessmentSuccess %}
+          <div class="form-success-summary" role="status" aria-live="polite">
+            <p>{{ fitAssessmentSuccess }}</p>
           </div>
         {% endif %}
         {% if assessmentError %}
@@ -60,17 +72,22 @@
             {% for application in applications %}
               <article class="application-item">
                 <div class="application-main">
-                  <details>
-                    <summary class="application-applicant">{{ application.applicantEmail }}</summary>
-                    <div class="application-message" id="application-message-{{ application.applicationId }}">
-                      <span class="application-message-label">Application message</span>
-                      <p>{{ application.message }}</p>
-                    </div>
-                  </details>
+                  <button type="button" class="application-applicant review-button" data-review-dialog-open="application-{{ application.applicationId }}">{{ application.applicantEmail }}</button>
                   <time datetime="{{ application.createdAt }}">Applied {{ application.createdAt | formatDate }}</time>
                 </div>
 
                 <div class="application-actions">
+                  <button type="button" class="review-button" data-review-dialog-open="application-{{ application.applicationId }}">View application</button>
+                  <div class="fit-result">
+                    {% if application.fitStatus == "Complete" %}
+                      <span class="fit-score">AI fit {{ application.fitScore }}%</span>
+                      <button type="button" class="review-button" data-review-dialog-open="fit-{{ application.applicationId }}">View fit assessment</button>
+                    {% elif application.fitStatus %}
+                      <span class="fit-status">AI fit {{ application.fitStatus }}</span>
+                    {% else %}
+                      <span class="fit-status">AI fit Pending</span>
+                    {% endif %}
+                  </div>
                   {% if application.status == "In Progress" %}
                     <span class="application-status in-progress">{{ application.status }}</span>
                     <form method="post" action="/job-roles/{{ job.jobRoleId }}/applications/{{ application.applicationId }}/hire" data-confirmation-message="Hire this applicant?">
@@ -85,9 +102,52 @@
                     <span class="application-status rejected">Rejected</span>
                   {% endif %}
                 </div>
+
+                <template id="application-{{ application.applicationId }}">
+                  <div class="review-dialog-heading">
+                    <p class="review-dialog-eyebrow">Application</p>
+                    <h2>{{ application.applicantEmail }}</h2>
+                  </div>
+                  <section class="review-dialog-section" aria-labelledby="application-message-heading-{{ application.applicationId }}">
+                    <h3 id="application-message-heading-{{ application.applicationId }}">Application message</h3>
+                    <p class="review-dialog-message">{{ application.message }}</p>
+                  </section>
+                </template>
+
+                {% if application.fitStatus == "Complete" %}
+                  <template id="fit-{{ application.applicationId }}">
+                    <div class="review-dialog-heading">
+                      <p class="review-dialog-eyebrow">AI fit assessment</p>
+                      <h2>{{ application.applicantEmail }}</h2>
+                      <span class="fit-score">AI fit {{ application.fitScore }}%</span>
+                    </div>
+                    <p class="fit-disclaimer">AI-generated decision support only. Recruiters remain responsible for every employment decision.</p>
+                    <section class="review-dialog-section">
+                      <h3>Assessment summary</h3>
+                      <p>{{ application.fitSummary }}</p>
+                    </section>
+                    <div class="review-dialog-columns">
+                      <section class="review-dialog-section">
+                        <h3>Matching strengths</h3>
+                        <ul>{% for strength in application.fitStrengths %}<li>{{ strength }}</li>{% endfor %}</ul>
+                      </section>
+                      <section class="review-dialog-section">
+                        <h3>Missing or unclear requirements</h3>
+                        <ul>{% for gap in application.fitGaps %}<li>{{ gap }}</li>{% endfor %}</ul>
+                      </section>
+                    </div>
+                    {% if application.fitAssessedAt %}<p class="review-dialog-metadata">Assessed {{ application.fitAssessedAt | formatDate }} using {{ application.fitModel }} (prompt {{ application.fitPromptVersion }}).</p>{% endif %}
+                  </template>
+                {% endif %}
               </article>
             {% endfor %}
           </div>
+          <dialog class="application-review-dialog" id="application-review-dialog" aria-labelledby="application-review-dialog-title">
+            <div class="application-review-dialog-content" data-review-dialog-content></div>
+            <form method="dialog" class="application-review-dialog-actions">
+              <button type="submit" class="btn btn-secondary" data-review-dialog-close>Close</button>
+            </form>
+          </dialog>
         {% else %}
           <p class="empty-applications">No applications have been submitted for this role.</p>
         {% endif %}

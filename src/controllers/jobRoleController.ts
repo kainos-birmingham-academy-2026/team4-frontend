@@ -514,6 +514,14 @@ export class JobRoleController {
 		if (res.locals.isAdmin) {
 			try {
 				applications = (await getApplicationsByJobRole(id, token)) ?? [];
+				if (req.query.fitSort === "asc" || req.query.fitSort === "desc") {
+					const direction = req.query.fitSort === "asc" ? 1 : -1;
+					applications.sort((first, second) => {
+						if (first.fitStatus !== "Complete") return 1;
+						if (second.fitStatus !== "Complete") return -1;
+						return ((first.fitScore ?? 0) - (second.fitScore ?? 0)) * direction;
+					});
+				}
 			} catch {
 				applications = [];
 			}
@@ -539,6 +547,14 @@ export class JobRoleController {
 			assessmentError:
 				typeof req.query.assessmentError === "string"
 					? req.query.assessmentError
+					: undefined,
+			fitAssessmentSuccess:
+				typeof req.query.fitAssessed === "string"
+					? `Fit assessment complete: ${req.query.fitAssessed} completed, ${req.query.fitUnavailable ?? "0"} unavailable, ${req.query.fitFailed ?? "0"} failed, ${req.query.fitSkipped ?? "0"} already complete.`
+					: undefined,
+			fitSort:
+				req.query.fitSort === "asc" || req.query.fitSort === "desc"
+					? req.query.fitSort
 					: undefined,
 		});
 	}

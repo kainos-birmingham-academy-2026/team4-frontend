@@ -184,6 +184,8 @@ npm run prepare
 	- Displays the form to add a new job role. Admin only
 - `GET /job-roles/:id`
 	- Displays a page listing the details of a job role, including the applications list for Admins
+- `POST /job-roles/:id/applications/fit-assessments`
+	- Admin-only role-level action that requests fit assessments for applications without a completed result
 - `POST /job-roles/:id`
 	- Updates an existing job role. Admin only
 - `GET /job-roles/:id/edit`
@@ -222,6 +224,14 @@ Example:
 PORT=3000
 API_BASE_URL=http://localhost:4000
 ```
+
+## Admin applicant assessment workflow
+
+Admins can open a job role's Applications section and select **Assess applicants**. The frontend sends the request to the backend role-level endpoint and displays the returned batch counts.
+
+The applicant list remains compact. **View application** opens the applicant's message in a focused dialog, while **View fit assessment** opens the stored score, summary, strengths, gaps, and assessment metadata. Completed scores can be sorted. These fit details are shown only in the admin interface; applicant-facing application pages do not expose them.
+
+The frontend does not store or receive the Azure API key. Configure `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT`, and `FIT_PROMPT_VERSION` in the backend's ignored `.env` file. Set `API_BASE_URL` to the backend address and restart both applications after changing local environment variables.
 
 ## Registration Validation
 
