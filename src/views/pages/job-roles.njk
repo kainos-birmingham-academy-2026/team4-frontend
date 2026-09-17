@@ -225,4 +225,20 @@
       </div>
     </div>
   </section>
+
+  <script>
+    (() => {
+      const filterDropdowns = document.querySelectorAll(".filter-dropdown");
+
+      filterDropdowns.forEach((dropdown) => {
+        dropdown.addEventListener("toggle", () => {
+          if (!dropdown.open) return;
+
+          filterDropdowns.forEach((otherDropdown) => {
+            if (otherDropdown !== dropdown) otherDropdown.open = false;
+          });
+        });
+      });
+    })();
+  </script>
 {% endblock %}

@@ -551,6 +551,20 @@ test.describe("job role listing", () => {
 		await expect(jobRolesPage.filterDropdownCount("band")).toHaveText("2");
 	});
 
+	test("keeps only one checkbox filter dropdown open", async ({ page }) => {
+		const capabilityDropdown = page.locator(
+			'details:has(input[name="capability"])',
+		);
+		const bandDropdown = page.locator('details:has(input[name="band"])');
+
+		await capabilityDropdown.locator("summary").click();
+		await expect(capabilityDropdown).toHaveAttribute("open", "");
+
+		await bandDropdown.locator("summary").click();
+		await expect(capabilityDropdown).not.toHaveAttribute("open", "");
+		await expect(bandDropdown).toHaveAttribute("open", "");
+	});
+
 	test("clear filters resets text, checkbox, and date filters", async ({
 		page,
 	}) => {

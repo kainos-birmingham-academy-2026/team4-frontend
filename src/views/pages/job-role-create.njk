@@ -12,108 +12,105 @@
       <p class="form-error" role="alert">{{ errors.general }}</p>
     {% endif %}
 
-    <form method="post" action="{% if isEdit %}/job-roles/{{ formActionId }}{% else %}/job-roles{% endif %}" class="form-card">
-      <div class="form-group">
-        <label for="roleName">Job role name</label>
-        <input class="form-control" id="roleName" name="roleName" type="text" value="{{ formValues.roleName }}" required />
-        {% if errors.roleName %}<p class="form-error">{{ errors.roleName }}</p>{% endif %}
-      </div>
+    <form method="post" action="{% if isEdit %}/job-roles/{{ formActionId }}{% else %}/job-roles{% endif %}" class="form-card job-role-form">
+      <section class="job-role-form-section" aria-labelledby="role-overview-heading">
+        <div class="job-role-form-section-heading">
+          <p>01</p>
+          <div>
+            <h2 id="role-overview-heading">Role overview</h2>
+            <p>Set out the essential information candidates need first.</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="roleName">Job role name</label>
+          <input class="form-control" id="roleName" name="roleName" type="text" value="{{ formValues.roleName }}" required />
+          {% if errors.roleName %}<p class="form-error">{{ errors.roleName }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="description">Job specification summary</label>
+          <textarea id="description" name="description" rows="5" required>{{ formValues.description }}</textarea>
+          {% if errors.description %}<p class="form-error">{{ errors.description }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="sharepointUrl">SharePoint link</label>
+          <input class="form-control" id="sharepointUrl" name="sharepointUrl" type="url" value="{{ formValues.sharepointUrl }}" required />
+          {% if errors.sharepointUrl %}<p class="form-error">{{ errors.sharepointUrl }}</p>{% endif %}
+        </div>
+      </section>
 
-      <div class="form-group">
-        <label for="description">Job specification summary</label>
-        <textarea id="description" name="description" rows="5" required>{{ formValues.description }}</textarea>
-        {% if errors.description %}<p class="form-error">{{ errors.description }}</p>{% endif %}
-      </div>
+      <section class="job-role-form-section" aria-labelledby="responsibilities-heading">
+        <div class="job-role-form-section-heading">
+          <p>02</p>
+          <div>
+            <h2 id="responsibilities-heading">Responsibilities</h2>
+            <p>Use one line for each key responsibility.</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="responsibilities">Responsibilities</label>
+          <textarea id="responsibilities" name="responsibilities" rows="6" placeholder="Enter one responsibility per line" required>{{ formValues.responsibilities }}</textarea>
+          {% if errors.responsibilities %}<p class="form-error">{{ errors.responsibilities }}</p>{% endif %}
+        </div>
+      </section>
 
-      <div class="form-group">
-        <label for="sharepointUrl">SharePoint link</label>
-        <input class="form-control" id="sharepointUrl" name="sharepointUrl" type="url" value="{{ formValues.sharepointUrl }}" required />
-        {% if errors.sharepointUrl %}<p class="form-error">{{ errors.sharepointUrl }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="responsibilities">Responsibilities</label>
-        <textarea
-          id="responsibilities"
-          name="responsibilities"
-          rows="6"
-          placeholder="Enter one responsibility per line"
-          required
-        >{{ formValues.responsibilities }}</textarea>
-        {% if errors.responsibilities %}<p class="form-error">{{ errors.responsibilities }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="numberOfOpenPositions">Number of open positions</label>
-        <input
-          class="form-control"
-          id="numberOfOpenPositions"
-          name="numberOfOpenPositions"
-          type="number"
-          min="0"
-          step="1"
-          value="{{ formValues.numberOfOpenPositions }}"
-          required
-        />
-        {% if errors.numberOfOpenPositions %}<p class="form-error">{{ errors.numberOfOpenPositions }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="location">Location</label>
-        <input class="form-control" id="location" name="location" type="text" value="{{ formValues.location }}" required />
-        {% if errors.location %}<p class="form-error">{{ errors.location }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="closingDate">Closing date</label>
-        <input id="closingDate" name="closingDate" type="date" value="{{ formValues.closingDate }}" required />
-        {% if errors.closingDate %}<p class="form-error">{{ errors.closingDate }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="capabilityId">Capability</label>
-        <select id="capabilityId" name="capabilityId" required>
-          <option value="">Select a capability</option>
-          {% for capability in options.capabilities %}
-            <option
-              value="{{ capability.id }}"
-              {% if formValues.capabilityId == capability.id | string %}selected{% endif %}
-            >
-              {{ capability.name }}
-            </option>
-          {% endfor %}
-        </select>
-        {% if errors.capabilityId %}<p class="form-error">{{ errors.capabilityId }}</p>{% endif %}
-      </div>
-
-      <div class="form-group">
-        <label for="bandId">Band</label>
-        <select id="bandId" name="bandId" required>
-          <option value="">Select a band</option>
-          {% for band in options.bands %}
-            <option
-              value="{{ band.id }}"
-              {% if formValues.bandId == band.id | string %}selected{% endif %}
-            >
-              {{ band.name }}
-            </option>
-          {% endfor %}
-        </select>
-        {% if errors.bandId %}<p class="form-error">{{ errors.bandId }}</p>{% endif %}
-      </div>
-
-      {% if isEdit %}
-      <div class="form-group">
-        <label for="statusId">Status</label>
-        <select id="statusId" name="statusId" required>
-          <option value="">Select a status</option>
-          {% for status in options.statuses %}
-            <option value="{{ status.id }}" {% if formValues.statusId == status.id | string %}selected{% endif %}>{{ status.name }}</option>
-          {% endfor %}
-        </select>
-        {% if errors.statusId %}<p class="form-error">{{ errors.statusId }}</p>{% endif %}
-      </div>
-      {% endif %}
+      <section class="job-role-form-section" aria-labelledby="hiring-details-heading">
+        <div class="job-role-form-section-heading">
+          <p>03</p>
+          <div>
+            <h2 id="hiring-details-heading">Hiring details</h2>
+            <p>Choose where this role sits and how it will be advertised.</p>
+          </div>
+        </div>
+        <div class="job-role-form-grid">
+          <div class="form-group">
+            <label for="numberOfOpenPositions">Number of open positions</label>
+            <input class="form-control" id="numberOfOpenPositions" name="numberOfOpenPositions" type="number" min="0" step="1" value="{{ formValues.numberOfOpenPositions }}" required />
+            {% if errors.numberOfOpenPositions %}<p class="form-error">{{ errors.numberOfOpenPositions }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input class="form-control" id="location" name="location" type="text" value="{{ formValues.location }}" required />
+            {% if errors.location %}<p class="form-error">{{ errors.location }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="closingDate">Closing date</label>
+            <input id="closingDate" name="closingDate" type="date" value="{{ formValues.closingDate }}" required />
+            {% if errors.closingDate %}<p class="form-error">{{ errors.closingDate }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="capabilityId">Capability</label>
+            <select id="capabilityId" name="capabilityId" required>
+              <option value="">Select a capability</option>
+              {% for capability in options.capabilities %}
+                <option value="{{ capability.id }}" {% if formValues.capabilityId == capability.id | string %}selected{% endif %}>{{ capability.name }}</option>
+              {% endfor %}
+            </select>
+            {% if errors.capabilityId %}<p class="form-error">{{ errors.capabilityId }}</p>{% endif %}
+          </div>
+          <div class="form-group">
+            <label for="bandId">Band</label>
+            <select id="bandId" name="bandId" required>
+              <option value="">Select a band</option>
+              {% for band in options.bands %}
+                <option value="{{ band.id }}" {% if formValues.bandId == band.id | string %}selected{% endif %}>{{ band.name }}</option>
+              {% endfor %}
+            </select>
+            {% if errors.bandId %}<p class="form-error">{{ errors.bandId }}</p>{% endif %}
+          </div>
+          {% if isEdit %}
+            <div class="form-group">
+              <label for="statusId">Status</label>
+              <select id="statusId" name="statusId" required>
+                <option value="">Select a status</option>
+                {% for status in options.statuses %}
+                  <option value="{{ status.id }}" {% if formValues.statusId == status.id | string %}selected{% endif %}>{{ status.name }}</option>
+                {% endfor %}
+              </select>
+              {% if errors.statusId %}<p class="form-error">{{ errors.statusId }}</p>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </section>
 
       <div class="form-group form-actions">
         <button type="submit">{% if isEdit %}Save changes{% else %}Create job role{% endif %}</button>

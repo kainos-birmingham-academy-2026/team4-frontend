@@ -34,6 +34,28 @@ test.describe("home page", () => {
 		);
 	});
 
+	test("introduces career disciplines and the hiring process", async ({
+		page,
+	}) => {
+		await expect(
+			page.getByRole("heading", { name: "Find your discipline" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: "A clear path from application to offer",
+			}),
+		).toBeVisible();
+
+		const disciplineLinks = page.locator(".homepage-discipline-grid a");
+		await expect(disciplineLinks).toHaveCount(6);
+		for (const disciplineLink of await disciplineLinks.all()) {
+			await expect(disciplineLink).toHaveAttribute("href", "/job-roles");
+		}
+		await expect(
+			page.locator('.homepage-final-cta a[href="/job-roles"]'),
+		).toHaveText(homepageContent.browseRolesLink);
+	});
+
 	test("opens and closes the careers assistant", async ({ homePage }) => {
 		await expect(homePage.chatDialog).toBeHidden();
 		await homePage.openChat();

@@ -1,32 +1,112 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-  <section class="hero">
-    <div class="container hero-inner">
-      <p class="eyebrow">Careers at Kainos</p>
-      <h1>Build your career on work that matters</h1>
-      <p class="hero-copy">
-        Explore current openings across engineering, consulting, design, data and
-        operations. Every role is listed with its capability, band, location and
-        closing date, so you can find the opportunity that fits where you want to
-        take your career next.
-      </p>
+  <section class="homepage-hero">
+    <div class="container homepage-hero-grid">
+      <div class="homepage-hero-copy">
+        <p class="eyebrow">Careers at Kainos</p>
+        <h1>Build your career on work that matters</h1>
+        <p>
+          Find a role where your ideas, expertise and curiosity can help shape
+          digital services people rely on every day.
+        </p>
+        <div class="homepage-hero-actions">
+          <a class="btn" href="/job-roles">Browse open roles</a>
+          {% if isApplicant %}
+            <a class="btn btn-secondary" href="/applications">View my applications</a>
+          {% endif %}
+        </div>
+      </div>
 
-      <a class="btn" href="/job-roles">Browse open roles</a>
-      {% if isApplicant %}
-        <a class="btn btn-secondary" href="/applications">View my applications</a>
-      {% endif %}
+      <aside class="homepage-capability-panel" aria-labelledby="capability-panel-heading">
+        <p class="homepage-panel-kicker">Explore your next chapter</p>
+        <h2 id="capability-panel-heading">Your skills can take you further</h2>
+        <ul>
+          <li>Build services that make a difference</li>
+          <li>Learn alongside generous, talented people</li>
+          <li>Grow through meaningful new challenges</li>
+        </ul>
+      </aside>
     </div>
   </section>
 
-  <section class="intro">
+  <section class="homepage-section homepage-disciplines" aria-labelledby="disciplines-heading">
     <div class="container">
-      <h2>Find the right opportunity</h2>
-      <p>
-        Filter live vacancies by capability, band and location to see the roles
-        that match your experience. Open each listing for a full description, key
-        responsibilities and the number of positions available before you apply.
-      </p>
+      <div class="homepage-section-heading">
+        <p class="eyebrow">Where you can make an impact</p>
+        <h2 id="disciplines-heading">Find your discipline</h2>
+        <p>Explore opportunities across the teams that bring our work to life.</p>
+      </div>
+      <div class="homepage-discipline-grid">
+        <a href="/job-roles">Engineering</a>
+        <a href="/job-roles">Data &amp; AI</a>
+        <a href="/job-roles">Experience Design</a>
+        <a href="/job-roles">Delivery &amp; Product</a>
+        <a href="/job-roles">Graduates &amp; Academy</a>
+        <a href="/job-roles">Platforms &amp; Cloud</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="homepage-section homepage-why" aria-labelledby="why-heading">
+    <div class="container homepage-two-column">
+      <div class="homepage-section-heading">
+        <p class="eyebrow">Why Kainos</p>
+        <h2 id="why-heading">Work with purpose. Grow with confidence.</h2>
+      </div>
+      <div class="homepage-value-list">
+        <article>
+          <h3>Meaningful work</h3>
+          <p>Help organisations create better digital experiences for the people they serve.</p>
+        </article>
+        <article>
+          <h3>Learning that lasts</h3>
+          <p>Take on fresh challenges with the support, feedback and space to build your craft.</p>
+        </article>
+        <article>
+          <h3>People-first collaboration</h3>
+          <p>Bring your perspective to a team that values thoughtful, practical work together.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="homepage-section homepage-process" aria-labelledby="process-heading">
+    <div class="container">
+      <div class="homepage-section-heading">
+        <p class="eyebrow">What happens next</p>
+        <h2 id="process-heading">A clear path from application to offer</h2>
+      </div>
+      <ol class="homepage-process-grid">
+        <li><span>01</span><h3>Apply</h3><p>Tell us about the opportunity that has caught your attention.</p></li>
+        <li><span>02</span><h3>Review</h3><p>We look at your experience and how it connects to the role.</p></li>
+        <li><span>03</span><h3>Meet the team</h3><p>Share your thinking and get to know the people you could work with.</p></li>
+        <li><span>04</span><h3>Join us</h3><p>Start a new chapter with the support to make an impact early.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="homepage-section homepage-story" aria-labelledby="story-heading">
+    <div class="container homepage-story-content">
+      <p class="eyebrow">Life at Kainos</p>
+      <blockquote id="story-heading">"The best work happens when you can keep learning, contribute your own ideas and trust the people around you."</blockquote>
+      <p class="homepage-story-attribution">Kainos colleague</p>
+    </div>
+  </section>
+
+  <section class="homepage-trust-strip" aria-label="Our commitment">
+    <div class="container">
+      <p>Curious minds welcome</p>
+      <p>Progress built together</p>
+      <p>Opportunities to keep growing</p>
+    </div>
+  </section>
+
+  <section class="homepage-final-cta">
+    <div class="container">
+      <p class="eyebrow">Your next role is waiting</p>
+      <h2>See where your career could go</h2>
+      <a class="btn" href="/job-roles">Browse open roles</a>
     </div>
   </section>
 {% endblock %}

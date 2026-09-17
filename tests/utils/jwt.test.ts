@@ -16,6 +16,8 @@ describe("jwt utils", () => {
 		expect(getRoleFromToken(undefined)).toBeUndefined();
 		expect(getRoleFromToken("not-a-token")).toBeUndefined();
 		expect(getRoleFromToken("a.%%%")).toBeUndefined();
+		expect(getRoleFromToken(encodeToken({ role: 123 }))).toBeUndefined();
+		expect(getRoleFromToken(encodeToken({ role: true }))).toBeUndefined();
 	});
 
 	it("treats non-admin users as applicants", () => {
