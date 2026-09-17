@@ -1,0 +1,56 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="page-section career-paths">
+    <div class="container">
+      <div class="page-header career-paths-header">
+        <p class="eyebrow">Career navigator</p>
+        <h1>Build your career comparison</h1>
+        <p>Choose a capability and role on each side. You can compare roles in the same career path or explore a move into a different capability.</p>
+      </div>
+
+      <form class="career-picker" action="/job-roles/compare" method="get" data-comparison-form>
+        <div class="career-picker-grid">
+          {% for side in [{ key: "roleA", label: "Starting role", number: "01" }, { key: "roleB", label: "Target role", number: "02" }] %}
+            <fieldset class="career-picker-panel" data-comparison-side>
+              <legend><span>{{ side.number }}</span>{{ side.label }}</legend>
+
+              <label for="{{ side.key }}-capability">Capability</label>
+              <select id="{{ side.key }}-capability" data-capability-select>
+                <option value="">Select a capability</option>
+                {% for capability in careerMatrix.capabilities %}
+                  <option value="{{ capability.id }}">{{ capability.name }}</option>
+                {% endfor %}
+              </select>
+
+              <label for="{{ side.key }}-role">Role</label>
+              <select id="{{ side.key }}-role" name="{{ side.key }}" data-role-select disabled required>
+                <option value="">Select a capability first</option>
+                {% for capability in careerMatrix.capabilities %}
+                  {% for band in careerMatrix.bands %}
+                    {% set cellKey = capability.id ~ "_" ~ band.id %}
+                    {% for role in careerMatrix.matrix[cellKey] %}
+                      <option value="{{ role.jobRoleId }}" data-capability-id="{{ capability.id }}" hidden disabled>
+                        {{ role.roleName }} · {{ band.name }} · {{ role.location }}
+                      </option>
+                    {% endfor %}
+                  {% endfor %}
+                {% endfor %}
+              </select>
+
+              <p class="career-picker-help">Only currently open roles are available.</p>
+            </fieldset>
+          {% endfor %}
+        </div>
+
+        <div class="comparison-actions" data-comparison-status="incomplete">
+          <div class="comparison-status" role="status" aria-live="polite" aria-atomic="true" id="comparison-status">
+            <strong data-comparison-heading>Comparison not ready</strong>
+            <span data-comparison-message>Select a starting role and a target role.</span>
+          </div>
+          <button type="submit" class="btn" data-compare-submit aria-describedby="comparison-status" disabled>Compare roles</button>
+        </div>
+      </form>
+    </div>
+  </section>
+{% endblock %}

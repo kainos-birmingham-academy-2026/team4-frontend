@@ -1,12 +1,14 @@
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../src/app";
 import {
 	getMyApplications,
 	submitApplication,
 } from "../../src/services/applicationApiService";
 import {
+	compareJobRoles,
 	exportJobRoles,
+	getCareerMatrix,
 	getCreateJobRoleOptions,
 	getJobRoleById,
 	getPaginatedJobRoles,
@@ -14,6 +16,8 @@ import {
 import { mockJobRoles } from "../mockJobRoles";
 
 vi.mock("../../src/services/jobRoleApiService", () => ({
+	compareJobRoles: vi.fn(),
+	getCareerMatrix: vi.fn(),
 	getCreateJobRoleOptions: vi.fn(),
 	exportJobRoles: vi.fn(),
 	getPaginatedJobRoles: vi.fn(),
@@ -161,7 +165,6 @@ describe("GET /job-roles", () => {
 		expect(response.text).toContain('role="status"');
 	});
 });
-
 describe("GET /job-roles/export", () => {
 	it("returns the generated CSV download", async () => {
 		vi.mocked(exportJobRoles).mockResolvedValue({
@@ -178,6 +181,71 @@ describe("GET /job-roles/export", () => {
 		expect(response.headers["content-disposition"]).toBe(
 			'attachment; filename="job-roles.csv"',
 		);
+	});
+});
+
+describe("career path routes", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("renders capability-filtered role selectors on both sides", async () => {
+		vi.mocked(getCareerMatrix).mockResolvedValue({
+			capabilities: [
+				{ id: 1, name: "Engineering" },
+				{ id: 2, name: "Data" },
+			],
+			bands: [
+				{ id: 1, name: "Band 1" },
+				{ id: 2, name: "Band 2" },
+			],
+			matrix: {
+				"1_2": [mockJobRoles[0]],
+				"2_1": [mockJobRoles[1]],
+			},
+		});
+
+		const response = await request(app).get("/career-matrix");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Build your career comparison");
+		expect(response.text).toContain("Software Engineer");
+		expect(response.text).toContain("Data Analyst");
+		expect(response.text).toContain('name="roleA"');
+		expect(response.text).toContain('name="roleB"');
+		expect(response.text).toContain('data-capability-id="1"');
+		expect(response.text).toContain('data-capability-id="2"');
+		expect(response.text).toContain("Comparison not ready");
+		expect(response.text).toContain('role="status"');
+		expect(response.text).toContain('aria-describedby="comparison-status"');
+	});
+
+	it("renders shared and target responsibilities for two roles", async () => {
+		vi.mocked(compareJobRoles).mockResolvedValue({
+			roleA: mockJobRoles[0],
+			roleB: mockJobRoles[1],
+			sharedResponsibilities: ["Collaborate with teams"],
+			roleAResponsibilities: ["Participate in code reviews"],
+			roleBResponsibilities: ["Create visualizations and reports"],
+		});
+
+		const response = await request(app).get(
+			"/job-roles/compare?roleA=1&roleB=2",
+		);
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Software Engineer to Data Analyst");
+		expect(response.text).toContain("Skills that carry forward");
+		expect(response.text).toContain("Create visualizations and reports");
+	});
+
+	it("rejects a comparison of the same role", async () => {
+		const response = await request(app).get(
+			"/job-roles/compare?roleA=1&roleB=1",
+		);
+
+		expect(response.status).toBe(400);
+		expect(compareJobRoles).not.toHaveBeenCalled();
 	});
 });
 

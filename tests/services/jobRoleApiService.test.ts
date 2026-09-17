@@ -2,10 +2,12 @@ import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import apiClient from "../../src/config/apiClient";
 import {
+	compareJobRoles,
 	createJobRole,
 	deleteJobRole,
 	exportJobRoles,
 	getAllJobRoles,
+	getCareerMatrix,
 	getCreateJobRoleOptions,
 	getFilterOptions,
 	getJobRoleById,
@@ -62,6 +64,96 @@ describe("jobRoleApiService - exportJobRoles", () => {
 		});
 
 		await expect(exportJobRoles(mockToken)).rejects.toThrow("Forbidden");
+	});
+});
+
+describe("jobRoleApiService - career paths", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("returns the career matrix with authorization", async () => {
+		const careerMatrix = {
+			capabilities: [{ id: 1, name: "Engineering" }],
+			bands: [{ id: 2, name: "Consultant" }],
+			matrix: { "1_2": [mockJobRoles[0]] },
+		};
+		vi.mocked(apiClient).get = vi
+			.fn()
+			.mockResolvedValue({ data: careerMatrix });
+
+		await expect(getCareerMatrix(mockToken)).resolves.toEqual(careerMatrix);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles/career-matrix", {
+			headers: { Authorization: `Bearer ${mockToken}` },
+		});
+	});
+
+	it("maps career matrix API errors", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi
+			.fn()
+			.mockRejectedValue({ message: "Unavailable" });
+
+		await expect(getCareerMatrix(mockToken)).rejects.toThrow(
+			"Error fetching career matrix: Unavailable",
+		);
+	});
+
+	it("passes through non-Axios career matrix errors", async () => {
+		const error = new Error("Connection failed");
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(error);
+
+		await expect(getCareerMatrix(mockToken)).rejects.toBe(error);
+	});
+
+	it("returns a role comparison with authorization and query parameters", async () => {
+		const comparison = {
+			roleA: mockJobRoles[0],
+			roleB: mockJobRoles[1],
+			sharedResponsibilities: ["Collaborate with teams"],
+			roleAResponsibilities: ["Review code"],
+			roleBResponsibilities: ["Create reports"],
+		};
+		vi.mocked(apiClient).get = vi.fn().mockResolvedValue({ data: comparison });
+
+		await expect(compareJobRoles(1, 2, mockToken)).resolves.toEqual(comparison);
+		expect(apiClient.get).toHaveBeenCalledWith("/api/job-roles/compare", {
+			params: { roleA: 1, roleB: 2 },
+			headers: { Authorization: `Bearer ${mockToken}` },
+		});
+	});
+
+	it("maps missing roles to the expected comparison error", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Not found",
+			response: { status: 404 },
+		});
+
+		await expect(compareJobRoles(1, 99, mockToken)).rejects.toThrow(
+			"Job role not found.",
+		);
+	});
+
+	it("maps other role comparison API errors", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue({
+			message: "Unavailable",
+			response: { status: 503 },
+		});
+
+		await expect(compareJobRoles(1, 2, mockToken)).rejects.toThrow(
+			"Error comparing job roles: Unavailable",
+		);
+	});
+
+	it("passes through non-Axios role comparison errors", async () => {
+		const error = new Error("Connection failed");
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
+		vi.mocked(apiClient).get = vi.fn().mockRejectedValue(error);
+
+		await expect(compareJobRoles(1, 2, mockToken)).rejects.toBe(error);
 	});
 });
 

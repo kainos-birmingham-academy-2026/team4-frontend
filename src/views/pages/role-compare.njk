@@ -1,0 +1,64 @@
+{% extends "layouts/base.njk" %}
+
+{% block content %}
+  <section class="page-section role-comparison">
+    <div class="container">
+      <a href="/career-matrix" class="breadcrumb-link">Back to career paths</a>
+      <div class="page-header">
+        <p class="eyebrow">Role comparison</p>
+        <h1>{{ comparison.roleA.roleName }} to {{ comparison.roleB.roleName }}</h1>
+        <p>See what carries forward and where the next role asks you to grow.</p>
+      </div>
+
+      <div class="comparison-columns">
+        {% for role in [comparison.roleA, comparison.roleB] %}
+          <section class="comparison-role" aria-labelledby="role-{{ role.jobRoleId }}">
+            <p class="comparison-kicker">{% if loop.first %}Starting role{% else %}Target role{% endif %}</p>
+            <h2 id="role-{{ role.jobRoleId }}">{{ role.roleName }}</h2>
+            <dl class="comparison-meta">
+              <div><dt>Capability</dt><dd>{{ role.capability }}</dd></div>
+              <div><dt>Band</dt><dd>{{ role.band }}</dd></div>
+              <div><dt>Location</dt><dd>{{ role.location }}</dd></div>
+              <div><dt>Open positions</dt><dd>{{ role.numberOfOpenPositions }}</dd></div>
+            </dl>
+            <a class="btn btn-secondary" href="/job-roles/{{ role.jobRoleId }}">View role</a>
+          </section>
+        {% endfor %}
+      </div>
+
+      <section class="responsibility-delta" aria-labelledby="responsibility-heading">
+        <h2 id="responsibility-heading">How expectations change</h2>
+        <div class="delta-grid">
+          <div class="delta-group shared">
+            <h3>Skills that carry forward</h3>
+            <ul>
+              {% for responsibility in comparison.sharedResponsibilities %}<li>{{ responsibility }}</li>
+              {% else %}<li>No directly shared responsibilities listed.</li>{% endfor %}
+            </ul>
+          </div>
+          <div class="delta-group current">
+            <h3>Unique to {{ comparison.roleA.roleName }}</h3>
+            <ul>
+              {% for responsibility in comparison.roleAResponsibilities %}<li>{{ responsibility }}</li>
+              {% else %}<li>No unique responsibilities listed.</li>{% endfor %}
+            </ul>
+          </div>
+          <div class="delta-group target">
+            <h3>Growth areas for {{ comparison.roleB.roleName }}</h3>
+            <ul>
+              {% for responsibility in comparison.roleBResponsibilities %}<li>{{ responsibility }}</li>
+              {% else %}<li>No additional responsibilities listed.</li>{% endfor %}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {% if comparison.roleB.status == "Open" and comparison.roleB.numberOfOpenPositions > 0 %}
+        <div class="comparison-cta">
+          <div><strong>Ready for the next step?</strong><span>{{ comparison.roleB.numberOfOpenPositions }} position{% if comparison.roleB.numberOfOpenPositions != 1 %}s{% endif %} available.</span></div>
+          <a class="btn" href="/job-roles/{{ comparison.roleB.jobRoleId }}/apply">Apply for this role</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

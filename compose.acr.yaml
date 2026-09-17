@@ -1,0 +1,8 @@
+services:
+  team4-backend:
+    image: acraiacademy26.azurecr.io/team4-backend:v1.0.0
+    build: !reset null
+
+  team4-frontend:
+    image: acraiacademy26.azurecr.io/team4-frontend:v1.0.0
+    build: !reset null
