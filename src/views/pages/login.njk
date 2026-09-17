@@ -1,15 +1,16 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-  <section class="page-section">
-    <div class="container">
-      <div style="max-width: 500px; margin: 0 auto;">
-        <div class="page-header">
-          <h1>Sign In</h1>
-          <p>Access your Kainos Careers account</p>
-        </div>
+  <section class="auth-page auth-page-login">
+    <div class="container auth-page-container">
+      <div class="auth-layout">
+        <div class="auth-form-panel">
+          <div class="auth-page-header">
+            <p class="auth-eyebrow">Kainos Careers</p>
+            <h1>Sign In</h1>
+            <p>Sign in to continue exploring opportunities and managing your applications.</p>
+          </div>
 
-        <div class="form-card">
           {% if registrationSuccessMessage %}
             <div class="form-success-summary" role="status" aria-live="polite">
               <p>{{ registrationSuccessMessage }}</p>
@@ -54,6 +55,22 @@
             </div>
           </form>
         </div>
+
+        <aside class="auth-feature-panel auth-quote-panel" aria-labelledby="auth-quote-heading">
+          <div>
+            <p class="auth-feature-kicker">Careers at Kainos</p>
+            <h2 id="auth-quote-heading">Build a career with room to grow.</h2>
+          </div>
+          <figure class="auth-quote">
+            <blockquote>
+              "The best work happens when curious people are trusted to keep learning, ask better questions and make a difference together."
+            </blockquote>
+            <figcaption>
+              <span class="auth-quote-rule" aria-hidden="true"></span>
+              Kainos Careers
+            </figcaption>
+          </figure>
+        </aside>
       </div>
     </div>
   </section>

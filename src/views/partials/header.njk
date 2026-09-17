@@ -22,7 +22,10 @@
     </button>
 
     <nav id="primary-nav" aria-label="Primary navigation" class="primary-nav">
-      {% set navLinks = [{ href: "/job-roles", label: "Browse Roles" }, { href: "/career-matrix", label: "Career Paths" }] %}
+      {% set navLinks = [{ href: "/job-roles", label: "Browse Roles" }] %}
+      {% if not isAdmin %}
+        {% set navLinks = navLinks.concat([{ href: "/career-matrix", label: "Career Paths" }]) %}
+      {% endif %}
       {% if isApplicant %}
         {% set navLinks = navLinks.concat([{ href: "/applications", label: "My Applications" }, { href: "/logout", label: "Log Out" }]) %}
       {% elif isAuthenticated %}

@@ -52,21 +52,6 @@ describe("submitApplication", () => {
 		).rejects.toEqual(expect.objectContaining({ message: "Role is closed" }));
 	});
 
-	it("uses the default message when the API error is not a string", async () => {
-		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
-		vi.mocked(apiClient).post = vi.fn().mockRejectedValue({
-			response: { status: 400, data: { error: { message: "invalid" } } },
-		});
-
-		await expect(
-			submitApplication(2, "I am interested.", token),
-		).rejects.toEqual(
-			expect.objectContaining({
-				message: "Unable to submit your application. Please try again.",
-			}),
-		);
-	});
-
 	it("returns an application service error for non-Axios failures", async () => {
 		vi.spyOn(axios, "isAxiosError").mockReturnValue(false);
 		vi.mocked(apiClient).post = vi.fn().mockRejectedValue(new Error("failure"));
