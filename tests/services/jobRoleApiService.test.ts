@@ -522,7 +522,6 @@ describe("jobRoleApiService - getFilterOptions", () => {
 		);
 	});
 });
-
 describe("jobRoleApiService - createJobRole", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -708,6 +707,18 @@ describe("jobRoleApiService - updateJobRole", () => {
 		).rejects.toThrow("Error updating job role: Internal Server Error");
 	});
 
+	it("should throw a not found error when updating a missing role", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
+			message: "Not found",
+			response: { status: 404 },
+		});
+
+		await expect(
+			updateJobRole(mockJobRole1.jobRoleId, mockUpdateInput, mockToken),
+		).rejects.toThrow("Job role not found.");
+	});
+
 	it("should throw unexpected error for non-400/401/403/404/500 axios statuses", async () => {
 		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
 		vi.mocked(apiClient).put = vi.fn().mockRejectedValue({
@@ -771,6 +782,18 @@ describe("jobRoleApiService - deleteJobRole", () => {
 		await expect(
 			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
 		).rejects.toThrow("Error deleting job role: Internal Server Error");
+	});
+
+	it("should throw a not found error when deleting a missing role", async () => {
+		vi.spyOn(axios, "isAxiosError").mockReturnValue(true);
+		vi.mocked(apiClient).delete = vi.fn().mockRejectedValue({
+			message: "Not found",
+			response: { status: 404 },
+		});
+
+		await expect(
+			deleteJobRole(mockJobRole1.jobRoleId, mockToken),
+		).rejects.toThrow("Job role not found.");
 	});
 
 	it("should throw unexpected error for non-401/403/500 axios statuses", async () => {

@@ -101,6 +101,23 @@ describe("ChatProxyService", () => {
 		);
 	});
 
+	it("falls back when the backend response has no error message", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: false,
+			status: 500,
+			json: vi.fn().mockResolvedValue({}),
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		const service = new ChatProxyService("http://localhost:4000");
+		await expect(service.ask("hello")).rejects.toEqual(
+			expect.objectContaining({
+				message: "Chat service is unavailable.",
+				statusCode: 500,
+			}),
+		);
+	});
+
 	it("creates a typed error instance", () => {
 		const error = new ChatProxyServiceError("failed", 400);
 
