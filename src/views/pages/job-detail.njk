@@ -12,6 +12,11 @@
         {% endif %}
       </div>
       {% endif %}
+      {% if applicationUnavailable %}
+      <div class="form-error-summary" role="alert" aria-live="polite">
+        <p>This role is no longer accepting applications.</p>
+      </div>
+      {% endif %}
       <a href="/job-roles" class="breadcrumb-link">← Back to Job Roles</a>
 
       <div class="job-detail-header">

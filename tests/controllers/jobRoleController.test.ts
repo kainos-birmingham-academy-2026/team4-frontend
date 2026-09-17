@@ -632,6 +632,23 @@ describe("JobRoleController - getJobRoleDetails", () => {
 		});
 	});
 
+	it("shows an unavailable message after an ineligible application redirect", async () => {
+		const mockJobRole = mockJobRoles[0];
+		mockRequest.params.id = String(mockJobRole.jobRoleId);
+		mockRequest.query = { applicationUnavailable: "true" };
+		vi.mocked(getJobRoleById).mockResolvedValue({
+			...mockJobRole,
+			status: "Closed",
+		});
+
+		await jobRoleController.getJobRoleDetails(mockRequest, mockResponse);
+
+		expect(mockRender).toHaveBeenCalledWith(
+			"pages/job-detail.njk",
+			expect.objectContaining({ applicationUnavailable: true }),
+		);
+	});
+
 	it.each(["In Progress", "Hired", "Rejected"])(
 		"should show the applicant's %s status in the role badge",
 		async (status) => {

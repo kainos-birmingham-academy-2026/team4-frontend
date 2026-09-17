@@ -60,7 +60,7 @@ export class ApplicationController {
 		}
 
 		if (jobRole.status !== "Open" || jobRole.numberOfOpenPositions <= 0) {
-			res.redirect(`/job-roles/${id}`);
+			res.redirect(`/job-roles/${id}?applicationUnavailable=true`);
 			return;
 		}
 

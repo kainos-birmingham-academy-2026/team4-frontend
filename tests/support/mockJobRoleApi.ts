@@ -108,6 +108,52 @@ app.get("/api/applications", (_req, res) => {
 	});
 });
 
+app.post("/api/applications", (req, res) => {
+	const jobRole = mockJobRoles.find(
+		(candidate) => candidate.jobRoleId === Number(req.body.jobRoleId),
+	);
+	if (!jobRole) {
+		res.status(404).json({ error: "Job role not found" });
+		return;
+	}
+	if (jobRole.status !== "Open" || jobRole.numberOfOpenPositions <= 0) {
+		res
+			.status(400)
+			.json({ error: "This job role is not currently open for applications" });
+		return;
+	}
+	if (
+		mockApplications.some(
+			(application) =>
+				application.jobRoleId === jobRole.jobRoleId &&
+				application.userId === 10,
+		)
+	) {
+		res
+			.status(409)
+			.json({ error: "You have already applied for this job role" });
+		return;
+	}
+
+	const application: MockApplication = {
+		applicationId:
+			Math.max(
+				0,
+				...mockApplications.map(({ applicationId }) => applicationId),
+			) + 1,
+		userId: 10,
+		applicantEmail: testUser.email,
+		jobRoleId: jobRole.jobRoleId,
+		roleName: jobRole.roleName,
+		message: String(req.body.message ?? ""),
+		status: "In Progress",
+		createdAt: new Date().toISOString(),
+	};
+	mockApplications.push(application);
+
+	res.status(201).json(application);
+});
+
 app.get("/api/applications/job-role/:jobRoleId", (req, res) => {
 	res.json({
 		applications: mockApplications.filter(
