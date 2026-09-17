@@ -1,15 +1,32 @@
 {% extends "layouts/base.njk" %}
 
 {% block content %}
-  <section class="page-section">
-    <div class="container">
-      <div style="max-width: 500px; margin: 0 auto;">
-        <div class="page-header">
-          <h1>Create Your Account</h1>
-          <p>Join Kainos Careers and start exploring exciting opportunities</p>
-        </div>
+  <section class="auth-page auth-page-register">
+    <div class="container auth-page-container">
+      <div class="auth-layout auth-layout-register">
+        <aside class="auth-feature-panel auth-quote-panel auth-register-quote-panel" aria-labelledby="registration-quote-heading">
+          <div>
+            <p class="auth-feature-kicker">Your next chapter</p>
+            <h2 id="registration-quote-heading">Start somewhere that expects you to grow.</h2>
+          </div>
+          <figure class="auth-quote">
+            <blockquote>
+              "A great career is built one opportunity at a time. Bring your perspective, learn with others and do work that matters."
+            </blockquote>
+            <figcaption>
+              <span class="auth-quote-rule" aria-hidden="true"></span>
+              Kainos Careers
+            </figcaption>
+          </figure>
+        </aside>
 
-        <div class="form-card">
+        <div class="auth-form-panel">
+          <div class="auth-page-header">
+            <p class="auth-eyebrow">Kainos Careers</p>
+            <h1>Create Your Account</h1>
+            <p>Join Kainos Careers and start exploring opportunities that suit you.</p>
+          </div>
+
           {% if errors.general %}
             <div class="form-error-summary" role="alert" aria-live="polite">
               <p>{{ errors.general }}</p>

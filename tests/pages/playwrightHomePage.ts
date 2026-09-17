@@ -24,9 +24,9 @@ export class PlaywrightHomePage extends BasePage {
 
 	constructor(page: Page) {
 		super(page);
-		this.heading = page.locator("main h1");
-		this.eyebrow = page.locator("main .eyebrow");
-		this.browseRolesLink = page.locator('main a[href="/job-roles"]');
+		this.heading = page.locator(".homepage-hero h1");
+		this.eyebrow = page.locator(".homepage-hero .eyebrow");
+		this.browseRolesLink = page.locator('.homepage-hero a[href="/job-roles"]');
 		this.primaryBrowseRolesLink = page.locator('header a[href="/job-roles"]');
 		this.signUpLink = page.locator('header a[href="/register"]');
 		this.loginLink = page.locator('header a[href="/login"]');

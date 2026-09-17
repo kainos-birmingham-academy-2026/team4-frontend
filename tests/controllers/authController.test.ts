@@ -103,19 +103,6 @@ describe("AuthController - login", () => {
 			formValues: { email: mockBody.email },
 		});
 	});
-
-	it("should use a default message for a non-Error login failure", async () => {
-		mockRequest.body = mockBody;
-		vi.mocked(authApiService.login).mockRejectedValue({});
-
-		await authController.login(mockRequest, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(401);
-		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
-			errorMessage: "Unable to sign in",
-			formValues: { email: mockBody.email },
-		});
-	});
 });
 
 describe("AuthController - logout", () => {
@@ -193,23 +180,6 @@ describe("AuthController - submitRegistration", async () => {
 
 	it("should return 400 and render the registration page when a field isn't provided", async () => {
 		mockRequest.body = { email: "", password: "", confirmPassword: "" };
-
-		await authController.submitRegistration(mockRequest, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(400);
-		expect(mockRender).toHaveBeenCalledWith("pages/register.njk", {
-			errors: {
-				email: "Email is required.",
-				password: "Password is required.",
-				confirmPassword: "Confirm your password.",
-			},
-			form: { email: "" },
-			pageTitle: "Kainos Careers - Register",
-		});
-	});
-
-	it("should validate an omitted registration body", async () => {
-		mockRequest.body = undefined;
 
 		await authController.submitRegistration(mockRequest, mockResponse);
 

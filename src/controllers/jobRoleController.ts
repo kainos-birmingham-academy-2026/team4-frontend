@@ -261,6 +261,11 @@ export class JobRoleController {
 	}
 
 	async showCareerMatrix(req: Request, res: Response): Promise<void> {
+		if (res.locals.isAdmin) {
+			this.handleForbiddenError(res);
+			return;
+		}
+
 		try {
 			const careerMatrix = await getCareerMatrix(this.getJwtToken(req));
 			res.render("pages/career-matrix.njk", {

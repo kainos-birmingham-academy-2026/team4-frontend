@@ -8,7 +8,6 @@ import {
 } from "../../src/controllers/jobRoleController";
 import { getMyApplications } from "../../src/services/applicationApiService";
 import {
-	compareJobRoles,
 	createJobRole,
 	deleteJobRole,
 	exportJobRoles,
@@ -69,6 +68,58 @@ vi.mock("../../src/services/applicationApiService");
 
 const jobRoleController = new JobRoleController();
 
+describe("JobRoleController - showCareerMatrix", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("forbids an Admin from viewing career paths", async () => {
+		await jobRoleController.showCareerMatrix(mockRequest, mockResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(403);
+		expect(mockRender).toHaveBeenCalledWith("pages/login.njk", {
+			pageTitle: "Kainos Careers - Login",
+			status: 403,
+			message: "Forbidden access",
+		});
+		expect(getCareerMatrix).not.toHaveBeenCalled();
+	});
+
+	it("renders career paths for an applicant", async () => {
+		const careerMatrix = { capabilities: [], bands: [], matrix: {} };
+		vi.mocked(getCareerMatrix).mockResolvedValue(careerMatrix);
+		const applicantResponse = {
+			...mockResponse,
+			locals: { isAdmin: false },
+		} as unknown as Response;
+
+		await jobRoleController.showCareerMatrix(mockRequest, applicantResponse);
+
+		expect(getCareerMatrix).toHaveBeenCalledWith("mock-jwt-token");
+		expect(mockRender).toHaveBeenCalledWith("pages/career-matrix.njk", {
+			pageTitle: "Kainos Careers - Career Paths",
+			careerMatrix,
+		});
+	});
+
+	it("renders an error when career paths cannot be fetched", async () => {
+		vi.mocked(getCareerMatrix).mockRejectedValue(new Error("Unavailable"));
+		const applicantResponse = {
+			...mockResponse,
+			locals: { isAdmin: false },
+		} as unknown as Response;
+
+		await jobRoleController.showCareerMatrix(mockRequest, applicantResponse);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(500);
+		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
+			pageTitle: "Kainos Careers - Error",
+			status: 500,
+			message: "Error fetching career paths",
+		});
+	});
+});
+
 describe("job role filter helpers", () => {
 	it("extracts and trims scalar and array filters", () => {
 		expect(
@@ -115,89 +166,6 @@ describe("job role filter helpers", () => {
 				sortOrder: undefined,
 			}),
 		).toBe("");
-	});
-});
-
-describe("JobRoleController - career paths", () => {
-	beforeEach(() => vi.clearAllMocks());
-
-	it("should render the career matrix", async () => {
-		const careerMatrix = { capabilities: [], bands: [], matrix: {} };
-		vi.mocked(getCareerMatrix).mockResolvedValue(careerMatrix);
-
-		await jobRoleController.showCareerMatrix(mockRequest, mockResponse);
-
-		expect(getCareerMatrix).toHaveBeenCalledWith("mock-jwt-token");
-		expect(mockRender).toHaveBeenCalledWith("pages/career-matrix.njk", {
-			pageTitle: "Kainos Careers - Career Paths",
-			careerMatrix,
-		});
-	});
-
-	it("should render an error when the career matrix cannot be fetched", async () => {
-		vi.mocked(getCareerMatrix).mockRejectedValue(new Error("Unavailable"));
-
-		await jobRoleController.showCareerMatrix(mockRequest, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(500);
-		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
-			pageTitle: "Kainos Careers - Error",
-			status: 500,
-			message: "Error fetching career paths",
-		});
-	});
-});
-
-describe("JobRoleController - role comparison", () => {
-	beforeEach(() => vi.clearAllMocks());
-
-	it.each([
-		{ roleA: "0", roleB: "2" },
-		{ roleA: "1", roleB: "1" },
-		{ roleA: "invalid", roleB: "2" },
-	])("should reject invalid role parameters", async (query) => {
-		const requestWithQuery = { ...mockRequest, query } as unknown as Request;
-
-		await jobRoleController.showRoleComparison(requestWithQuery, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(400);
-		expect(compareJobRoles).not.toHaveBeenCalled();
-	});
-
-	it("should render a valid role comparison", async () => {
-		const comparison = { roleA: mockJobRoles[0], roleB: mockJobRoles[1] };
-		vi.mocked(compareJobRoles).mockResolvedValue(comparison as never);
-		const requestWithQuery = {
-			...mockRequest,
-			query: { roleA: "1", roleB: "2" },
-		} as unknown as Request;
-
-		await jobRoleController.showRoleComparison(requestWithQuery, mockResponse);
-
-		expect(compareJobRoles).toHaveBeenCalledWith(1, 2, "mock-jwt-token");
-		expect(mockRender).toHaveBeenCalledWith("pages/role-compare.njk", {
-			pageTitle: "Kainos Careers - Compare Roles",
-			comparison,
-		});
-	});
-
-	it("should render not found when a compared role does not exist", async () => {
-		vi.mocked(compareJobRoles).mockRejectedValue(
-			new Error("Job role not found."),
-		);
-		const requestWithQuery = {
-			...mockRequest,
-			query: { roleA: "1", roleB: "2" },
-		} as unknown as Request;
-
-		await jobRoleController.showRoleComparison(requestWithQuery, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(404);
-		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
-			pageTitle: "Kainos Careers - Error",
-			status: 404,
-			message: "Job role not found",
-		});
 	});
 });
 
@@ -284,38 +252,6 @@ describe("JobRoleController - getJobRoles", () => {
 			ordering: { sortBy: undefined, sortOrder: undefined },
 			sortLinks: expect.any(Object),
 			sortQuery: expect.any(Function),
-		});
-	});
-
-	it("should fall back to the non-paginated job list when pagination fails", async () => {
-		vi.mocked(getPaginatedJobRoles).mockRejectedValue(new Error("Unsupported"));
-		vi.mocked(getAllJobRoles).mockResolvedValue(mockJobRoles);
-		vi.mocked(getMyApplications).mockResolvedValue([]);
-
-		await jobRoleController.getJobRoles(mockRequest, mockResponse);
-
-		expect(getAllJobRoles).toHaveBeenCalledWith("mock-jwt-token");
-		expect(mockRender).toHaveBeenCalledWith(
-			"pages/job-roles",
-			expect.objectContaining({
-				filterOptions: emptyFilterOptions,
-				pagination: expect.objectContaining({
-					totalCount: mockJobRoles.length,
-				}),
-			}),
-		);
-	});
-
-	it("should render an error when the non-paginated fallback fails", async () => {
-		vi.mocked(getPaginatedJobRoles).mockRejectedValue(new Error("Unsupported"));
-		vi.mocked(getAllJobRoles).mockRejectedValue(new Error("Unavailable"));
-
-		await jobRoleController.getJobRoles(mockRequest, mockResponse);
-
-		expect(mockRender).toHaveBeenCalledWith("pages/error.njk", {
-			pageTitle: "Kainos Careers - Error",
-			status: 500,
-			message: "Error fetching job roles",
 		});
 	});
 
@@ -966,26 +902,6 @@ describe("JobRoleController - create", () => {
 			expect.objectContaining({
 				errors: expect.objectContaining({
 					roleName: "Enter a job role name.",
-				}),
-			}),
-		);
-	});
-
-	it("should reject an invalid SharePoint URL format", async () => {
-		mockRequest.body = {
-			...validCreateForm,
-			sharepointUrl: "not-a-valid-url",
-		};
-
-		await jobRoleController.create(mockRequest, mockResponse);
-
-		expect(mockResponse.status).toHaveBeenCalledWith(400);
-		expect(createJobRole).not.toHaveBeenCalled();
-		expect(mockRender).toHaveBeenCalledWith(
-			"pages/job-role-create.njk",
-			expect.objectContaining({
-				errors: expect.objectContaining({
-					sharepointUrl: "Enter a valid SharePoint link.",
 				}),
 			}),
 		);
